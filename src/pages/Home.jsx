@@ -21,7 +21,7 @@ const Home = () => {
               Book your appointment with our talented stylists and transform your look.
             </p>
             <div className="hero-buttons">
-              <Link to="/book" className="btn btn-primary">
+              <Link to="/book-appointment" className="btn btn-primary">
                 Book Now
               </Link>
               <Link to="/my-bookings" className="btn btn-secondary">
