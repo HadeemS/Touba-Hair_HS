@@ -1,7 +1,7 @@
 // API utility functions for connecting to backend
 
-// Change this to your Render API URL when deployed
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// API URL from environment variable or fallback to Render production URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://touba-hair-hs.onrender.com';
 
 // Helper function for API calls
 async function apiCall(endpoint, options = {}) {
@@ -41,6 +41,7 @@ export const galleryAPI = {
   create: (formData) => apiCall('/api/gallery', {
     method: 'POST',
     body: formData,
+    // Note: Don't set Content-Type header for FormData, browser will set it with boundary
   }),
   update: (id, data) => apiCall(`/api/gallery/${id}`, {
     method: 'PUT',

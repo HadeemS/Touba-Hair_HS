@@ -20,7 +20,7 @@
 
 1. **Create `.env` file** in the root of your project:
    ```
-   VITE_API_URL=https://your-api-name.onrender.com
+   VITE_API_URL=https://touba-hair-hs.onrender.com
    ```
 
 2. **Rebuild your frontend**:
@@ -32,6 +32,8 @@
    ```bash
    npm run deploy
    ```
+
+**Note**: Your API is already configured at `https://touba-hair-hs.onrender.com`
 
 ## Step 3: Test the API
 

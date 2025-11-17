@@ -108,12 +108,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit for videos
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed!'), false);
+      cb(new Error('Only image and video files are allowed!'), false);
     }
   }
 });
@@ -174,30 +174,36 @@ app.get('/api/gallery/:id', async (req, res) => {
   }
 });
 
-// Add new gallery image
-app.post('/api/gallery', upload.single('image'), async (req, res) => {
+// Add new gallery item (image or video)
+app.post('/api/gallery', upload.single('media'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No image file provided' });
+      return res.status(400).json({ error: 'No media file provided' });
     }
 
     const gallery = await readGallery();
-    const newImage = {
+    const isVideo = req.file.mimetype.startsWith('video/');
+    const mediaUrl = `/uploads/${req.file.filename}`;
+    
+    const newItem = {
       id: Date.now().toString(),
-      imageUrl: `/uploads/${req.file.filename}`,
-      title: req.body.title || 'Hair Style',
+      type: isVideo ? 'video' : 'image',
+      imageUrl: isVideo ? null : mediaUrl,
+      videoUrl: isVideo ? mediaUrl : null,
+      posterUrl: req.body.posterUrl || null,
+      title: req.body.title || (isVideo ? 'Hair Style Video' : 'Hair Style'),
       description: req.body.description || '',
       braiderName: req.body.braiderName || '',
       serviceType: req.body.serviceType || '',
       createdAt: new Date().toISOString()
     };
 
-    gallery.push(newImage);
+    gallery.push(newItem);
     await writeGallery(gallery);
 
-    res.status(201).json(newImage);
+    res.status(201).json(newItem);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to add image' });
+    res.status(500).json({ error: 'Failed to add media' });
   }
 });
 
@@ -224,31 +230,43 @@ app.put('/api/gallery/:id', async (req, res) => {
   }
 });
 
-// Delete gallery image
+// Delete gallery item
 app.delete('/api/gallery/:id', async (req, res) => {
   try {
     const gallery = await readGallery();
     const index = gallery.findIndex(img => img.id === req.params.id);
     
     if (index === -1) {
-      return res.status(404).json({ error: 'Image not found' });
+      return res.status(404).json({ error: 'Item not found' });
     }
 
-    // Delete the image file
-    const image = gallery[index];
-    if (image.imageUrl) {
-      const imagePath = join(__dirname, 'public', image.imageUrl);
-      if (existsSync(imagePath)) {
-        await fs.unlink(imagePath);
+    // Delete the media file
+    const item = gallery[index];
+    if (item.imageUrl) {
+      const mediaPath = join(__dirname, 'public', item.imageUrl);
+      if (existsSync(mediaPath)) {
+        await fs.unlink(mediaPath);
+      }
+    }
+    if (item.videoUrl) {
+      const mediaPath = join(__dirname, 'public', item.videoUrl);
+      if (existsSync(mediaPath)) {
+        await fs.unlink(mediaPath);
+      }
+    }
+    if (item.posterUrl) {
+      const posterPath = join(__dirname, 'public', item.posterUrl);
+      if (existsSync(posterPath)) {
+        await fs.unlink(posterPath);
       }
     }
 
     gallery.splice(index, 1);
     await writeGallery(gallery);
 
-    res.json({ message: 'Image deleted successfully' });
+    res.json({ message: 'Item deleted successfully' });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete image' });
+    res.status(500).json({ error: 'Failed to delete item' });
   }
 });
 

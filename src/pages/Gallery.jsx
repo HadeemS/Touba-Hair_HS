@@ -61,32 +61,52 @@ const Gallery = () => {
           </div>
         ) : (
           <div className="gallery-grid">
-            {images.map((image) => (
-              <div key={image.id} className="gallery-item">
-                <div className="gallery-image-wrapper">
-                  <img 
-                    src={`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${image.imageUrl}`}
-                    alt={image.title}
-                    className="gallery-image"
-                    loading="lazy"
-                  />
-                  <div className="gallery-overlay">
-                    <div className="gallery-info">
-                      <h3 className="gallery-title">{image.title}</h3>
-                      {image.description && (
-                        <p className="gallery-description">{image.description}</p>
-                      )}
-                      {image.braiderName && (
-                        <p className="gallery-braider">Stylist: {image.braiderName}</p>
-                      )}
-                      {image.serviceType && (
-                        <p className="gallery-service">{image.serviceType}</p>
-                      )}
+            {images.map((item) => {
+              const isVideo = item.type === 'video' || item.videoUrl || (item.imageUrl && item.imageUrl.match(/\.(mp4|webm|ogg)$/i))
+              const mediaUrl = isVideo 
+                ? (item.videoUrl || item.imageUrl)
+                : `${import.meta.env.VITE_API_URL || 'https://touba-hair-hs.onrender.com'}${item.imageUrl}`
+              
+              return (
+                <div key={item.id} className={`gallery-item ${isVideo ? 'video-item' : ''}`}>
+                  <div className="gallery-media-wrapper">
+                    {isVideo ? (
+                      <video 
+                        src={mediaUrl}
+                        className="gallery-media"
+                        controls
+                        preload="metadata"
+                        poster={item.posterUrl ? `${import.meta.env.VITE_API_URL || 'https://touba-hair-hs.onrender.com'}${item.posterUrl}` : undefined}
+                      >
+                        Your browser does not support the video tag.
+                      </video>
+                    ) : (
+                      <img 
+                        src={mediaUrl}
+                        alt={item.title}
+                        className="gallery-media"
+                        loading="lazy"
+                      />
+                    )}
+                    <div className="gallery-overlay">
+                      <div className="gallery-info">
+                        {isVideo && <span className="video-badge">▶ Video</span>}
+                        <h3 className="gallery-title">{item.title}</h3>
+                        {item.description && (
+                          <p className="gallery-description">{item.description}</p>
+                        )}
+                        {item.braiderName && (
+                          <p className="gallery-braider">Stylist: {item.braiderName}</p>
+                        )}
+                        {item.serviceType && (
+                          <p className="gallery-service">{item.serviceType}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

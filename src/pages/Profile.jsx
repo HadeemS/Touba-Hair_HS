@@ -37,8 +37,8 @@ const Profile = () => {
   return (
     <div className="page">
       <div className="container">
-        <header className="page-header">
-          <h1>My Profile</h1>
+      <header className="page-header">
+        <h1>My Profile</h1>
           <p>
             {braider 
               ? `Welcome, ${user?.name}! Manage your braider profile.`
@@ -49,60 +49,60 @@ const Profile = () => {
               View My Appointments
             </Link>
           )}
-        </header>
+      </header>
 
-        <section className="booking-card" style={{ marginTop: '1.25rem' }}>
-          {savedMessage && <div className="alert">{savedMessage}</div>}
+      <section className="booking-card" style={{ marginTop: '1.25rem' }}>
+        {savedMessage && <div className="alert">{savedMessage}</div>}
 
-          <form onSubmit={handleSubmit} className="form-grid">
-            <label className="field">
-              <span>Full Name</span>
-              <input
-                type="text"
-                name="name"
-                value={profile.name}
-                onChange={handleChange}
-              />
-            </label>
+        <form onSubmit={handleSubmit} className="form-grid">
+          <label className="field">
+            <span>Full Name</span>
+            <input
+              type="text"
+              name="name"
+              value={profile.name}
+              onChange={handleChange}
+            />
+          </label>
 
-            <label className="field">
-              <span>Email</span>
-              <input
-                type="email"
-                name="email"
-                value={profile.email}
-                onChange={handleChange}
-              />
-            </label>
+          <label className="field">
+            <span>Email</span>
+            <input
+              type="email"
+              name="email"
+              value={profile.email}
+              onChange={handleChange}
+            />
+          </label>
 
-            <label className="field">
-              <span>Phone</span>
-              <input
-                type="tel"
-                name="phone"
-                value={profile.phone}
-                onChange={handleChange}
-              />
-            </label>
+          <label className="field">
+            <span>Phone</span>
+            <input
+              type="tel"
+              name="phone"
+              value={profile.phone}
+              onChange={handleChange}
+            />
+          </label>
 
-            <label className="field">
-              <span>Notes / Hair Info</span>
-              <textarea
-                rows="3"
-                name="notes"
-                value={profile.notes}
-                onChange={handleChange}
-                placeholder="Preferred styles, hair length, sensitivities, etc."
-              />
-            </label>
+          <label className="field">
+            <span>Notes / Hair Info</span>
+            <textarea
+              rows="3"
+              name="notes"
+              value={profile.notes}
+              onChange={handleChange}
+              placeholder="Preferred styles, hair length, sensitivities, etc."
+            />
+          </label>
 
-            <div className="booking-actions">
-              <button type="submit" className="btn-primary">
-                Save Profile
-              </button>
-            </div>
-          </form>
-        </section>
+          <div className="booking-actions">
+            <button type="submit" className="btn-primary">
+              Save Profile
+            </button>
+          </div>
+        </form>
+      </section>
       </div>
     </div>
   );
