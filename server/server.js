@@ -362,6 +362,20 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Root route
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Touba Hair API', 
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      gallery: '/api/gallery',
+      prices: '/api/prices',
+      health: '/api/health'
+    }
+  });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

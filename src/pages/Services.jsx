@@ -16,18 +16,103 @@ const Services = () => {
   const loadServices = async () => {
     try {
       setLoading(true)
+      console.log('Loading services from API...')
       const data = await pricesAPI.getAll()
-      if (data && data.length > 0) {
-        setServices(data)
+      console.log('Services data received:', data)
+      
+      // Check if API returned data and has all 21 services
+      if (data && Array.isArray(data) && data.length >= 21) {
+        // Transform API data to match the format expected by the component
+        const transformedData = data.map(service => ({
+          id: service.id,
+          name: service.name,
+          description: service.description || '',
+          price: service.price,
+          duration: service.duration || '',
+          category: service.category || 'Other',
+          icon: getServiceIcon(service.name),
+          features: getServiceFeatures(service.name),
+          details: getServiceDetails(service.name),
+          popular: isPopularService(service.name)
+        }))
+        setServices(transformedData)
+        console.log('Services set successfully:', transformedData.length, 'services')
       } else {
+        // API returned less than 21 services (old data), use defaults
+        console.log(`API returned only ${data?.length || 0} services. Using default 21 services.`)
         setServices(getDefaultServices())
       }
     } catch (err) {
       console.error('Error loading services:', err)
+      console.log('Falling back to default services')
       setServices(getDefaultServices())
     } finally {
       setLoading(false)
     }
+  }
+
+  const getServiceIcon = (name) => {
+    const iconMap = {
+      'Box Braids': '📦',
+      'Cornrows': '🌾',
+      'Goddess Braids': '👑',
+      'Fulani Braids': '✨',
+      'Micro Braids': '💫',
+      'Knotless Braids': '🔄',
+      'Feed-in Braids': '🎯',
+      'Senegalese Twists': '🌀',
+      'Lemonade Braids': '🍋',
+      'Passion Twists': '💃',
+      'Ghana Braids': '🇬🇭',
+      'Crochet Braids': '🪝',
+      'Retwist Service': '🔄',
+      'Wig Application': '👑',
+      'Eyebrow Shaping': '✨',
+      'Hair Washing & Detangling': '💧',
+      'Deep Conditioning Treatment': '🌿',
+      'Hair Cut & Trim': '✂️',
+      'Scalp Treatment': '💆🏾‍♀️',
+      'Style Refresh': '💇🏾‍♀️',
+      'Color Services': '🎨'
+    }
+    return iconMap[name] || '✨'
+  }
+
+  const getServiceFeatures = (name) => {
+    // Return features based on service name - you can expand this
+    const defaultFeatures = {
+      'Retwist Service': ['Maintains style freshness', 'Quick service', 'Affordable maintenance', 'Extends style life'],
+      'Wig Application': ['Secure application', 'Natural hairline', 'Custom fitting', 'Protective styling option'],
+      'Eyebrow Shaping': ['Threading available', 'Waxing option', 'Precision shaping', 'Quick service'],
+      'Hair Washing & Detangling': ['Gentle cleansing', 'Thorough detangling', 'Deep conditioning included', 'Prepares for styling'],
+      'Deep Conditioning Treatment': ['Moisture restoration', 'Steam treatment', 'Repairs damage', 'Strengthens hair'],
+      'Hair Cut & Trim': ['Precision cutting', 'Shape maintenance', 'Health-focused', 'Quick service'],
+      'Scalp Treatment': ['Promotes growth', 'Relieves irritation', 'Exfoliation included', 'Relaxing massage'],
+      'Style Refresh': ['Edge touch-ups', 'Flyaway control', 'Quick refresh', 'Affordable'],
+      'Color Services': ['Highlights available', 'Color correction', 'Quality products', 'Hair protection']
+    }
+    return defaultFeatures[name] || []
+  }
+
+  const getServiceDetails = (name) => {
+    // Return details based on service name
+    const defaultDetails = {
+      'Retwist Service': 'Retwisting is essential for maintaining locs, twists, and some braided styles. Our skilled stylists will carefully retwist your hair to keep it looking neat and well-maintained.',
+      'Wig Application': 'Our wig application service includes proper cap fitting, natural hairline customization, and secure installation methods. Whether you prefer glueless, tape, or sew-in methods, we\'ve got you covered.',
+      'Eyebrow Shaping': 'Well-groomed eyebrows can transform your entire look. Our skilled technicians use threading, waxing, or precision tweezing to create the perfect arch and shape for your face.',
+      'Hair Washing & Detangling': 'Proper hair washing and detangling is the foundation of any great style. Our gentle techniques ensure your hair is clean, detangled, and ready for styling without unnecessary breakage.',
+      'Deep Conditioning Treatment': 'Deep conditioning treatments penetrate the hair shaft to restore moisture, repair damage, and strengthen your hair. Includes a relaxing steam treatment for maximum product absorption.',
+      'Hair Cut & Trim': 'Regular trims are essential for maintaining healthy hair and preventing split ends. Our skilled stylists will trim your hair while preserving your style and promoting healthy growth.',
+      'Scalp Treatment': 'A healthy scalp is the foundation of healthy hair. Our scalp treatments include gentle exfoliation, therapeutic massage, and application of nourishing oils to promote optimal hair growth conditions.',
+      'Style Refresh': 'Keep your style looking fresh between full installations with our style refresh service. We\'ll touch up edges, control flyaways, and ensure your style looks polished and well-maintained.',
+      'Color Services': 'Transform your look with professional hair coloring. Whether you want subtle highlights, bold color, or color correction, our experienced colorists will achieve your desired look while maintaining hair health.'
+    }
+    return defaultDetails[name] || ''
+  }
+
+  const isPopularService = (name) => {
+    const popularServices = ['Box Braids', 'Goddess Braids', 'Knotless Braids', 'Lemonade Braids', 'Retwist Service', 'Eyebrow Shaping']
+    return popularServices.includes(name)
   }
 
   const getDefaultServices = () => {
@@ -43,114 +128,6 @@ const Services = () => {
         features: ['Long-lasting (6-8 weeks)', 'Low maintenance', 'Versatile styling options', 'Hair protection'],
         details: 'Box braids are a timeless protective style that involves sectioning hair into square or rectangular parts and braiding synthetic or natural hair extensions into each section. Perfect for all hair types and lengths.',
         popular: true
-      },
-      {
-        id: '13',
-        name: 'Retwist Service',
-        description: 'Professional retwist service to maintain your locs, twists, or braids. Keep your style fresh and neat with our expert retwisting techniques. Perfect for maintaining your protective style between full installations.',
-        price: 60,
-        duration: '1-2 hours',
-        category: 'Maintenance',
-        icon: '🔄',
-        features: ['Maintains style freshness', 'Quick service', 'Affordable maintenance', 'Extends style life'],
-        details: 'Retwisting is essential for maintaining locs, twists, and some braided styles. Our skilled stylists will carefully retwist your hair to keep it looking neat and well-maintained, extending the life of your style.',
-        popular: true
-      },
-      {
-        id: '14',
-        name: 'Wig Application',
-        description: 'Professional wig installation and application services. From glueless wigs to custom installations, we ensure a secure, natural-looking fit. Perfect for protective styling or style versatility.',
-        price: 80,
-        duration: '2-3 hours',
-        category: 'Installation',
-        icon: '👑',
-        features: ['Secure application', 'Natural hairline', 'Custom fitting', 'Protective styling option'],
-        details: 'Our wig application service includes proper cap fitting, natural hairline customization, and secure installation methods. Whether you prefer glueless, tape, or sew-in methods, we\'ve got you covered.',
-        popular: false
-      },
-      {
-        id: '15',
-        name: 'Eyebrow Shaping',
-        description: 'Professional eyebrow shaping and grooming services. Achieve perfectly arched brows that frame your face beautifully. We offer threading, waxing, and precision tweezing.',
-        price: 25,
-        duration: '30 minutes',
-        category: 'Grooming',
-        icon: '✨',
-        features: ['Threading available', 'Waxing option', 'Precision shaping', 'Quick service'],
-        details: 'Well-groomed eyebrows can transform your entire look. Our skilled technicians use threading, waxing, or precision tweezing to create the perfect arch and shape for your face.',
-        popular: true
-      },
-      {
-        id: '16',
-        name: 'Hair Washing & Detangling',
-        description: 'Professional hair washing and detangling service. Gentle cleansing and thorough detangling to prepare your hair for styling. Includes deep conditioning treatment.',
-        price: 35,
-        duration: '45-60 minutes',
-        category: 'Hair Care',
-        icon: '💧',
-        features: ['Gentle cleansing', 'Thorough detangling', 'Deep conditioning included', 'Prepares for styling'],
-        details: 'Proper hair washing and detangling is the foundation of any great style. Our gentle techniques ensure your hair is clean, detangled, and ready for styling without unnecessary breakage.',
-        popular: false
-      },
-      {
-        id: '17',
-        name: 'Deep Conditioning Treatment',
-        description: 'Intensive deep conditioning treatment to restore moisture and strength to your hair. Perfect for dry, damaged, or color-treated hair. Includes steam treatment for maximum penetration.',
-        price: 45,
-        duration: '1 hour',
-        category: 'Hair Care',
-        icon: '🌿',
-        features: ['Moisture restoration', 'Steam treatment', 'Repairs damage', 'Strengthens hair'],
-        details: 'Deep conditioning treatments penetrate the hair shaft to restore moisture, repair damage, and strengthen your hair. Includes a relaxing steam treatment for maximum product absorption.',
-        popular: false
-      },
-      {
-        id: '18',
-        name: 'Hair Cut & Trim',
-        description: 'Professional hair cutting and trimming services. From precision cuts to simple trims, we maintain your hair\'s health and shape. Perfect for maintaining your natural hair or styled looks.',
-        price: 40,
-        duration: '30-45 minutes',
-        category: 'Hair Care',
-        icon: '✂️',
-        features: ['Precision cutting', 'Shape maintenance', 'Health-focused', 'Quick service'],
-        details: 'Regular trims are essential for maintaining healthy hair and preventing split ends. Our skilled stylists will trim your hair while preserving your style and promoting healthy growth.',
-        popular: false
-      },
-      {
-        id: '19',
-        name: 'Scalp Treatment',
-        description: 'Therapeutic scalp treatment to promote healthy hair growth and relieve dryness or irritation. Includes exfoliation, massage, and nourishing oils. Perfect for maintaining a healthy scalp.',
-        price: 50,
-        duration: '45 minutes',
-        category: 'Hair Care',
-        icon: '💆🏾‍♀️',
-        features: ['Promotes growth', 'Relieves irritation', 'Exfoliation included', 'Relaxing massage'],
-        details: 'A healthy scalp is the foundation of healthy hair. Our scalp treatments include gentle exfoliation, therapeutic massage, and application of nourishing oils to promote optimal hair growth conditions.',
-        popular: false
-      },
-      {
-        id: '20',
-        name: 'Style Refresh',
-        description: 'Quick style refresh service to revive your existing braids, twists, or locs. Includes edge touch-ups, flyaway control, and overall style maintenance. Perfect between full installations.',
-        price: 40,
-        duration: '1 hour',
-        category: 'Maintenance',
-        icon: '💇🏾‍♀️',
-        features: ['Edge touch-ups', 'Flyaway control', 'Quick refresh', 'Affordable'],
-        details: 'Keep your style looking fresh between full installations with our style refresh service. We\'ll touch up edges, control flyaways, and ensure your style looks polished and well-maintained.',
-        popular: false
-      },
-      {
-        id: '21',
-        name: 'Color Services',
-        description: 'Professional hair coloring services including highlights, all-over color, and color correction. We use quality products to achieve your desired look while protecting your hair\'s health.',
-        price: 120,
-        duration: '2-4 hours',
-        category: 'Styling',
-        icon: '🎨',
-        features: ['Highlights available', 'Color correction', 'Quality products', 'Hair protection'],
-        details: 'Transform your look with professional hair coloring. Whether you want subtle highlights, bold color, or color correction, our experienced colorists will achieve your desired look while maintaining hair health.',
-        popular: false
       },
       {
         id: '2',
@@ -282,6 +259,114 @@ const Services = () => {
         icon: '🪝',
         features: ['Quick installation', 'Minimal tension', 'Various textures', 'Easy removal'],
         details: 'Crochet braids use a crochet hook to attach pre-made braids or twists to cornrow base braids. This method is faster, causes less tension, and allows for easy style changes without redoing the entire head.',
+        popular: false
+      },
+      {
+        id: '13',
+        name: 'Retwist Service',
+        description: 'Professional retwist service to maintain your locs, twists, or braids. Keep your style fresh and neat with our expert retwisting techniques. Perfect for maintaining your protective style between full installations.',
+        price: 60,
+        duration: '1-2 hours',
+        category: 'Maintenance',
+        icon: '🔄',
+        features: ['Maintains style freshness', 'Quick service', 'Affordable maintenance', 'Extends style life'],
+        details: 'Retwisting is essential for maintaining locs, twists, and some braided styles. Our skilled stylists will carefully retwist your hair to keep it looking neat and well-maintained, extending the life of your style.',
+        popular: true
+      },
+      {
+        id: '14',
+        name: 'Wig Application',
+        description: 'Professional wig installation and application services. From glueless wigs to custom installations, we ensure a secure, natural-looking fit. Perfect for protective styling or style versatility.',
+        price: 80,
+        duration: '2-3 hours',
+        category: 'Installation',
+        icon: '👑',
+        features: ['Secure application', 'Natural hairline', 'Custom fitting', 'Protective styling option'],
+        details: 'Our wig application service includes proper cap fitting, natural hairline customization, and secure installation methods. Whether you prefer glueless, tape, or sew-in methods, we\'ve got you covered.',
+        popular: false
+      },
+      {
+        id: '15',
+        name: 'Eyebrow Shaping',
+        description: 'Professional eyebrow shaping and grooming services. Achieve perfectly arched brows that frame your face beautifully. We offer threading, waxing, and precision tweezing.',
+        price: 25,
+        duration: '30 minutes',
+        category: 'Grooming',
+        icon: '✨',
+        features: ['Threading available', 'Waxing option', 'Precision shaping', 'Quick service'],
+        details: 'Well-groomed eyebrows can transform your entire look. Our skilled technicians use threading, waxing, or precision tweezing to create the perfect arch and shape for your face.',
+        popular: true
+      },
+      {
+        id: '16',
+        name: 'Hair Washing & Detangling',
+        description: 'Professional hair washing and detangling service. Gentle cleansing and thorough detangling to prepare your hair for styling. Includes deep conditioning treatment.',
+        price: 35,
+        duration: '45-60 minutes',
+        category: 'Hair Care',
+        icon: '💧',
+        features: ['Gentle cleansing', 'Thorough detangling', 'Deep conditioning included', 'Prepares for styling'],
+        details: 'Proper hair washing and detangling is the foundation of any great style. Our gentle techniques ensure your hair is clean, detangled, and ready for styling without unnecessary breakage.',
+        popular: false
+      },
+      {
+        id: '17',
+        name: 'Deep Conditioning Treatment',
+        description: 'Intensive deep conditioning treatment to restore moisture and strength to your hair. Perfect for dry, damaged, or color-treated hair. Includes steam treatment for maximum penetration.',
+        price: 45,
+        duration: '1 hour',
+        category: 'Hair Care',
+        icon: '🌿',
+        features: ['Moisture restoration', 'Steam treatment', 'Repairs damage', 'Strengthens hair'],
+        details: 'Deep conditioning treatments penetrate the hair shaft to restore moisture, repair damage, and strengthen your hair. Includes a relaxing steam treatment for maximum product absorption.',
+        popular: false
+      },
+      {
+        id: '18',
+        name: 'Hair Cut & Trim',
+        description: 'Professional hair cutting and trimming services. From precision cuts to simple trims, we maintain your hair\'s health and shape. Perfect for maintaining your natural hair or styled looks.',
+        price: 40,
+        duration: '30-45 minutes',
+        category: 'Hair Care',
+        icon: '✂️',
+        features: ['Precision cutting', 'Shape maintenance', 'Health-focused', 'Quick service'],
+        details: 'Regular trims are essential for maintaining healthy hair and preventing split ends. Our skilled stylists will trim your hair while preserving your style and promoting healthy growth.',
+        popular: false
+      },
+      {
+        id: '19',
+        name: 'Scalp Treatment',
+        description: 'Therapeutic scalp treatment to promote healthy hair growth and relieve dryness or irritation. Includes exfoliation, massage, and nourishing oils. Perfect for maintaining a healthy scalp.',
+        price: 50,
+        duration: '45 minutes',
+        category: 'Hair Care',
+        icon: '💆🏾‍♀️',
+        features: ['Promotes growth', 'Relieves irritation', 'Exfoliation included', 'Relaxing massage'],
+        details: 'A healthy scalp is the foundation of healthy hair. Our scalp treatments include gentle exfoliation, therapeutic massage, and application of nourishing oils to promote optimal hair growth conditions.',
+        popular: false
+      },
+      {
+        id: '20',
+        name: 'Style Refresh',
+        description: 'Quick style refresh service to revive your existing braids, twists, or locs. Includes edge touch-ups, flyaway control, and overall style maintenance. Perfect between full installations.',
+        price: 40,
+        duration: '1 hour',
+        category: 'Maintenance',
+        icon: '💇🏾‍♀️',
+        features: ['Edge touch-ups', 'Flyaway control', 'Quick refresh', 'Affordable'],
+        details: 'Keep your style looking fresh between full installations with our style refresh service. We\'ll touch up edges, control flyaways, and ensure your style looks polished and well-maintained.',
+        popular: false
+      },
+      {
+        id: '21',
+        name: 'Color Services',
+        description: 'Professional hair coloring services including highlights, all-over color, and color correction. We use quality products to achieve your desired look while protecting your hair\'s health.',
+        price: 120,
+        duration: '2-4 hours',
+        category: 'Styling',
+        icon: '🎨',
+        features: ['Highlights available', 'Color correction', 'Quality products', 'Hair protection'],
+        details: 'Transform your look with professional hair coloring. Whether you want subtle highlights, bold color, or color correction, our experienced colorists will achieve your desired look while maintaining hair health.',
         popular: false
       }
     ]
