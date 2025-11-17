@@ -11,9 +11,20 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Footer from './components/Footer'
 import './App.css'
 
+// Get base path for GitHub Pages
+const getBasename = () => {
+  // Check if we're on GitHub Pages (has /repo-name/ in path)
+  const path = window.location.pathname
+  const match = path.match(/^(\/[^\/]+)/)
+  if (match && match[1] !== '/') {
+    return match[1]
+  }
+  return '/'
+}
+
 function App() {
   return (
-    <Router>
+    <Router basename={getBasename()}>
       <div className="app">
         <Navbar />
         <main className="main-content">
