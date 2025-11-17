@@ -175,16 +175,41 @@ You'll need:
 - **Hosting**: Netlify, Vercel, or AWS
 - **Domain**: Namecheap, Google Domains, or Cloudflare
 
+## 🖼️ Gallery & Pricing API
+
+The website now includes a backend API for managing gallery images and service prices.
+
+### Backend Setup
+
+1. **Navigate to server directory**:
+   ```bash
+   cd server
+   npm install
+   ```
+
+2. **Start the API server**:
+   ```bash
+   npm start
+   ```
+
+3. **Deploy to Render**: See `RENDER_DEPLOY.md` for detailed instructions
+
+### API Endpoints
+
+- **Gallery**: `/api/gallery` - Manage portfolio images
+- **Prices**: `/api/prices` - Manage service pricing
+- **Health**: `/api/health` - API status check
+
 ## 📝 Future Enhancements
 
-- [ ] User authentication
+- [x] Photo gallery
+- [x] Service pricing API
+- [ ] Admin dashboard for managing gallery/prices
 - [ ] Email notifications
 - [ ] Payment integration
-- [ ] Admin dashboard
 - [ ] Calendar sync
 - [ ] SMS reminders
 - [ ] Review system
-- [ ] Photo gallery
 
 ## 🤝 Contributing
 

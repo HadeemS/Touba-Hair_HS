@@ -24,8 +24,11 @@ const Home = () => {
               <Link to="/book-appointment" className="btn btn-primary">
                 Book Now
               </Link>
-              <Link to="/my-bookings" className="btn btn-secondary">
-                View My Bookings
+              <Link to="/services" className="btn btn-secondary">
+                Our Services
+              </Link>
+              <Link to="/gallery" className="btn btn-outline">
+                View Gallery
               </Link>
             </div>
           </div>

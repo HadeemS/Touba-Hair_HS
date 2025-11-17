@@ -1,0 +1,353 @@
+import express from 'express';
+import cors from 'cors';
+import multer from 'multer';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import fs from 'fs/promises';
+import { existsSync } from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
+
+// Ensure data directory exists
+const dataDir = join(__dirname, 'data');
+const galleryFile = join(dataDir, 'gallery.json');
+const pricesFile = join(dataDir, 'prices.json');
+
+async function ensureDataDir() {
+  if (!existsSync(dataDir)) {
+    await fs.mkdir(dataDir, { recursive: true });
+  }
+  
+  // Initialize gallery.json if it doesn't exist
+  if (!existsSync(galleryFile)) {
+    await fs.writeFile(galleryFile, JSON.stringify([], null, 2));
+  }
+  
+  // Initialize prices.json if it doesn't exist
+  if (!existsSync(pricesFile)) {
+    const defaultPrices = [
+      {
+        id: '1',
+        name: 'Box Braids',
+        description: 'Classic box braids with premium hair extensions',
+        price: 150,
+        duration: '4-6 hours',
+        category: 'Braids'
+      },
+      {
+        id: '2',
+        name: 'Cornrows',
+        description: 'Traditional cornrow braiding styles',
+        price: 80,
+        duration: '2-3 hours',
+        category: 'Braids'
+      },
+      {
+        id: '3',
+        name: 'Goddess Braids',
+        description: 'Elegant goddess braids with decorative elements',
+        price: 180,
+        duration: '5-7 hours',
+        category: 'Braids'
+      },
+      {
+        id: '4',
+        name: 'Fulani Braids',
+        description: 'Traditional Fulani braiding style',
+        price: 160,
+        duration: '4-6 hours',
+        category: 'Braids'
+      },
+      {
+        id: '5',
+        name: 'Micro Braids',
+        description: 'Fine micro braids for a delicate look',
+        price: 200,
+        duration: '6-8 hours',
+        category: 'Braids'
+      },
+      {
+        id: '6',
+        name: 'Knotless Braids',
+        description: 'Gentle knotless braids for hair protection',
+        price: 170,
+        duration: '5-7 hours',
+        category: 'Braids'
+      }
+    ];
+    await fs.writeFile(pricesFile, JSON.stringify(defaultPrices, null, 2));
+  }
+}
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = join(__dirname, 'public', 'uploads');
+    if (!existsSync(uploadDir)) {
+      fs.mkdir(uploadDir, { recursive: true }).then(() => {
+        cb(null, uploadDir);
+      });
+    } else {
+      cb(null, uploadDir);
+    }
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + '-' + file.originalname);
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
+
+// Initialize data directory
+await ensureDataDir();
+
+// Helper functions to read/write JSON files
+async function readGallery() {
+  try {
+    const data = await fs.readFile(galleryFile, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    return [];
+  }
+}
+
+async function writeGallery(gallery) {
+  await fs.writeFile(galleryFile, JSON.stringify(gallery, null, 2));
+}
+
+async function readPrices() {
+  try {
+    const data = await fs.readFile(pricesFile, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    return [];
+  }
+}
+
+async function writePrices(prices) {
+  await fs.writeFile(pricesFile, JSON.stringify(prices, null, 2));
+}
+
+// ==================== GALLERY ROUTES ====================
+
+// Get all gallery images
+app.get('/api/gallery', async (req, res) => {
+  try {
+    const gallery = await readGallery();
+    res.json(gallery);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch gallery' });
+  }
+});
+
+// Get single gallery image
+app.get('/api/gallery/:id', async (req, res) => {
+  try {
+    const gallery = await readGallery();
+    const image = gallery.find(img => img.id === req.params.id);
+    if (!image) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+    res.json(image);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch image' });
+  }
+});
+
+// Add new gallery image
+app.post('/api/gallery', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+
+    const gallery = await readGallery();
+    const newImage = {
+      id: Date.now().toString(),
+      imageUrl: `/uploads/${req.file.filename}`,
+      title: req.body.title || 'Hair Style',
+      description: req.body.description || '',
+      braiderName: req.body.braiderName || '',
+      serviceType: req.body.serviceType || '',
+      createdAt: new Date().toISOString()
+    };
+
+    gallery.push(newImage);
+    await writeGallery(gallery);
+
+    res.status(201).json(newImage);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add image' });
+  }
+});
+
+// Update gallery image
+app.put('/api/gallery/:id', async (req, res) => {
+  try {
+    const gallery = await readGallery();
+    const index = gallery.findIndex(img => img.id === req.params.id);
+    
+    if (index === -1) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+
+    gallery[index] = {
+      ...gallery[index],
+      ...req.body,
+      updatedAt: new Date().toISOString()
+    };
+
+    await writeGallery(gallery);
+    res.json(gallery[index]);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update image' });
+  }
+});
+
+// Delete gallery image
+app.delete('/api/gallery/:id', async (req, res) => {
+  try {
+    const gallery = await readGallery();
+    const index = gallery.findIndex(img => img.id === req.params.id);
+    
+    if (index === -1) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+
+    // Delete the image file
+    const image = gallery[index];
+    if (image.imageUrl) {
+      const imagePath = join(__dirname, 'public', image.imageUrl);
+      if (existsSync(imagePath)) {
+        await fs.unlink(imagePath);
+      }
+    }
+
+    gallery.splice(index, 1);
+    await writeGallery(gallery);
+
+    res.json({ message: 'Image deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete image' });
+  }
+});
+
+// ==================== PRICES ROUTES ====================
+
+// Get all prices
+app.get('/api/prices', async (req, res) => {
+  try {
+    const prices = await readPrices();
+    res.json(prices);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch prices' });
+  }
+});
+
+// Get single price
+app.get('/api/prices/:id', async (req, res) => {
+  try {
+    const prices = await readPrices();
+    const price = prices.find(p => p.id === req.params.id);
+    if (!price) {
+      return res.status(404).json({ error: 'Price not found' });
+    }
+    res.json(price);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch price' });
+  }
+});
+
+// Add new price
+app.post('/api/prices', async (req, res) => {
+  try {
+    const prices = await readPrices();
+    const newPrice = {
+      id: Date.now().toString(),
+      ...req.body,
+      createdAt: new Date().toISOString()
+    };
+
+    prices.push(newPrice);
+    await writePrices(prices);
+
+    res.status(201).json(newPrice);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add price' });
+  }
+});
+
+// Update price
+app.put('/api/prices/:id', async (req, res) => {
+  try {
+    const prices = await readPrices();
+    const index = prices.findIndex(p => p.id === req.params.id);
+    
+    if (index === -1) {
+      return res.status(404).json({ error: 'Price not found' });
+    }
+
+    prices[index] = {
+      ...prices[index],
+      ...req.body,
+      updatedAt: new Date().toISOString()
+    };
+
+    await writePrices(prices);
+    res.json(prices[index]);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update price' });
+  }
+});
+
+// Delete price
+app.delete('/api/prices/:id', async (req, res) => {
+  try {
+    const prices = await readPrices();
+    const index = prices.findIndex(p => p.id === req.params.id);
+    
+    if (index === -1) {
+      return res.status(404).json({ error: 'Price not found' });
+    }
+
+    prices.splice(index, 1);
+    await writePrices(prices);
+
+    res.json({ message: 'Price deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete price' });
+  }
+});
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📸 Gallery API: http://localhost:${PORT}/api/gallery`);
+  console.log(`💰 Prices API: http://localhost:${PORT}/api/prices`);
+});
+

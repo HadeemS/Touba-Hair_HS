@@ -88,6 +88,42 @@ const Navbar = () => {
             </NavLink>
           </li>
 
+          <li>
+            <NavLink
+              to="/gallery"
+              className={({ isActive }) =>
+                `navbar-link ${isActive ? 'active' : ''}`
+              }
+              onClick={closeMenu}
+            >
+              Gallery
+            </NavLink>
+          </li>
+
+          <li>
+            <NavLink
+              to="/services"
+              className={({ isActive }) =>
+                `navbar-link ${isActive ? 'active' : ''}`
+              }
+              onClick={closeMenu}
+            >
+              Services
+            </NavLink>
+          </li>
+
+          <li>
+            <NavLink
+              to="/pricing"
+              className={({ isActive }) =>
+                `navbar-link ${isActive ? 'active' : ''}`
+              }
+              onClick={closeMenu}
+            >
+              Pricing
+            </NavLink>
+          </li>
+
           {user ? (
             <>
               {isBraider() ? (
