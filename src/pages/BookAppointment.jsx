@@ -4,6 +4,7 @@ import { braiders } from '../data/braiders'
 import { generateTimeSlots, getAvailableDates, formatDateDisplay, formatDateStorage, getDayName } from '../utils/timeSlots'
 import { isTimeSlotAvailable, saveBooking } from '../utils/bookingStorage'
 import './BookAppointment.css'
+import { getStoredProfile } from '../utils/profileStorage'
 
 const BookAppointment = () => {
   const navigate = useNavigate()
@@ -20,6 +21,15 @@ const BookAppointment = () => {
 
   const availableDates = getAvailableDates()
   const timeSlots = generateTimeSlots()
+
+  const storedProfile = getStoredProfile()
+  if (storedProfile) {
+    setCustomerInfo({
+      name: storedProfile.name,
+      email: storedProfile.email,
+      phone: storedProfile.phone
+    })
+  }
 
   const handleBraiderSelect = (braider) => {
     setSelectedBraider(braider)
@@ -87,6 +97,17 @@ const BookAppointment = () => {
       setStep(step - 1)
     }
   }
+  useEffect(() => {
+    const stored = getStoredProfile()
+    if (stored) {
+      if (!clientName) setClientName(stored.name || '')
+      if (!clientEmail) setClientEmail(stored.email || '')
+      if (!clientPhone) setClientPhone(stored.phone || '')
+      if (!clientNotes) setClientNotes(stored.notes || '')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  
 
   return (
     <div className="book-appointment">

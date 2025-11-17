@@ -54,6 +54,15 @@ const Navbar = () => {
               My Bookings
             </Link>
           </li>
+          <li>
+            <Link 
+              to="/profile" 
+              className={`navbar-link ${isActive('/profile') ? 'active' : ''}`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Profile
+            </Link>
+          </li>
         </ul>
       </div>
     </nav>
@@ -61,4 +70,3 @@ const Navbar = () => {
 }
 
 export default Navbar
-
