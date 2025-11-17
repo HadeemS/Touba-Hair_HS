@@ -80,7 +80,7 @@ const Home = () => {
             <p className="cta-subtitle">
               Book your appointment today and let our expert stylists create the perfect braids for you.
             </p>
-            <Link to="/book" className="btn btn-primary btn-large">
+            <Link to="/book-appointment" className="btn btn-primary btn-large">
               Schedule Your Appointment
             </Link>
           </div>

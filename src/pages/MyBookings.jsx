@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom'
 import { getBookings, deleteBooking } from '../utils/bookingStorage'
 import { formatDateDisplay } from '../utils/timeSlots'
 import { getBraiderById } from '../data/braiders'
+import { getCurrentUser } from '../utils/auth'
 import './MyBookings.css'
 
 const MyBookings = () => {
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
+  const user = getCurrentUser()
 
   useEffect(() => {
     loadBookings()
@@ -16,8 +18,12 @@ const MyBookings = () => {
   const loadBookings = () => {
     try {
       const allBookings = getBookings()
+      // Filter bookings for logged-in customer
+      const customerBookings = allBookings.filter(
+        booking => booking.customerEmail === user?.email
+      )
       // Sort by date and time
-      const sorted = allBookings.sort((a, b) => {
+      const sorted = customerBookings.sort((a, b) => {
         const dateCompare = a.date.localeCompare(b.date)
         if (dateCompare !== 0) return dateCompare
         return a.timeSlot.localeCompare(b.timeSlot)
@@ -75,7 +81,7 @@ const MyBookings = () => {
               <div className="empty-icon">📅</div>
               <h2>No bookings yet</h2>
               <p>Start by booking your first appointment!</p>
-              <Link to="/book" className="btn btn-primary">
+              <Link to="/book-appointment" className="btn btn-primary">
                 Book Appointment
               </Link>
             </div>
@@ -177,7 +183,7 @@ const MyBookings = () => {
 
         {bookings.length > 0 && (
           <div className="book-again-section">
-            <Link to="/book" className="btn btn-primary">
+            <Link to="/book-appointment" className="btn btn-primary">
               Book Another Appointment
             </Link>
           </div>

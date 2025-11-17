@@ -79,6 +79,21 @@
   width: 100%;
 }
 
+.logout-btn {
+  background: none;
+  border: none;
+  color: var(--text-dark);
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: var(--spacing-xs) 0;
+  font-family: inherit;
+}
+
+.logout-btn:hover {
+  color: var(--accent-pink);
+}
+
 .menu-toggle {
   display: none;
   flex-direction: column;

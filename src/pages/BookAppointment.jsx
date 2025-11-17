@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { braiders } from '../data/braiders'
 import { generateTimeSlots, getAvailableDates, formatDateDisplay, formatDateStorage, getDayName } from '../utils/timeSlots'
@@ -23,14 +23,17 @@ const BookAppointment = () => {
   const availableDates = getAvailableDates()
   const timeSlots = generateTimeSlots()
 
-  const storedProfile = getStoredProfile()
-  if (storedProfile) {
-    setCustomerInfo({
-      name: storedProfile.name,
-      email: storedProfile.email,
-      phone: storedProfile.phone
-    })
-  }
+  // Load stored profile on component mount
+  useEffect(() => {
+    const storedProfile = getStoredProfile()
+    if (storedProfile && (storedProfile.name || storedProfile.email || storedProfile.phone)) {
+      setCustomerInfo({
+        name: storedProfile.name || '',
+        email: storedProfile.email || '',
+        phone: storedProfile.phone || ''
+      })
+    }
+  }, [])
 
   const handleBraiderSelect = (braider) => {
     setSelectedBraider(braider)
@@ -83,6 +86,22 @@ const BookAppointment = () => {
 
       await saveBooking(booking)
       
+      // Try to send email notification
+      try {
+        await sendBookingEmail({
+          clientName: customerInfo.name,
+          clientEmail: customerInfo.email,
+          clientPhone: customerInfo.phone,
+          notes: '',
+          serviceName: 'Hair Braiding',
+          braiderName: selectedBraider.name,
+          dateTimeDisplay: `${formatDateDisplay(selectedDate)} at ${selectedTimeSlot}`
+        })
+      } catch (emailError) {
+        console.error('Email sending failed:', emailError)
+        // Don't block the booking if email fails
+      }
+      
       alert('Booking confirmed! You will receive a confirmation email shortly.')
       navigate('/my-bookings')
     } catch (error) {
@@ -98,16 +117,6 @@ const BookAppointment = () => {
       setStep(step - 1)
     }
   }
-  useEffect(() => {
-    const stored = getStoredProfile()
-    if (stored) {
-      if (!clientName) setClientName(stored.name || '')
-      if (!clientEmail) setClientEmail(stored.email || '')
-      if (!clientPhone) setClientPhone(stored.phone || '')
-      if (!clientNotes) setClientNotes(stored.notes || '')
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
   
 
   return (
