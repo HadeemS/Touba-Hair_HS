@@ -5,6 +5,7 @@ import { generateTimeSlots, getAvailableDates, formatDateDisplay, formatDateStor
 import { isTimeSlotAvailable, saveBooking } from '../utils/bookingStorage'
 import './BookAppointment.css'
 import { getStoredProfile } from '../utils/profileStorage'
+import { sendBookingEmail } from '../utils/sendBookingEmail'
 
 const BookAppointment = () => {
   const navigate = useNavigate()

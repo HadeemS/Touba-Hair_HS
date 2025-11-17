@@ -1,24 +1,27 @@
+// src/components/Navbar.jsx
 import React, { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import './Navbar.css'
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const location = useLocation()
 
-  const isActive = (path) => location.pathname === path
+  const toggleMenu = () => setIsMenuOpen(prev => !prev)
+  const closeMenu = () => setIsMenuOpen(false)
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-logo">
+        {/* Logo */}
+        <Link to="/" className="navbar-logo" onClick={closeMenu}>
           <span className="logo-icon">✨</span>
           <span className="logo-text">Touba Hair</span>
         </Link>
         
+        {/* Mobile toggle */}
         <button 
           className={`menu-toggle ${isMenuOpen ? 'active' : ''}`}
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          onClick={toggleMenu}
           aria-label="Toggle menu"
         >
           <span></span>
@@ -26,42 +29,55 @@ const Navbar = () => {
           <span></span>
         </button>
 
+        {/* Links */}
         <ul className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
           <li>
-            <Link 
-              to="/" 
-              className={`navbar-link ${isActive('/') ? 'active' : ''}`}
-              onClick={() => setIsMenuOpen(false)}
+            <NavLink
+              to="/"
+              end
+              className={({ isActive }) =>
+                `navbar-link ${isActive ? 'active' : ''}`
+              }
+              onClick={closeMenu}
             >
               Home
-            </Link>
+            </NavLink>
           </li>
+
           <li>
-            <Link 
-              to="/book" 
-              className={`navbar-link ${isActive('/book') ? 'active' : ''}`}
-              onClick={() => setIsMenuOpen(false)}
+            <NavLink
+              to="/book"
+              className={({ isActive }) =>
+                `navbar-link ${isActive ? 'active' : ''}`
+              }
+              onClick={closeMenu}
             >
               Book Appointment
-            </Link>
+            </NavLink>
           </li>
+
           <li>
-            <Link 
-              to="/my-bookings" 
-              className={`navbar-link ${isActive('/my-bookings') ? 'active' : ''}`}
-              onClick={() => setIsMenuOpen(false)}
+            <NavLink
+              to="/my-bookings"
+              className={({ isActive }) =>
+                `navbar-link ${isActive ? 'active' : ''}`
+              }
+              onClick={closeMenu}
             >
               My Bookings
-            </Link>
+            </NavLink>
           </li>
+
           <li>
-            <Link 
-              to="/profile" 
-              className={`navbar-link ${isActive('/profile') ? 'active' : ''}`}
-              onClick={() => setIsMenuOpen(false)}
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                `navbar-link ${isActive ? 'active' : ''}`
+              }
+              onClick={closeMenu}
             >
               Profile
-            </Link>
+            </NavLink>
           </li>
         </ul>
       </div>
