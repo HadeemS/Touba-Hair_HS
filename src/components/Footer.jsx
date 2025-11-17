@@ -38,7 +38,7 @@ const Footer = () => {
               <li>📍 6312 Sandhills Promenade, Columbia, SC</li>
               <li>📞 (839) 201-3566</li>
               <li>📞 (803) 333-0042</li>
-              <li>✉️ mametouab@gmail.com</li>
+              <li>✉️ mametouba@gmail.com</li>
             </ul>
           </div>
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { braiders } from '../data/braiders'
 import { generateTimeSlots, getAvailableDates, formatDateDisplay, formatDateStorage, getDayName } from '../utils/timeSlots'
 import { isTimeSlotAvailable, saveBooking } from '../utils/bookingStorage'
+import { getBraiderAvailableDays } from '../utils/braiderSettings'
 import './BookAppointment.css'
 import { getStoredProfile } from '../utils/profileStorage'
 import { sendBookingEmail } from '../utils/sendBookingEmail'
@@ -44,7 +45,10 @@ const BookAppointment = () => {
 
   const handleDateSelect = (date) => {
     const dayName = getDayName(date)
-    if (selectedBraider.availableDays.includes(dayName)) {
+    // Check saved availability first, then fall back to default
+    const availableDays = getBraiderAvailableDays(selectedBraider.name, selectedBraider.availableDays)
+    
+    if (availableDays.includes(dayName)) {
       setSelectedDate(date)
       setSelectedTimeSlot(null)
       setStep(3)
@@ -183,7 +187,9 @@ const BookAppointment = () => {
               <div className="dates-grid">
                 {availableDates.map((date, index) => {
                   const dayName = getDayName(date)
-                  const isAvailable = selectedBraider.availableDays.includes(dayName)
+                  // Check saved availability first, then fall back to default
+                  const availableDays = getBraiderAvailableDays(selectedBraider.name, selectedBraider.availableDays)
+                  const isAvailable = availableDays.includes(dayName)
                   const isSelected = selectedDate && formatDateStorage(selectedDate) === formatDateStorage(date)
                   
                   return (

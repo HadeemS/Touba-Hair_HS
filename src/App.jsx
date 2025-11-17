@@ -7,6 +7,7 @@ import Profile from './pages/Profile'
 import MyBookings from './pages/MyBookings'
 import Login from './pages/Login'
 import BraiderProfile from './pages/BraiderProfile'
+import BraiderSettings from './pages/BraiderSettings'
 import Gallery from './pages/Gallery'
 import Services from './pages/Services'
 import Locations from './pages/Locations'
@@ -60,6 +61,14 @@ function App() {
               element={
                 <ProtectedRoute requireBraider={true}>
                   <BraiderProfile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/braider-settings" 
+              element={
+                <ProtectedRoute requireBraider={true}>
+                  <BraiderSettings />
                 </ProtectedRoute>
               } 
             />

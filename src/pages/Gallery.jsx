@@ -15,11 +15,19 @@ const Gallery = () => {
     try {
       setLoading(true)
       const data = await galleryAPI.getAll()
-      setImages(data)
-      setError(null)
+      console.log('Gallery data loaded:', data)
+      if (data && Array.isArray(data)) {
+        setImages(data)
+        setError(null)
+      } else {
+        console.error('Invalid gallery data format:', data)
+        setError('Invalid data format received from server.')
+        setImages([])
+      }
     } catch (err) {
       console.error('Error loading gallery:', err)
-      setError('Failed to load gallery. Please try again later.')
+      setError(`Failed to load gallery: ${err.message}. Please check your connection and try again.`)
+      setImages([])
     } finally {
       setLoading(false)
     }
@@ -63,9 +71,15 @@ const Gallery = () => {
           <div className="gallery-grid">
             {images.map((item) => {
               const isVideo = item.type === 'video' || item.videoUrl || (item.imageUrl && item.imageUrl.match(/\.(mp4|webm|ogg)$/i))
+              
+              // Check if imageUrl is already a full URL (starts with http:// or https://)
+              const isFullUrl = item.imageUrl && (item.imageUrl.startsWith('http://') || item.imageUrl.startsWith('https://'))
+              
               const mediaUrl = isVideo 
                 ? (item.videoUrl || item.imageUrl)
-                : `${import.meta.env.VITE_API_URL || 'https://touba-hair-hs.onrender.com'}${item.imageUrl}`
+                : isFullUrl 
+                  ? item.imageUrl 
+                  : `${import.meta.env.VITE_API_URL || 'https://touba-hair-hs.onrender.com'}${item.imageUrl}`
               
               return (
                 <div key={item.id} className={`gallery-item ${isVideo ? 'video-item' : ''}`}>
@@ -76,16 +90,20 @@ const Gallery = () => {
                         className="gallery-media"
                         controls
                         preload="metadata"
-                        poster={item.posterUrl ? `${import.meta.env.VITE_API_URL || 'https://touba-hair-hs.onrender.com'}${item.posterUrl}` : undefined}
+                        poster={item.posterUrl ? (item.posterUrl.startsWith('http') ? item.posterUrl : `${import.meta.env.VITE_API_URL || 'https://touba-hair-hs.onrender.com'}${item.posterUrl}`) : undefined}
                       >
                         Your browser does not support the video tag.
                       </video>
                     ) : (
                       <img 
                         src={mediaUrl}
-                        alt={item.title}
+                        alt={item.title || 'Gallery image'}
                         className="gallery-media"
                         loading="lazy"
+                        onError={(e) => {
+                          console.error('Failed to load image:', mediaUrl)
+                          e.target.style.display = 'none'
+                        }}
                       />
                     )}
                     <div className="gallery-overlay">

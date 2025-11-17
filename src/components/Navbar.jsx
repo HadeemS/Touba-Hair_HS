@@ -127,17 +127,30 @@ const Navbar = () => {
           {user ? (
             <>
               {isBraider() ? (
-                <li>
-                  <NavLink
-                    to="/braider-profile"
-                    className={({ isActive }) =>
-                      `navbar-link ${isActive ? 'active' : ''}`
-                    }
-                    onClick={closeMenu}
-                  >
-                    My Appointments
-                  </NavLink>
-                </li>
+                <>
+                  <li>
+                    <NavLink
+                      to="/braider-profile"
+                      className={({ isActive }) =>
+                        `navbar-link ${isActive ? 'active' : ''}`
+                      }
+                      onClick={closeMenu}
+                    >
+                      My Appointments
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink
+                      to="/braider-settings"
+                      className={({ isActive }) =>
+                        `navbar-link ${isActive ? 'active' : ''}`
+                      }
+                      onClick={closeMenu}
+                    >
+                      Settings
+                    </NavLink>
+                  </li>
+                </>
               ) : (
                 <li>
                   <NavLink
