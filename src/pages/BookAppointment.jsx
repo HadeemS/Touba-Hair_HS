@@ -296,7 +296,7 @@ const BookAppointment = () => {
                       value={customerInfo.phone}
                       onChange={handleInputChange}
                       required
-                      placeholder="(555) 123-4567"
+                      placeholder="(839) 201-3566"
                     />
                   </div>
                   <button

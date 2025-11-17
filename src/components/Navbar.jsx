@@ -112,6 +112,18 @@ const Navbar = () => {
             </NavLink>
           </li>
 
+          <li>
+            <NavLink
+              to="/locations"
+              className={({ isActive }) =>
+                `navbar-link ${isActive ? 'active' : ''}`
+              }
+              onClick={closeMenu}
+            >
+              Locations
+            </NavLink>
+          </li>
+
           {user ? (
             <>
               {isBraider() ? (

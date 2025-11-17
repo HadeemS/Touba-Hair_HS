@@ -9,6 +9,7 @@ import Login from './pages/Login'
 import BraiderProfile from './pages/BraiderProfile'
 import Gallery from './pages/Gallery'
 import Services from './pages/Services'
+import Locations from './pages/Locations'
 import ProtectedRoute from './components/ProtectedRoute'
 import Footer from './components/Footer'
 import './App.css'
@@ -36,6 +37,7 @@ function App() {
             <Route path="/book-appointment" element={<BookAppointment />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/locations" element={<Locations />} />
             <Route path="/login" element={<Login />} />
             <Route 
               path="/my-bookings" 
