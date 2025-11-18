@@ -20,20 +20,37 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy (required for Render and other hosting platforms)
+// MUST be set before any middleware that uses IP addresses (like rate limiting)
+app.set('trust proxy', true);
+
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/touba-hair';
 
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('✅ Connected to MongoDB');
-})
-.catch((error) => {
-  console.error('❌ MongoDB connection error:', error);
-  console.log('⚠️  Continuing without database connection (some features will not work)');
-});
+if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
+  console.error('❌ MONGODB_URI not set or incomplete. Please set MONGODB_URI environment variable.');
+  console.error('⚠️  Current MONGODB_URI:', MONGODB_URI ? 'Set but incomplete' : 'Not set');
+} else {
+  mongoose.connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 10000, // Timeout after 10s
+    socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+  })
+  .then(() => {
+    console.log('✅ Connected to MongoDB');
+    console.log('📊 Database:', mongoose.connection.name);
+  })
+  .catch((error) => {
+    console.error('❌ MongoDB connection error:', error.message);
+    console.error('⚠️  Check your MONGODB_URI environment variable in Render');
+    console.error('⚠️  Make sure:');
+    console.error('   1. Password is correct and URL-encoded');
+    console.error('   2. IP whitelist includes 0.0.0.0/0');
+    console.error('   3. Database name is included in connection string');
+    console.error('   4. Connection string format: mongodb+srv://username:password@cluster.mongodb.net/database-name?retryWrites=true&w=majority');
+  });
+}
 
 // Middleware
 app.use(cors({
