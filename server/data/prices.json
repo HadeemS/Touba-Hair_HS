@@ -1,0 +1,170 @@
+[
+  {
+    "id": "1",
+    "name": "Box Braids",
+    "description": "Classic box braids with premium hair extensions. Perfect for protective styling and long-lasting wear.",
+    "price": 150,
+    "duration": "4-6 hours",
+    "category": "Protective Styles"
+  },
+  {
+    "id": "2",
+    "name": "Cornrows",
+    "description": "Traditional cornrow braiding styles. Elegant patterns that showcase your natural hair texture.",
+    "price": 80,
+    "duration": "2-3 hours",
+    "category": "Traditional"
+  },
+  {
+    "id": "3",
+    "name": "Goddess Braids",
+    "description": "Elegant goddess braids with decorative elements. A stunning style that combines beauty and sophistication.",
+    "price": 180,
+    "duration": "5-7 hours",
+    "category": "Specialty"
+  },
+  {
+    "id": "4",
+    "name": "Fulani Braids",
+    "description": "Traditional Fulani braiding style with unique patterns and accessories. A beautiful cultural expression.",
+    "price": 160,
+    "duration": "4-6 hours",
+    "category": "Traditional"
+  },
+  {
+    "id": "5",
+    "name": "Micro Braids",
+    "description": "Fine micro braids for a delicate, natural look. Perfect for those who want subtle elegance.",
+    "price": 200,
+    "duration": "6-8 hours",
+    "category": "Protective Styles"
+  },
+  {
+    "id": "6",
+    "name": "Knotless Braids",
+    "description": "Gentle knotless braids for maximum hair protection. Reduces tension and promotes healthy hair growth.",
+    "price": 170,
+    "duration": "5-7 hours",
+    "category": "Protective Styles"
+  },
+  {
+    "id": "7",
+    "name": "Feed-in Braids",
+    "description": "Seamless feed-in braids that look natural and blend beautifully with your hair.",
+    "price": 140,
+    "duration": "4-5 hours",
+    "category": "Protective Styles"
+  },
+  {
+    "id": "8",
+    "name": "Senegalese Twists",
+    "description": "Classic Senegalese twists for a sleek, polished look. Perfect for professional settings.",
+    "price": 130,
+    "duration": "3-4 hours",
+    "category": "Traditional"
+  },
+  {
+    "id": "9",
+    "name": "Lemonade Braids",
+    "description": "Side-swept braids inspired by Beyoncé's iconic look. A trendy style featuring braids swept to one side.",
+    "price": 165,
+    "duration": "5-6 hours",
+    "category": "Specialty"
+  },
+  {
+    "id": "10",
+    "name": "Passion Twists",
+    "description": "Soft, bouncy twists with a natural, wavy texture. A modern protective style with added volume.",
+    "price": 155,
+    "duration": "4-5 hours",
+    "category": "Protective Styles"
+  },
+  {
+    "id": "11",
+    "name": "Ghana Braids",
+    "description": "Traditional Ghana braids featuring intricate patterns and designs. A beautiful cultural style.",
+    "price": 145,
+    "duration": "4-5 hours",
+    "category": "Traditional"
+  },
+  {
+    "id": "12",
+    "name": "Crochet Braids",
+    "description": "Quick installation crochet braids using a crochet hook. A versatile protective style with minimal tension.",
+    "price": 120,
+    "duration": "2-3 hours",
+    "category": "Protective Styles"
+  },
+  {
+    "id": "13",
+    "name": "Retwist Service",
+    "description": "Professional retwist service to maintain your locs, twists, or braids. Keep your style fresh and neat.",
+    "price": 60,
+    "duration": "1-2 hours",
+    "category": "Maintenance"
+  },
+  {
+    "id": "14",
+    "name": "Wig Application",
+    "description": "Professional wig installation and application services. From glueless wigs to custom installations.",
+    "price": 80,
+    "duration": "2-3 hours",
+    "category": "Installation"
+  },
+  {
+    "id": "15",
+    "name": "Eyebrow Shaping",
+    "description": "Professional eyebrow shaping and grooming services. Achieve perfectly arched brows that frame your face beautifully.",
+    "price": 25,
+    "duration": "30 minutes",
+    "category": "Grooming"
+  },
+  {
+    "id": "16",
+    "name": "Hair Washing & Detangling",
+    "description": "Professional hair washing and detangling service. Gentle cleansing and thorough detangling with deep conditioning.",
+    "price": 35,
+    "duration": "45-60 minutes",
+    "category": "Hair Care"
+  },
+  {
+    "id": "17",
+    "name": "Deep Conditioning Treatment",
+    "description": "Intensive deep conditioning treatment to restore moisture and strength. Includes steam treatment for maximum penetration.",
+    "price": 45,
+    "duration": "1 hour",
+    "category": "Hair Care"
+  },
+  {
+    "id": "18",
+    "name": "Hair Cut & Trim",
+    "description": "Professional hair cutting and trimming services. From precision cuts to simple trims, we maintain your hair's health.",
+    "price": 40,
+    "duration": "30-45 minutes",
+    "category": "Hair Care"
+  },
+  {
+    "id": "19",
+    "name": "Scalp Treatment",
+    "description": "Therapeutic scalp treatment to promote healthy hair growth and relieve dryness. Includes exfoliation and massage.",
+    "price": 50,
+    "duration": "45 minutes",
+    "category": "Hair Care"
+  },
+  {
+    "id": "20",
+    "name": "Style Refresh",
+    "description": "Quick style refresh service to revive your existing braids, twists, or locs. Includes edge touch-ups and flyaway control.",
+    "price": 40,
+    "duration": "1 hour",
+    "category": "Maintenance"
+  },
+  {
+    "id": "21",
+    "name": "Color Services",
+    "description": "Professional hair coloring services including highlights, all-over color, and color correction. Quality products used.",
+    "price": 120,
+    "duration": "2-4 hours",
+    "category": "Styling"
+  }
+]

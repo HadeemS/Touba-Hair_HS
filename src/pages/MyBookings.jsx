@@ -4,6 +4,7 @@ import { getBookings, deleteBooking } from '../utils/bookingStorage'
 import { formatDateDisplay } from '../utils/timeSlots'
 import { getBraiderById } from '../data/braiders'
 import { getCurrentUser } from '../utils/auth'
+import { appointmentsAPI } from '../utils/api'
 import './MyBookings.css'
 
 const MyBookings = () => {
@@ -15,34 +16,77 @@ const MyBookings = () => {
     loadBookings()
   }, [])
 
-  const loadBookings = () => {
+  const loadBookings = async () => {
     try {
-      const allBookings = getBookings()
-      // Filter bookings for logged-in customer
-      const customerBookings = allBookings.filter(
-        booking => booking.customerEmail === user?.email
-      )
+      if (!user) {
+        setLoading(false)
+        return
+      }
+
+      // Fetch from backend API
+      const response = await appointmentsAPI.getAll()
+      const apiBookings = response.appointments || []
+      
+      // Transform API bookings to match expected format
+      const transformedBookings = apiBookings.map(booking => ({
+        id: booking._id,
+        braiderId: booking.braiderId,
+        braiderName: booking.braiderName,
+        date: booking.date,
+        timeSlot: booking.timeSlot,
+        customerName: booking.customerName,
+        customerEmail: booking.customerEmail,
+        customerPhone: booking.customerPhone,
+        status: booking.status,
+        serviceName: booking.serviceName,
+        servicePrice: booking.servicePrice
+      }))
+
       // Sort by date and time
-      const sorted = customerBookings.sort((a, b) => {
+      const sorted = transformedBookings.sort((a, b) => {
         const dateCompare = a.date.localeCompare(b.date)
         if (dateCompare !== 0) return dateCompare
         return a.timeSlot.localeCompare(b.timeSlot)
       })
+      
       setBookings(sorted)
     } catch (error) {
       console.error('Error loading bookings:', error)
+      // Fallback to localStorage if API fails
+      try {
+        const allBookings = getBookings()
+        const customerBookings = allBookings.filter(
+          booking => booking.customerEmail === user?.email
+        )
+        const sorted = customerBookings.sort((a, b) => {
+          const dateCompare = a.date.localeCompare(b.date)
+          if (dateCompare !== 0) return dateCompare
+          return a.timeSlot.localeCompare(b.timeSlot)
+        })
+        setBookings(sorted)
+      } catch (fallbackError) {
+        console.error('Fallback loading failed:', fallbackError)
+      }
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDelete = (bookingId) => {
+  const handleDelete = async (bookingId) => {
     if (window.confirm('Are you sure you want to cancel this booking?')) {
-      if (deleteBooking(bookingId)) {
-        loadBookings()
+      try {
+        await appointmentsAPI.cancel(bookingId)
+        // Also remove from localStorage if exists
+        try {
+          deleteBooking(bookingId)
+        } catch (localError) {
+          // Ignore localStorage errors
+        }
+        await loadBookings()
         alert('Booking cancelled successfully.')
-      } else {
-        alert('Error cancelling booking. Please try again.')
+      } catch (error) {
+        console.error('Cancel error:', error)
+        alert(error.message || 'Error cancelling booking. Please try again.')
       }
     }
   }
@@ -97,14 +141,18 @@ const MyBookings = () => {
                 return (
                   <div key={booking.id} className="booking-card upcoming">
                     <div className="booking-card-header">
-                      <div className="booking-status upcoming-badge">Upcoming</div>
-                      <button
-                        className="cancel-button"
-                        onClick={() => handleDelete(booking.id)}
-                        aria-label="Cancel booking"
-                      >
-                        ✕
-                      </button>
+                      <div className={`booking-status ${booking.status === 'confirmed' ? 'upcoming-badge' : booking.status === 'completed' ? 'past-badge' : 'cancelled-badge'}`}>
+                        {booking.status === 'confirmed' ? 'Upcoming' : booking.status === 'completed' ? 'Completed' : booking.status === 'cancelled' ? 'Cancelled' : booking.status}
+                      </div>
+                      {booking.status === 'confirmed' && (
+                        <button
+                          className="cancel-button"
+                          onClick={() => handleDelete(booking.id)}
+                          aria-label="Cancel booking"
+                        >
+                          ✕
+                        </button>
+                      )}
                     </div>
                     <div className="booking-content">
                       <div className="booking-braider">

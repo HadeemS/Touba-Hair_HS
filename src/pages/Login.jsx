@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { login } from '../utils/auth'
+import { login, register } from '../utils/auth'
 import './Login.css'
 
 const Login = () => {
@@ -29,7 +29,7 @@ const Login = () => {
     setIsLoading(true)
 
     try {
-      const result = login(formData.email, formData.password)
+      const result = await login(formData.email, formData.password)
       
       if (result.success) {
         navigate(from, { replace: true })

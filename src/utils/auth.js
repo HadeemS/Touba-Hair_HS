@@ -1,45 +1,60 @@
 // Authentication utility functions
-const AUTH_KEY = 'touba_hair_auth'
+import { authAPI } from './api.js'
 
-export const login = (email, password, role = 'customer') => {
-  // In a real app, this would verify credentials with a backend
-  // For now, we'll use simple demo authentication
-  
-  // Demo credentials
-  const braiderEmails = ['amina@toubahair.com', 'fatou@toubahair.com', 'mariama@toubahair.com', 'aissatou@toubahair.com']
-  const isBraider = braiderEmails.includes(email.toLowerCase())
-  
-  // Simple demo: password is "password123" for all users
-  if (password === 'password123' || password === 'demo') {
-    const user = {
-      email: email.toLowerCase(),
-      role: isBraider ? 'braider' : 'customer',
-      name: isBraider ? getBraiderNameByEmail(email) : email.split('@')[0],
-      loggedIn: true,
-      loginTime: new Date().toISOString()
+const AUTH_KEY = 'touba_hair_auth'
+const TOKEN_KEY = 'auth_token'
+
+// Login with backend API
+export const login = async (email, password) => {
+  try {
+    const response = await authAPI.login({ email, password })
+    
+    if (response.token && response.user) {
+      // Store token and user info
+      localStorage.setItem(TOKEN_KEY, response.token)
+      localStorage.setItem(AUTH_KEY, JSON.stringify({
+        ...response.user,
+        loggedIn: true,
+        loginTime: new Date().toISOString()
+      }))
+      return { success: true, user: response.user }
     }
     
-    localStorage.setItem(AUTH_KEY, JSON.stringify(user))
-    return { success: true, user }
+    return { success: false, error: 'Login failed' }
+  } catch (error) {
+    return { success: false, error: error.message || 'Login failed. Please try again.' }
   }
-  
-  return { success: false, error: 'Invalid credentials' }
 }
 
-const getBraiderNameByEmail = (email) => {
-  const emailMap = {
-    'amina@toubahair.com': 'Amina',
-    'fatou@toubahair.com': 'Fatou',
-    'mariama@toubahair.com': 'Mariama',
-    'aissatou@toubahair.com': 'Aissatou'
+// Register new user
+export const register = async (userData) => {
+  try {
+    const response = await authAPI.register(userData)
+    
+    if (response.token && response.user) {
+      // Store token and user info
+      localStorage.setItem(TOKEN_KEY, response.token)
+      localStorage.setItem(AUTH_KEY, JSON.stringify({
+        ...response.user,
+        loggedIn: true,
+        loginTime: new Date().toISOString()
+      }))
+      return { success: true, user: response.user }
+    }
+    
+    return { success: false, error: 'Registration failed' }
+  } catch (error) {
+    return { success: false, error: error.message || 'Registration failed. Please try again.' }
   }
-  return emailMap[email.toLowerCase()] || email.split('@')[0]
 }
 
+// Logout
 export const logout = () => {
   localStorage.removeItem(AUTH_KEY)
+  localStorage.removeItem(TOKEN_KEY)
 }
 
+// Get current user from localStorage (for quick access)
 export const getCurrentUser = () => {
   try {
     const auth = localStorage.getItem(AUTH_KEY)
@@ -52,18 +67,58 @@ export const getCurrentUser = () => {
   }
 }
 
-export const isAuthenticated = () => {
-  return getCurrentUser() !== null
+// Get current user from API (for fresh data)
+export const getCurrentUserFromAPI = async () => {
+  try {
+    const token = localStorage.getItem(TOKEN_KEY)
+    if (!token) return null
+    
+    const response = await authAPI.getMe()
+    if (response.user) {
+      // Update localStorage
+      localStorage.setItem(AUTH_KEY, JSON.stringify({
+        ...response.user,
+        loggedIn: true,
+        loginTime: new Date().toISOString()
+      }))
+      return response.user
+    }
+    return null
+  } catch (error) {
+    // Token might be invalid, clear auth
+    logout()
+    return null
+  }
 }
 
+// Get auth token
+export const getAuthToken = () => {
+  return localStorage.getItem(TOKEN_KEY)
+}
+
+// Check if authenticated
+export const isAuthenticated = () => {
+  const token = localStorage.getItem(TOKEN_KEY)
+  const user = getCurrentUser()
+  return !!(token && user && user.loggedIn)
+}
+
+// Check if user is employee/braider
 export const isBraider = () => {
   const user = getCurrentUser()
-  return user && user.role === 'braider'
+  return user && (user.role === 'employee' || user.role === 'braider')
 }
 
+// Check if user is customer/client
 export const isCustomer = () => {
   const user = getCurrentUser()
-  return user && user.role === 'customer'
+  return user && user.role === 'client'
+}
+
+// Check if user is admin
+export const isAdmin = () => {
+  const user = getCurrentUser()
+  return user && user.role === 'admin'
 }
 
 export const requireAuth = () => {

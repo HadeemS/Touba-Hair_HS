@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { braiders } from '../data/braiders'
 import { generateTimeSlots, getAvailableDates, formatDateDisplay, formatDateStorage, getDayName } from '../utils/timeSlots'
 import { isTimeSlotAvailable, saveBooking } from '../utils/bookingStorage'
+import { appointmentsAPI } from '../utils/api'
+import { getCurrentUser } from '../utils/auth'
 import { getBraiderAvailableDays } from '../utils/braiderSettings'
 import './BookAppointment.css'
 import { getStoredProfile } from '../utils/profileStorage'
@@ -78,17 +80,41 @@ const BookAppointment = () => {
     setIsSubmitting(true)
 
     try {
-      const booking = {
+      // Check if user is logged in
+      const user = getCurrentUser()
+      if (!user) {
+        // Redirect to login if not authenticated
+        if (window.confirm('Please login to book an appointment. Would you like to login now?')) {
+          navigate('/login', { state: { from: { pathname: '/book-appointment' } } })
+        }
+        setIsSubmitting(false)
+        return
+      }
+
+      const bookingData = {
         braiderId: selectedBraider.id,
         braiderName: selectedBraider.name,
         date: formatDateStorage(selectedDate),
         timeSlot: selectedTimeSlot,
         customerName: customerInfo.name,
         customerEmail: customerInfo.email,
-        customerPhone: customerInfo.phone
+        customerPhone: customerInfo.phone,
+        serviceName: 'Hair Braiding',
+        servicePrice: 0 // You can get this from selected service if needed
       }
 
-      await saveBooking(booking)
+      // Save to backend
+      const response = await appointmentsAPI.create(bookingData)
+      
+      // Also save to localStorage as backup (optional)
+      try {
+        await saveBooking({
+          ...bookingData,
+          id: response.appointment._id
+        })
+      } catch (localError) {
+        console.warn('Failed to save to localStorage:', localError)
+      }
       
       // Try to send email notification
       try {
@@ -109,8 +135,9 @@ const BookAppointment = () => {
       alert('Booking confirmed! You will receive a confirmation email shortly.')
       navigate('/my-bookings')
     } catch (error) {
-      alert('Error booking appointment. Please try again.')
-      console.error(error)
+      const errorMessage = error.message || 'Error booking appointment. Please try again.'
+      alert(errorMessage)
+      console.error('Booking error:', error)
     } finally {
       setIsSubmitting(false)
     }

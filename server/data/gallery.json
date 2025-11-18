@@ -1,0 +1,74 @@
+[
+  {
+    "id": "1",
+    "type": "image",
+    "imageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&h=800&fit=crop",
+    "videoUrl": null,
+    "posterUrl": null,
+    "title": "Elegant Box Braids",
+    "description": "Beautiful medium-length box braids with a sleek finish",
+    "braiderName": "Amina",
+    "serviceType": "Box Braids",
+    "createdAt": "2024-01-15T10:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "type": "image",
+    "imageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&h=800&fit=crop",
+    "videoUrl": null,
+    "posterUrl": null,
+    "title": "Goddess Braids",
+    "description": "Stunning goddess braids with decorative accessories",
+    "braiderName": "Fatou",
+    "serviceType": "Goddess Braids",
+    "createdAt": "2024-01-16T14:30:00.000Z"
+  },
+  {
+    "id": "3",
+    "type": "image",
+    "imageUrl": "https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=800&h=800&fit=crop",
+    "videoUrl": null,
+    "posterUrl": null,
+    "title": "Traditional Cornrows",
+    "description": "Classic cornrow pattern showcasing intricate braiding skills",
+    "braiderName": "Mariama",
+    "serviceType": "Cornrows",
+    "createdAt": "2024-01-17T09:15:00.000Z"
+  },
+  {
+    "id": "4",
+    "type": "image",
+    "imageUrl": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&h=800&fit=crop",
+    "videoUrl": null,
+    "posterUrl": null,
+    "title": "Fulani Braids",
+    "description": "Traditional Fulani braids with unique patterns and beads",
+    "braiderName": "Aissatou",
+    "serviceType": "Fulani Braids",
+    "createdAt": "2024-01-18T11:45:00.000Z"
+  },
+  {
+    "id": "5",
+    "type": "image",
+    "imageUrl": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=800&h=800&fit=crop",
+    "videoUrl": null,
+    "posterUrl": null,
+    "title": "Knotless Braids",
+    "description": "Gentle knotless braids for maximum hair protection",
+    "braiderName": "Amina",
+    "serviceType": "Knotless Braids",
+    "createdAt": "2024-01-19T13:20:00.000Z"
+  },
+  {
+    "id": "6",
+    "type": "image",
+    "imageUrl": "https://images.unsplash.com/photo-1492106087820-71f1a00d2b11?w=800&h=800&fit=crop",
+    "videoUrl": null,
+    "posterUrl": null,
+    "title": "Micro Braids",
+    "description": "Fine micro braids creating a delicate, natural look",
+    "braiderName": "Fatou",
+    "serviceType": "Micro Braids",
+    "createdAt": "2024-01-20T15:00:00.000Z"
+  }
+]

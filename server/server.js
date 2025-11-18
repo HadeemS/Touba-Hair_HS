@@ -1,10 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs/promises';
 import { existsSync } from 'fs';
+import authRoutes from './routes/auth.js';
+import appointmentRoutes from './routes/appointments.js';
+import rewardRoutes from './routes/rewards.js';
+
+// Load environment variables
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -12,10 +20,34 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// MongoDB connection
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/touba-hair';
+
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => {
+  console.log('✅ Connected to MongoDB');
+})
+.catch((error) => {
+  console.error('❌ MongoDB connection error:', error);
+  console.log('⚠️  Continuing without database connection (some features will not work)');
+});
+
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*', // In production, set this to your frontend URL
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.static('public'));
+
+// Request logging (optional, for debugging)
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
 // Ensure data directory exists
 const dataDir = join(__dirname, 'data');
@@ -357,18 +389,31 @@ app.delete('/api/prices/:id', async (req, res) => {
   }
 });
 
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/rewards', rewardRoutes);
+
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    database: dbStatus
+  });
 });
 
 // Root route
 app.get('/', (req, res) => {
   res.json({ 
     message: 'Touba Hair API', 
-    version: '1.0.0',
+    version: '2.0.0',
     status: 'running',
     endpoints: {
+      auth: '/api/auth',
+      appointments: '/api/appointments',
+      rewards: '/api/rewards',
       gallery: '/api/gallery',
       prices: '/api/prices',
       health: '/api/health'
