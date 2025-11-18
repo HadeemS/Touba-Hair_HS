@@ -3,18 +3,33 @@ import { Link } from 'react-router-dom'
 import { getBookings, deleteBooking } from '../utils/bookingStorage'
 import { formatDateDisplay } from '../utils/timeSlots'
 import { getBraiderById } from '../data/braiders'
-import { getCurrentUser } from '../utils/auth'
-import { appointmentsAPI } from '../utils/api'
+import { getCurrentUser, isCustomer } from '../utils/auth'
+import { appointmentsAPI, rewardsAPI } from '../utils/api'
 import './MyBookings.css'
 
 const MyBookings = () => {
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
+  const [rewards, setRewards] = useState(null)
   const user = getCurrentUser()
 
   useEffect(() => {
     loadBookings()
+    if (isCustomer()) {
+      loadRewards()
+    }
   }, [])
+
+  const loadRewards = async () => {
+    try {
+      const response = await rewardsAPI.getMe()
+      if (response.reward) {
+        setRewards(response.reward)
+      }
+    } catch (error) {
+      console.error('Error loading rewards:', error)
+    }
+  }
 
   const loadBookings = async () => {
     try {
@@ -120,6 +135,25 @@ const MyBookings = () => {
         <div className="bookings-header">
           <h1 className="page-title">My Bookings</h1>
           <p className="page-subtitle">Manage your appointments</p>
+          
+          {/* Rewards Display */}
+          {isCustomer() && rewards && (
+            <div className="rewards-banner">
+              <div className="rewards-content">
+                <div className="rewards-icon">🎁</div>
+                <div className="rewards-info">
+                  <div className="rewards-points">{rewards.totalPoints || 0} Points</div>
+                  <div className="rewards-tier-badge">{rewards.tier || 'bronze'} tier</div>
+                </div>
+                {rewards.pointsToNextReward > 0 && (
+                  <div className="rewards-progress">
+                    <p>{rewards.pointsToNextReward} points until next reward!</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
           {bookings.length === 0 && (
             <div className="empty-state">
               <div className="empty-icon">📅</div>

@@ -139,12 +139,22 @@ router.get('/me', authenticate, async (req, res) => {
 // Update user profile
 router.put('/profile', authenticate, async (req, res) => {
   try {
-    const { name, phone, notes } = req.body;
+    const { name, phone, notes, email } = req.body;
     const updates = {};
 
     if (name) updates.name = name;
     if (phone !== undefined) updates.phone = phone;
     if (notes !== undefined) updates.notes = notes;
+    
+    // Email change requires verification
+    if (email && email !== req.user.email) {
+      // Check if new email already exists
+      const existingUser = await User.findOne({ email: email.toLowerCase() });
+      if (existingUser) {
+        return res.status(400).json({ error: 'Email already in use by another account.' });
+      }
+      updates.email = email.toLowerCase();
+    }
 
     const user = await User.findByIdAndUpdate(
       req.user._id,
@@ -166,6 +176,51 @@ router.put('/profile', authenticate, async (req, res) => {
   } catch (error) {
     console.error('Update profile error:', error);
     res.status(500).json({ error: 'Failed to update profile.' });
+  }
+});
+
+// Change password
+router.put('/change-password', authenticate, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    // If user has a password, verify current password (for employees/admins/clients with passwords)
+    if (user.password) {
+      if (!currentPassword) {
+        return res.status(400).json({ error: 'Current password is required.' });
+      }
+
+      const isPasswordValid = await user.comparePassword(currentPassword);
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: 'Current password is incorrect.' });
+      }
+    } else {
+      // For clients without a password, currentPassword is optional
+      // This allows setting a password for the first time
+      if (currentPassword) {
+        return res.status(400).json({ error: 'You don\'t have a password set. Leave current password empty to set a new password.' });
+      }
+    }
+
+    // Update password (will be hashed by pre-save hook)
+    user.password = newPassword;
+    await user.save();
+
+    res.json({
+      message: 'Password changed successfully'
+    });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ error: 'Failed to change password.' });
   }
 });
 

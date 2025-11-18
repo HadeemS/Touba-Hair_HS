@@ -12,6 +12,10 @@ import Gallery from './pages/Gallery'
 import Services from './pages/Services'
 import Locations from './pages/Locations'
 import AdminDashboard from './pages/AdminDashboard'
+import About from './pages/About'
+import FAQs from './pages/FAQs'
+import Policies from './pages/Policies'
+import Contact from './pages/Contact'
 import ProtectedRoute from './components/ProtectedRoute'
 import Footer from './components/Footer'
 import './App.css'
@@ -40,6 +44,10 @@ function App() {
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/services" element={<Services />} />
             <Route path="/locations" element={<Locations />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/faqs" element={<FAQs />} />
+            <Route path="/policies" element={<Policies />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route 
               path="/my-bookings" 

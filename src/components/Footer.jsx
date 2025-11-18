@@ -26,8 +26,16 @@ const Footer = () => {
               <li><Link to="/services">Services</Link></li>
               <li><Link to="/gallery">Gallery</Link></li>
               <li><Link to="/locations">Locations</Link></li>
-              <li><Link to="/my-bookings">My Bookings</Link></li>
-              <li><Link to="/profile">Profile</Link></li>
+              <li><Link to="/about">About</Link></li>
+            </ul>
+          </div>
+
+          <div className="footer-section">
+            <h4 className="footer-title">Information</h4>
+            <ul className="footer-links">
+              <li><Link to="/faqs">FAQs</Link></li>
+              <li><Link to="/policies">Policies</Link></li>
+              <li><Link to="/contact">Contact</Link></li>
             </ul>
           </div>
 
@@ -54,6 +62,11 @@ const Footer = () => {
 
         <div className="footer-bottom">
           <p>&copy; {new Date().getFullYear()} Touba Hair Salon. All rights reserved.</p>
+          <div className="footer-legal">
+            <Link to="/policies">Privacy Policy</Link>
+            <span> • </span>
+            <Link to="/policies">Terms of Service</Link>
+          </div>
         </div>
       </div>
     </footer>

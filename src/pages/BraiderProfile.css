@@ -225,6 +225,75 @@
   font-size: 1rem;
 }
 
+.status-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  margin-left: var(--spacing-sm);
+}
+
+.status-badge.status-confirmed {
+  background: #3498db;
+  color: white;
+}
+
+.status-badge.status-completed {
+  background: #27ae60;
+  color: white;
+}
+
+.status-badge.status-cancelled {
+  background: #e74c3c;
+  color: white;
+}
+
+.status-badge.status-pending {
+  background: #f39c12;
+  color: white;
+}
+
+.booking-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-light);
+  flex-wrap: wrap;
+}
+
+.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-success {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #229954;
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
 .empty-state {
   text-align: center;
   padding: var(--spacing-2xl);

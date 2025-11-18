@@ -13,6 +13,7 @@ const Login = () => {
   })
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const from = location.state?.from?.pathname || '/my-bookings'
 
@@ -87,16 +88,32 @@ const Login = () => {
 
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                placeholder="Enter your password"
-                autoComplete="current-password"
-              />
+              <div className="password-input-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
+                  className="password-input"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <span className="password-icon" aria-hidden="true">👁️</span>
+                  ) : (
+                    <span className="password-icon" aria-hidden="true">👁️‍🗨️</span>
+                  )}
+                </button>
+              </div>
             </div>
 
             <button
@@ -109,12 +126,28 @@ const Login = () => {
           </form>
 
           <div className="login-demo">
-            <h3>Admin Access</h3>
+            <h3>Demo Accounts</h3>
             <div className="demo-accounts">
               <div className="demo-account">
-                <strong>Admin:</strong>
+                <strong>👑 Admin:</strong>
                 <p>Email: admin@toubahair.com</p>
                 <p>Password: Admin123!@#</p>
+                <small>Full access to admin dashboard</small>
+              </div>
+              <div className="demo-account">
+                <strong>👨‍💼 Employee (Example):</strong>
+                <p>Email: mariama@toubahair.com</p>
+                <p>Password: Employee123!</p>
+                <small>Access braider dashboard</small>
+              </div>
+              <div className="demo-account">
+                <strong>👤 Client (Example):</strong>
+                <p>Email: customer1@example.com</p>
+                <p>Password: Customer123!</p>
+                <small>Access bookings & rewards</small>
+              </div>
+              <div className="demo-account-note">
+                <small>📋 See DEMO_CREDENTIALS.md for all accounts</small>
               </div>
             </div>
           </div>

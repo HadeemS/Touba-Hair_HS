@@ -20,16 +20,27 @@ async function apiCall(endpoint, options = {}) {
   }
 
   try {
+    console.log('API Call:', url, options.method || 'GET');
     const response = await fetch(url, config);
+    console.log('API Response status:', response.status, response.statusText);
+    
+    const responseData = await response.json().catch(() => ({ error: 'Invalid JSON response' }));
+    console.log('API Response data:', responseData);
     
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Request failed' }));
-      throw new Error(error.error || error.message || `HTTP error! status: ${response.status}`);
+      const errorMessage = responseData.error || responseData.message || `HTTP error! status: ${response.status}`;
+      console.error('API Error:', errorMessage);
+      throw new Error(errorMessage);
     }
     
-    return await response.json();
+    return responseData;
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('API Call Error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      url: url
+    });
     throw error;
   }
 }
@@ -93,6 +104,16 @@ export const authAPI = {
   updateProfile: (data) => {
     const token = localStorage.getItem('auth_token');
     return apiCall('/api/auth/profile', {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data),
+    });
+  },
+  changePassword: (data) => {
+    const token = localStorage.getItem('auth_token');
+    return apiCall('/api/auth/change-password', {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`

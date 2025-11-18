@@ -7,7 +7,9 @@ const TOKEN_KEY = 'auth_token'
 // Login with backend API
 export const login = async (email, password) => {
   try {
+    console.log('Attempting login for:', email)
     const response = await authAPI.login({ email, password })
+    console.log('Login API response:', response)
     
     if (response.token && response.user) {
       // Store token and user info
@@ -17,12 +19,17 @@ export const login = async (email, password) => {
         loggedIn: true,
         loginTime: new Date().toISOString()
       }))
+      console.log('Login successful, token stored')
       return { success: true, user: response.user }
     }
     
+    console.error('Login failed - invalid response:', response)
     return { success: false, error: 'Login failed - invalid response from server' }
   } catch (error) {
     console.error('Login error details:', error)
+    console.error('Error message:', error.message)
+    console.error('Error stack:', error.stack)
+    
     // Extract error message from the error
     let errorMessage = 'Login failed. Please try again.'
     
@@ -34,7 +41,11 @@ export const login = async (email, password) => {
       }
       // Check for network errors
       if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-        errorMessage = 'Cannot connect to server. Please check your internet connection.'
+        errorMessage = 'Cannot connect to server. Please check your internet connection and API URL.'
+      }
+      // Check for invalid credentials
+      if (error.message.includes('Invalid email or password') || error.message.includes('401')) {
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.'
       }
     }
     

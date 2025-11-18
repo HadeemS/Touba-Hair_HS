@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { getBookings } from '../utils/bookingStorage'
 import { getCurrentUser } from '../utils/auth'
 import { formatDateDisplay } from '../utils/timeSlots'
+import { appointmentsAPI } from '../utils/api'
 import './BraiderProfile.css'
 
 const BraiderProfile = () => {
@@ -19,16 +20,31 @@ const BraiderProfile = () => {
     filterBookings()
   }, [bookings, filter])
 
-  const loadBookings = () => {
+  const loadBookings = async () => {
     try {
-      const allBookings = getBookings()
-      // Filter bookings for this braider
-      const braiderBookings = allBookings.filter(
-        booking => booking.braiderName === user?.name || booking.braiderId === getBraiderIdByName(user?.name)
-      )
+      setLoading(true)
+      
+      // Fetch from backend API
+      const response = await appointmentsAPI.getAll()
+      const apiBookings = response.appointments || []
+      
+      // Transform API bookings to match expected format
+      const transformedBookings = apiBookings.map(booking => ({
+        id: booking._id,
+        braiderId: booking.braiderId,
+        braiderName: booking.braiderName,
+        date: booking.date,
+        timeSlot: booking.timeSlot,
+        customerName: booking.customerName,
+        customerEmail: booking.customerEmail,
+        customerPhone: booking.customerPhone,
+        status: booking.status,
+        serviceName: booking.serviceName,
+        servicePrice: booking.servicePrice
+      }))
       
       // Sort by date and time
-      const sorted = braiderBookings.sort((a, b) => {
+      const sorted = transformedBookings.sort((a, b) => {
         const dateCompare = a.date.localeCompare(b.date)
         if (dateCompare !== 0) return dateCompare
         return a.timeSlot.localeCompare(b.timeSlot)
@@ -37,6 +53,21 @@ const BraiderProfile = () => {
       setBookings(sorted)
     } catch (error) {
       console.error('Error loading bookings:', error)
+      // Fallback to localStorage if API fails
+      try {
+        const allBookings = getBookings()
+        const braiderBookings = allBookings.filter(
+          booking => booking.braiderName === user?.name || booking.braiderId === getBraiderIdByName(user?.name)
+        )
+        const sorted = braiderBookings.sort((a, b) => {
+          const dateCompare = a.date.localeCompare(b.date)
+          if (dateCompare !== 0) return dateCompare
+          return a.timeSlot.localeCompare(b.timeSlot)
+        })
+        setBookings(sorted)
+      } catch (fallbackError) {
+        console.error('Fallback loading failed:', fallbackError)
+      }
     } finally {
       setLoading(false)
     }
@@ -72,7 +103,33 @@ const BraiderProfile = () => {
 
   const getPastCount = () => {
     const today = new Date().toISOString().split('T')[0]
-    return bookings.filter(booking => booking.date < today).length
+    return bookings.filter(booking => booking.date < today || booking.status === 'completed').length
+  }
+
+  const handleStatusUpdate = async (appointmentId, newStatus) => {
+    try {
+      await appointmentsAPI.updateStatus(appointmentId, newStatus)
+      await loadBookings()
+      alert(`Appointment marked as ${newStatus}`)
+    } catch (error) {
+      console.error('Error updating status:', error)
+      alert('Failed to update appointment status. Please try again.')
+    }
+  }
+
+  const handleCancel = async (appointmentId) => {
+    if (!window.confirm('Are you sure you want to cancel this appointment?')) {
+      return
+    }
+
+    try {
+      await appointmentsAPI.cancel(appointmentId)
+      await loadBookings()
+      alert('Appointment cancelled successfully')
+    } catch (error) {
+      console.error('Error cancelling appointment:', error)
+      alert('Failed to cancel appointment. Please try again.')
+    }
   }
 
   if (loading) {
@@ -176,9 +233,31 @@ const BraiderProfile = () => {
                   <div className="booking-service-info">
                     <div className="service-badge">
                       <span className="service-icon">✨</span>
-                      <span>Hair Braiding Service</span>
+                      <span>{booking.serviceName || 'Hair Braiding Service'}</span>
                     </div>
+                    {booking.status && (
+                      <div className={`status-badge status-${booking.status}`}>
+                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                      </div>
+                    )}
                   </div>
+                  
+                  {booking.status === 'confirmed' && (
+                    <div className="booking-actions">
+                      <button
+                        className="btn btn-success btn-sm"
+                        onClick={() => handleStatusUpdate(booking.id, 'completed')}
+                      >
+                        Mark as Completed
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleCancel(booking.id)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                 </div>
               )
             })}
