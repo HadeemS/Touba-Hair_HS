@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { login, register } from '../utils/auth'
+import { isAdmin, isBraider } from '../utils/auth'
 import './Login.css'
 
 const Login = () => {
@@ -32,12 +33,23 @@ const Login = () => {
       const result = await login(formData.email, formData.password)
       
       if (result.success) {
-        navigate(from, { replace: true })
+        // Small delay to ensure state is updated
+        setTimeout(() => {
+          // Redirect based on user role
+          if (isAdmin()) {
+            navigate('/admin', { replace: true })
+          } else if (isBraider()) {
+            navigate('/braider-profile', { replace: true })
+          } else {
+            navigate(from, { replace: true })
+          }
+        }, 100)
       } else {
         setError(result.error || 'Invalid email or password')
       }
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      console.error('Login error:', err)
+      setError(err.message || 'An error occurred. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -97,17 +109,12 @@ const Login = () => {
           </form>
 
           <div className="login-demo">
-            <h3>Demo Credentials</h3>
+            <h3>Admin Access</h3>
             <div className="demo-accounts">
               <div className="demo-account">
-                <strong>Customer:</strong>
-                <p>Email: customer@example.com</p>
-                <p>Password: password123</p>
-              </div>
-              <div className="demo-account">
-                <strong>Braider:</strong>
-                <p>Email: amina@toubahair.com</p>
-                <p>Password: password123</p>
+                <strong>Admin:</strong>
+                <p>Email: admin@toubahair.com</p>
+                <p>Password: Admin123!@#</p>
               </div>
             </div>
           </div>

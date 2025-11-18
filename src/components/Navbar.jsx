@@ -1,7 +1,7 @@
 // src/components/Navbar.jsx
 import React, { useState, useEffect } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
-import { getCurrentUser, logout, isBraider, isCustomer } from '../utils/auth'
+import { getCurrentUser, logout, isBraider, isCustomer, isAdmin } from '../utils/auth'
 import './Navbar.css'
 
 const Navbar = () => {
@@ -126,7 +126,20 @@ const Navbar = () => {
 
           {user ? (
             <>
-              {isBraider() ? (
+              {isAdmin() && (
+                <li>
+                  <NavLink
+                    to="/admin"
+                    className={({ isActive }) =>
+                      `navbar-link ${isActive ? 'active' : ''}`
+                    }
+                    onClick={closeMenu}
+                  >
+                    Admin Dashboard
+                  </NavLink>
+                </li>
+              )}
+              {isBraider() && !isAdmin() ? (
                 <>
                   <li>
                     <NavLink
@@ -151,7 +164,7 @@ const Navbar = () => {
                     </NavLink>
                   </li>
                 </>
-              ) : (
+              ) : !isAdmin() ? (
                 <li>
                   <NavLink
                     to="/my-bookings"
@@ -163,7 +176,7 @@ const Navbar = () => {
                     My Bookings
                   </NavLink>
                 </li>
-              )}
+              ) : null}
               
               <li>
                 <NavLink

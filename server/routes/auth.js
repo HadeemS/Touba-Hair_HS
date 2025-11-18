@@ -6,13 +6,14 @@ import rateLimit from 'express-rate-limit';
 
 const router = express.Router();
 
-// Rate limiting for auth routes
+// Rate limiting for auth routes (more lenient for development)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 requests per window
+  max: 20, // 20 requests per window (increased from 5)
   message: 'Too many login attempts. Please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true, // Don't count successful logins
 });
 
 // Register new user

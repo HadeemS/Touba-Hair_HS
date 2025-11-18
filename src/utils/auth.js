@@ -20,9 +20,25 @@ export const login = async (email, password) => {
       return { success: true, user: response.user }
     }
     
-    return { success: false, error: 'Login failed' }
+    return { success: false, error: 'Login failed - invalid response from server' }
   } catch (error) {
-    return { success: false, error: error.message || 'Login failed. Please try again.' }
+    console.error('Login error details:', error)
+    // Extract error message from the error
+    let errorMessage = 'Login failed. Please try again.'
+    
+    if (error.message) {
+      errorMessage = error.message
+      // Check for rate limiting
+      if (error.message.includes('Too many') || error.message.includes('rate limit')) {
+        errorMessage = 'Too many login attempts. Please wait 15 minutes and try again.'
+      }
+      // Check for network errors
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        errorMessage = 'Cannot connect to server. Please check your internet connection.'
+      }
+    }
+    
+    return { success: false, error: errorMessage }
   }
 }
 

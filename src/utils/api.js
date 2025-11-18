@@ -1,7 +1,7 @@
 // API utility functions for connecting to backend
 
 // API URL from environment variable or fallback to Render production URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://touba-hair-hs.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://touba-hair-hs-1.onrender.com';
 
 // Helper function for API calls
 async function apiCall(endpoint, options = {}) {

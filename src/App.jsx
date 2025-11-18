@@ -11,6 +11,7 @@ import BraiderSettings from './pages/BraiderSettings'
 import Gallery from './pages/Gallery'
 import Services from './pages/Services'
 import Locations from './pages/Locations'
+import AdminDashboard from './pages/AdminDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import Footer from './components/Footer'
 import './App.css'
@@ -69,6 +70,14 @@ function App() {
               element={
                 <ProtectedRoute requireBraider={true}>
                   <BraiderSettings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute requireAdmin={true}>
+                  <AdminDashboard />
                 </ProtectedRoute>
               } 
             />
