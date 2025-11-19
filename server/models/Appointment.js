@@ -57,6 +57,18 @@ const appointmentSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  serviceSize: {
+    type: String,
+    default: null
+  },
+  serviceLength: {
+    type: String,
+    default: null
+  },
+  serviceBoho: {
+    type: String,
+    default: null
+  },
   // Status
   status: {
     type: String,

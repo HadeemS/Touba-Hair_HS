@@ -130,139 +130,301 @@ const Services = () => {
         details: 'Box braids are a timeless protective style that involves sectioning hair into square or rectangular parts and braiding synthetic or natural hair extensions into each section. Perfect for all hair types and lengths. Price varies based on size and length.',
         popular: true,
         hasSizeOptions: true,
-        hasLengthOptions: true
+        hasLengthOptions: true,
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
       },
       {
         id: '2',
         name: 'Cornrows',
         description: 'Traditional cornrow braiding styles. Elegant patterns that showcase your natural hair texture. From simple straight-back styles to intricate geometric designs that celebrate African heritage.',
+        basePrice: 80,
         price: 80,
         duration: '2-3 hours',
         category: 'Traditional',
         icon: '🌾',
         features: ['Quick installation', 'Versatile patterns', 'Great for all hair types', 'Cultural significance'],
-        details: 'Cornrows are a traditional African braiding technique where hair is braided close to the scalp in straight or curved rows. This style has deep cultural roots and can be styled in countless creative patterns.',
-        popular: false
+        details: 'Cornrows are a traditional African braiding technique where hair is braided close to the scalp in straight or curved rows. This style has deep cultural roots and can be styled in countless creative patterns. Price varies based on size and length.',
+        popular: false,
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 20,
+          'Large': 35
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 30,
+          'Long (Waist Length)': 60,
+          'Extra Long (Hip Length)': 90
+        }
       },
       {
         id: '3',
         name: 'Goddess Braids',
         description: 'Elegant goddess braids with decorative elements. A stunning style that combines beauty and sophistication. Perfect for special occasions or everyday elegance that makes you feel like royalty.',
+        basePrice: 180,
         price: 180,
         duration: '5-7 hours',
         category: 'Specialty',
         icon: '👑',
         features: ['Elegant design', 'Decorative elements included', 'Special occasion ready', 'Long-lasting style'],
-        details: 'Goddess braids are larger, thicker braids often styled with decorative accessories like beads, cuffs, or rings. This regal style creates a stunning, eye-catching look perfect for making a statement.',
-        popular: true
+        details: 'Goddess braids are larger, thicker braids often styled with decorative accessories like beads, cuffs, or rings. This regal style creates a stunning, eye-catching look perfect for making a statement. Price varies based on size and length.',
+        popular: true,
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 35,
+          'Large': 60
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 45,
+          'Long (Waist Length)': 90,
+          'Extra Long (Hip Length)': 140
+        }
       },
       {
         id: '4',
         name: 'Fulani Braids',
         description: 'Traditional Fulani braiding style with unique patterns and accessories. A beautiful cultural expression featuring distinctive center parts and decorative elements that honor West African heritage.',
+        basePrice: 160,
         price: 160,
         duration: '4-6 hours',
         category: 'Traditional',
         icon: '✨',
         features: ['Cultural significance', 'Unique patterns', 'Accessories included', 'Distinctive style'],
-        details: 'Fulani braids originate from the Fulani people of West Africa. This style features a center part, braids on the sides, and often includes decorative beads or accessories. A beautiful way to honor cultural heritage.',
-        popular: false
+        details: 'Fulani braids originate from the Fulani people of West Africa. This style features a center part, braids on the sides, and often includes decorative beads or accessories. A beautiful way to honor cultural heritage. Price varies based on size and length.',
+        popular: false,
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 30,
+          'Large': 50
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 40,
+          'Long (Waist Length)': 80,
+          'Extra Long (Hip Length)': 120
+        }
       },
       {
         id: '5',
         name: 'Micro Braids',
         description: 'Fine micro braids for a delicate, natural look. Perfect for those who want subtle elegance with maximum hair protection. Ultra-fine braids that blend seamlessly with your natural hair.',
+        basePrice: 200,
         price: 200,
         duration: '6-8 hours',
         category: 'Protective Styles',
         icon: '💫',
         features: ['Ultra-fine braids', 'Natural appearance', 'Long-lasting (8-10 weeks)', 'Maximum protection'],
-        details: 'Micro braids are extremely small, fine braids that create a natural, seamless look. While installation takes longer, they last longer and provide excellent protection for your natural hair underneath.',
-        popular: false
+        details: 'Micro braids are extremely small, fine braids that create a natural, seamless look. While installation takes longer, they last longer and provide excellent protection for your natural hair underneath. Price varies based on size and length.',
+        popular: false,
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 40,
+          'Large': 70
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 50,
+          'Long (Waist Length)': 100,
+          'Extra Long (Hip Length)': 150
+        }
       },
       {
         id: '6',
         name: 'Knotless Braids',
         description: 'Gentle knotless braids for maximum hair protection. Reduces tension and promotes healthy hair growth. The modern, comfortable alternative to traditional box braids that your scalp will thank you for.',
+        basePrice: 170,
         price: 170,
         duration: '5-7 hours',
         category: 'Protective Styles',
         icon: '🔄',
         features: ['Tension-free', 'Hair-friendly', 'Comfortable wear', 'Reduced breakage'],
-        details: 'Knotless braids start with your natural hair and gradually incorporate extensions, eliminating the tight knot at the base. This technique reduces tension, prevents breakage, and is much more comfortable to wear.',
-        popular: true
+        details: 'Knotless braids start with your natural hair and gradually incorporate extensions, eliminating the tight knot at the base. This technique reduces tension, prevents breakage, and is much more comfortable to wear. Price varies based on size and length.',
+        popular: true,
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 30,
+          'Large': 55
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 40,
+          'Long (Waist Length)': 80,
+          'Extra Long (Hip Length)': 120
+        }
       },
       {
         id: '7',
         name: 'Feed-in Braids',
         description: 'Seamless feed-in braids that look natural and blend beautifully with your hair. The extension hair is gradually fed in, creating a smooth, natural appearance that looks like it grew from your scalp.',
+        basePrice: 140,
         price: 140,
         duration: '4-5 hours',
         category: 'Protective Styles',
         icon: '🎯',
         features: ['Natural look', 'Seamless blend', 'Versatile styling', 'Comfortable'],
-        details: 'Feed-in braids use a technique where extension hair is gradually added to your natural hair as you braid, creating a seamless transition. This method creates a more natural look and reduces tension on your scalp.',
-        popular: false
+        details: 'Feed-in braids use a technique where extension hair is gradually added to your natural hair as you braid, creating a seamless transition. This method creates a more natural look and reduces tension on your scalp. Price varies based on size and length.',
+        popular: false,
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 25,
+          'Large': 45
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 35,
+          'Long (Waist Length)': 70,
+          'Extra Long (Hip Length)': 105
+        }
       },
       {
         id: '8',
         name: 'Senegalese Twists',
         description: 'Classic Senegalese twists for a sleek, polished look. Perfect for professional settings and everyday wear. Two-strand twists that create a beautiful, uniform appearance with minimal maintenance.',
+        basePrice: 130,
         price: 130,
         duration: '3-4 hours',
         category: 'Traditional',
         icon: '🌀',
         features: ['Sleek finish', 'Professional look', 'Easy maintenance', 'Quick installation'],
-        details: 'Senegalese twists are created by twisting two strands of hair together with extensions. This style creates a sleek, uniform look that\'s perfect for professional environments and easy to maintain.',
-        popular: false
+        details: 'Senegalese twists are created by twisting two strands of hair together with extensions. This style creates a sleek, uniform look that\'s perfect for professional environments and easy to maintain. Price varies based on size and length.',
+        popular: false,
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 25,
+          'Large': 40
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 30,
+          'Long (Waist Length)': 60,
+          'Extra Long (Hip Length)': 90
+        }
       },
       {
         id: '9',
         name: 'Lemonade Braids',
         description: 'Side-swept braids inspired by Beyoncé\'s iconic look. A trendy style featuring braids swept to one side, perfect for making a fashion statement. Bold, beautiful, and absolutely stunning.',
+        basePrice: 165,
         price: 165,
         duration: '5-6 hours',
         category: 'Specialty',
         icon: '🍋',
         features: ['Trendy style', 'Fashion-forward', 'Versatile', 'Eye-catching'],
-        details: 'Lemonade braids are a modern style featuring cornrows or box braids swept to one side, inspired by Beyoncé\'s iconic look. This style is perfect for those who want a trendy, fashion-forward appearance.',
-        popular: true
+        details: 'Lemonade braids are a modern style featuring cornrows or box braids swept to one side, inspired by Beyoncé\'s iconic look. This style is perfect for those who want a trendy, fashion-forward appearance. Price varies based on size and length.',
+        popular: true,
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 30,
+          'Large': 50
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 40,
+          'Long (Waist Length)': 80,
+          'Extra Long (Hip Length)': 120
+        }
       },
       {
         id: '10',
         name: 'Passion Twists',
         description: 'Soft, bouncy twists with a natural, wavy texture. A modern protective style that combines the look of twists with added volume and movement. Perfect for those who want texture and bounce.',
+        basePrice: 155,
         price: 155,
         duration: '4-5 hours',
         category: 'Protective Styles',
         icon: '💃',
         features: ['Natural texture', 'Added volume', 'Easy styling', 'Comfortable'],
-        details: 'Passion twists use pre-twisted hair extensions to create soft, bouncy twists with natural movement. This style offers the protection of twists with added volume and a more relaxed, natural appearance.',
-        popular: false
+        details: 'Passion twists use pre-twisted hair extensions to create soft, bouncy twists with natural movement. This style offers the protection of twists with added volume and a more relaxed, natural appearance. Price varies based on size and length.',
+        popular: false,
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 28,
+          'Large': 48
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 38,
+          'Long (Waist Length)': 75,
+          'Extra Long (Hip Length)': 110
+        }
       },
       {
         id: '11',
         name: 'Ghana Braids',
         description: 'Traditional Ghana braids featuring intricate patterns and designs. A beautiful cultural style that showcases advanced braiding techniques. Perfect for those who appreciate artistry and tradition.',
+        basePrice: 145,
         price: 145,
         duration: '4-5 hours',
         category: 'Traditional',
         icon: '🇬🇭',
         features: ['Intricate patterns', 'Cultural heritage', 'Unique designs', 'Versatile'],
-        details: 'Ghana braids, also known as Ghanaian braids, feature intricate patterns and designs braided close to the scalp. This traditional style showcases advanced braiding techniques and cultural artistry.',
-        popular: false
+        details: 'Ghana braids, also known as Ghanaian braids, feature intricate patterns and designs braided close to the scalp. This traditional style showcases advanced braiding techniques and cultural artistry. Price varies based on size and length.',
+        popular: false,
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 28,
+          'Large': 45
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 35,
+          'Long (Waist Length)': 70,
+          'Extra Long (Hip Length)': 105
+        }
       },
       {
         id: '12',
         name: 'Crochet Braids',
         description: 'Quick installation crochet braids using a crochet hook. A versatile protective style that allows for various textures and styles with minimal tension. Perfect for those who want quick, easy styling.',
+        basePrice: 120,
         price: 120,
         duration: '2-3 hours',
         category: 'Protective Styles',
         icon: '🪝',
         features: ['Quick installation', 'Minimal tension', 'Various textures', 'Easy removal'],
-        details: 'Crochet braids use a crochet hook to attach pre-made braids or twists to cornrow base braids. This method is faster, causes less tension, and allows for easy style changes without redoing the entire head.',
-        popular: false
+        details: 'Crochet braids use a crochet hook to attach pre-made braids or twists to cornrow base braids. This method is faster, causes less tension, and allows for easy style changes without redoing the entire head. Price varies based on size and length.',
+        popular: false,
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 20,
+          'Large': 35
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 30,
+          'Long (Waist Length)': 60,
+          'Extra Long (Hip Length)': 90
+        }
       },
       {
         id: '13',

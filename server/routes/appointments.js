@@ -36,6 +36,9 @@ router.post('/', optionalAuthenticate, validate(appointmentValidation), async (r
       customerPhone,
       serviceName,
       servicePrice,
+      serviceSize,
+      serviceLength,
+      serviceBoho,
       notes
     } = req.body;
 
@@ -95,6 +98,9 @@ router.post('/', optionalAuthenticate, validate(appointmentValidation), async (r
       customerPhone,
       serviceName: serviceName || 'Hair Braiding',
       servicePrice: servicePrice || 0,
+      serviceSize: serviceSize || null,
+      serviceLength: serviceLength || null,
+      serviceBoho: serviceBoho || null,
       notes: notes || '',
       status: 'confirmed'
     });

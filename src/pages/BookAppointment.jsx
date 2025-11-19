@@ -17,6 +17,7 @@ const BookAppointment = () => {
   const [selectedService, setSelectedService] = useState(null)
   const [selectedSize, setSelectedSize] = useState(null)
   const [selectedLength, setSelectedLength] = useState(null)
+  const [selectedBoho, setSelectedBoho] = useState(null)
   const [services, setServices] = useState([])
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null)
@@ -79,22 +80,369 @@ const BookAppointment = () => {
           'Medium (Mid-Back)': 40,
           'Long (Waist Length)': 80,
           'Extra Long (Hip Length)': 120
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
         }
       },
-      { id: '2', name: 'Cornrows', price: 80, duration: '2-3 hours', category: 'Traditional' },
-      { id: '3', name: 'Goddess Braids', price: 180, duration: '5-7 hours', category: 'Specialty' },
-      { id: '4', name: 'Fulani Braids', price: 160, duration: '4-6 hours', category: 'Traditional' },
-      { id: '5', name: 'Lemonade Braids', price: 140, duration: '4-5 hours', category: 'Protective Styles' },
-      { id: '6', name: 'Knotless Braids', price: 170, duration: '5-7 hours', category: 'Protective Styles' },
-      { id: '7', name: 'Feed-in Braids', price: 140, duration: '4-5 hours', category: 'Protective Styles' },
-      { id: '8', name: 'Micro Braids', price: 200, duration: '6-8 hours', category: 'Protective Styles' },
-      { id: '9', name: 'Senegalese Twists', price: 130, duration: '3-4 hours', category: 'Protective Styles' },
-      { id: '10', name: 'Marley Twists', price: 120, duration: '3-4 hours', category: 'Protective Styles' },
-      { id: '11', name: 'Retwist Service', price: 50, duration: '1-2 hours', category: 'Maintenance' },
-      { id: '12', name: 'Eyebrow Shaping', price: 25, duration: '30 minutes', category: 'Beauty' },
-      { id: '13', name: 'Hair Wash & Condition', price: 30, duration: '1 hour', category: 'Maintenance' },
-      { id: '14', name: 'Haircut', price: 40, duration: '1 hour', category: 'Styling' },
-      { id: '15', name: 'Hair Consultation', price: 0, duration: '30 minutes', category: 'Consultation' }
+      { 
+        id: '2', 
+        name: 'Cornrows', 
+        basePrice: 80,
+        price: 80, 
+        duration: '2-3 hours', 
+        category: 'Traditional',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 20,
+          'Large': 35
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 30,
+          'Long (Waist Length)': 60,
+          'Extra Long (Hip Length)': 90
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
+      },
+      { 
+        id: '3', 
+        name: 'Goddess Braids', 
+        basePrice: 180,
+        price: 180, 
+        duration: '5-7 hours', 
+        category: 'Specialty',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 35,
+          'Large': 60
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 45,
+          'Long (Waist Length)': 90,
+          'Extra Long (Hip Length)': 140
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
+      },
+      { 
+        id: '4', 
+        name: 'Fulani Braids', 
+        basePrice: 160,
+        price: 160, 
+        duration: '4-6 hours', 
+        category: 'Traditional',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 30,
+          'Large': 50
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 40,
+          'Long (Waist Length)': 80,
+          'Extra Long (Hip Length)': 120
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
+      },
+      { 
+        id: '5', 
+        name: 'Lemonade Braids', 
+        basePrice: 165,
+        price: 165, 
+        duration: '5-6 hours', 
+        category: 'Specialty',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 30,
+          'Large': 50
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 40,
+          'Long (Waist Length)': 80,
+          'Extra Long (Hip Length)': 120
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
+      },
+      { 
+        id: '10', 
+        name: 'Marley Twists', 
+        basePrice: 120,
+        price: 120, 
+        duration: '3-4 hours', 
+        category: 'Protective Styles',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 25,
+          'Large': 40
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 30,
+          'Long (Waist Length)': 60,
+          'Extra Long (Hip Length)': 90
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
+      },
+      { 
+        id: '6', 
+        name: 'Knotless Braids', 
+        basePrice: 170,
+        price: 170, 
+        duration: '5-7 hours', 
+        category: 'Protective Styles',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 30,
+          'Large': 55
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 40,
+          'Long (Waist Length)': 80,
+          'Extra Long (Hip Length)': 120
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
+      },
+      { 
+        id: '7', 
+        name: 'Feed-in Braids', 
+        basePrice: 140,
+        price: 140, 
+        duration: '4-5 hours', 
+        category: 'Protective Styles',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 25,
+          'Large': 45
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 35,
+          'Long (Waist Length)': 70,
+          'Extra Long (Hip Length)': 105
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
+      },
+      { 
+        id: '8', 
+        name: 'Micro Braids', 
+        basePrice: 200,
+        price: 200, 
+        duration: '6-8 hours', 
+        category: 'Protective Styles',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 40,
+          'Large': 70
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 50,
+          'Long (Waist Length)': 100,
+          'Extra Long (Hip Length)': 150
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
+      },
+      { 
+        id: '9', 
+        name: 'Senegalese Twists', 
+        basePrice: 130,
+        price: 130, 
+        duration: '3-4 hours', 
+        category: 'Traditional',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 25,
+          'Large': 40
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 30,
+          'Long (Waist Length)': 60,
+          'Extra Long (Hip Length)': 90
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
+      },
+      { 
+        id: '10', 
+        name: 'Passion Twists', 
+        basePrice: 155,
+        price: 155, 
+        duration: '4-5 hours', 
+        category: 'Protective Styles',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 28,
+          'Large': 48
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 38,
+          'Long (Waist Length)': 75,
+          'Extra Long (Hip Length)': 110
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
+      },
+      { 
+        id: '11', 
+        name: 'Ghana Braids', 
+        basePrice: 145,
+        price: 145, 
+        duration: '4-5 hours', 
+        category: 'Traditional',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 28,
+          'Large': 45
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 35,
+          'Long (Waist Length)': 70,
+          'Extra Long (Hip Length)': 105
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
+      },
+      { 
+        id: '12', 
+        name: 'Crochet Braids', 
+        basePrice: 120,
+        price: 120, 
+        duration: '2-3 hours', 
+        category: 'Protective Styles',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 20,
+          'Large': 35
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 30,
+          'Long (Waist Length)': 60,
+          'Extra Long (Hip Length)': 90
+        },
+        hasBohoOptions: true,
+        bohoOptions: {
+          'None': 0,
+          'Half Pack (Black)': 30,
+          'Full Pack (Black)': 60,
+          'Half Pack (Other Color)': 40,
+          'Full Pack (Other Color)': 70
+        }
+      },
+      { id: '13', name: 'Retwist Service', price: 50, duration: '1-2 hours', category: 'Maintenance' },
+      { id: '14', name: 'Eyebrow Shaping', price: 25, duration: '30 minutes', category: 'Beauty' },
+      { id: '15', name: 'Hair Wash & Condition', price: 30, duration: '1 hour', category: 'Maintenance' },
+      { id: '16', name: 'Haircut', price: 40, duration: '1 hour', category: 'Styling' },
+      { id: '17', name: 'Hair Consultation', price: 0, duration: '30 minutes', category: 'Consultation' }
     ]
   }
 
@@ -108,14 +456,15 @@ const BookAppointment = () => {
 
   const handleServiceSelect = (service) => {
     setSelectedService(service)
-    // If service has size/length options, show those first, otherwise go to date selection
-    if (service.hasSizeOptions || service.hasLengthOptions) {
-      setStep(3) // Move to size/length selection
+    // If service has size/length/boho options, show those first, otherwise go to date selection
+    if (service.hasSizeOptions || service.hasLengthOptions || service.hasBohoOptions) {
+      setStep(3) // Move to size/length/boho selection
     } else {
       setStep(4) // Move directly to date selection
     }
     setSelectedSize(null)
     setSelectedLength(null)
+    setSelectedBoho(null)
     setSelectedDate(null)
     setSelectedTimeSlot(null)
   }
@@ -131,6 +480,7 @@ const BookAppointment = () => {
     // Check if required options are selected
     if (selectedService?.hasSizeOptions && !selectedSize) return false
     if (selectedService?.hasLengthOptions && !selectedLength) return false
+    // Boho is optional (can be "None"), so we don't require it
     return true
   }
 
@@ -149,6 +499,12 @@ const BookAppointment = () => {
     if (selectedLength && selectedService.lengthOptions) {
       const lengthPremium = selectedService.lengthOptions[selectedLength] || 0
       price += lengthPremium
+    }
+    
+    // Add boho premium
+    if (selectedBoho && selectedService.bohoOptions) {
+      const bohoPremium = selectedService.bohoOptions[selectedBoho] || 0
+      price += bohoPremium
     }
     
     return price
@@ -211,7 +567,8 @@ const BookAppointment = () => {
         serviceName: selectedService?.name || 'Hair Braiding',
         servicePrice: finalPrice,
         serviceSize: selectedSize || null,
-        serviceLength: selectedLength || null
+        serviceLength: selectedLength || null,
+        serviceBoho: selectedBoho || null
       }
 
       // Save to backend (works for both logged-in users and guests)
@@ -307,7 +664,7 @@ const BookAppointment = () => {
           </div>
           <div className={`step-indicator ${step >= 3 ? 'active' : ''}`}>
             <span className="step-number">3</span>
-            <span className="step-label">Size & Length</span>
+            <span className="step-label">Size, Length & Boho</span>
           </div>
           <div className={`step-indicator ${step >= 4 ? 'active' : ''}`}>
             <span className="step-number">4</span>
@@ -370,7 +727,7 @@ const BookAppointment = () => {
                         <h3 className="service-name">{service.name}</h3>
                         <div className="service-price">
                           ${service.basePrice || service.price}
-                          {(service.hasSizeOptions || service.hasLengthOptions) && (
+                          {(service.hasSizeOptions || service.hasLengthOptions || service.hasBohoOptions) && (
                             <span className="price-note">+ options</span>
                           )}
                         </div>
@@ -389,11 +746,11 @@ const BookAppointment = () => {
             </div>
           )}
 
-          {/* Step 3: Select Size & Length */}
-          {step === 3 && selectedService && (selectedService.hasSizeOptions || selectedService.hasLengthOptions) && (
+          {/* Step 3: Select Size & Length & Boho */}
+          {step === 3 && selectedService && (selectedService.hasSizeOptions || selectedService.hasLengthOptions || selectedService.hasBohoOptions) && (
             <div className="booking-step">
               <button className="back-button" onClick={goBack}>← Back</button>
-              <h2 className="step-title">Select Size & Length</h2>
+              <h2 className="step-title">Select Size, Length & Boho</h2>
               <p className="selected-info">
                 Service: <strong>{selectedService.name}</strong> | 
                 Base Price: <strong>${selectedService.basePrice || selectedService.price}</strong>
@@ -445,6 +802,30 @@ const BookAppointment = () => {
                 </div>
               )}
 
+              {selectedService.hasBohoOptions && (
+                <div className="options-section">
+                  <h3 className="options-title">Boho Hair (Optional)</h3>
+                  <p className="options-description">Add boho hair for a trendy, textured look</p>
+                  <div className="options-grid">
+                    {Object.entries(selectedService.bohoOptions).map(([boho, premium]) => (
+                      <button
+                        key={boho}
+                        className={`option-card ${selectedBoho === boho ? 'selected' : ''}`}
+                        onClick={() => setSelectedBoho(boho)}
+                      >
+                        <div className="option-name">{boho}</div>
+                        {premium > 0 && (
+                          <div className="option-premium">+${premium}</div>
+                        )}
+                        {premium === 0 && (
+                          <div className="option-premium">No extra charge</div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="price-summary">
                 <div className="price-breakdown">
                   <div className="price-item">
@@ -461,6 +842,12 @@ const BookAppointment = () => {
                     <div className="price-item">
                       <span>Length ({selectedLength}):</span>
                       <span>+${selectedService.lengthOptions[selectedLength] || 0}</span>
+                    </div>
+                  )}
+                  {selectedBoho && selectedService.bohoOptions && (
+                    <div className="price-item">
+                      <span>Boho ({selectedBoho}):</span>
+                      <span>+${selectedService.bohoOptions[selectedBoho] || 0}</span>
                     </div>
                   )}
                   <div className="price-item total">
@@ -490,6 +877,7 @@ const BookAppointment = () => {
                 Service: <strong>{selectedService?.name}</strong>
                 {selectedSize && <span> | Size: <strong>{selectedSize}</strong></span>}
                 {selectedLength && <span> | Length: <strong>{selectedLength}</strong></span>}
+                {selectedBoho && selectedBoho !== 'None' && <span> | Boho: <strong>{selectedBoho}</strong></span>}
               </p>
               <div className="dates-grid">
                 {availableDates.map((date, index) => {
@@ -524,7 +912,10 @@ const BookAppointment = () => {
               <h2 className="step-title">Select Time</h2>
               <p className="selected-info">
                 Stylist: <strong>{selectedBraider.name}</strong> | 
-                Service: <strong>{selectedService?.name}</strong> | 
+                Service: <strong>{selectedService?.name}</strong>
+                {selectedSize && <span> | Size: <strong>{selectedSize}</strong></span>}
+                {selectedLength && <span> | Length: <strong>{selectedLength}</strong></span>}
+                {selectedBoho && selectedBoho !== 'None' && <span> | Boho: <strong>{selectedBoho}</strong></span>} | 
                 Date: <strong>{formatDateDisplay(selectedDate)}</strong>
               </p>
               <div className="time-slots-grid">
