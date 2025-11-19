@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { braiders } from '../data/braiders'
 import { generateTimeSlots, getAvailableDates, formatDateDisplay, formatDateStorage, getDayName } from '../utils/timeSlots'
 import { isTimeSlotAvailable, saveBooking } from '../utils/bookingStorage'
-import { appointmentsAPI } from '../utils/api'
+import { appointmentsAPI, pricesAPI } from '../utils/api'
 import { getCurrentUser } from '../utils/auth'
 import { getBraiderAvailableDays } from '../utils/braiderSettings'
 import './BookAppointment.css'
@@ -14,6 +14,10 @@ const BookAppointment = () => {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [selectedBraider, setSelectedBraider] = useState(null)
+  const [selectedService, setSelectedService] = useState(null)
+  const [selectedSize, setSelectedSize] = useState(null)
+  const [selectedLength, setSelectedLength] = useState(null)
+  const [services, setServices] = useState([])
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null)
   const [customerInfo, setCustomerInfo] = useState({
@@ -26,7 +30,7 @@ const BookAppointment = () => {
   const availableDates = getAvailableDates()
   const timeSlots = generateTimeSlots()
 
-  // Load stored profile on component mount
+  // Load stored profile and services on component mount
   useEffect(() => {
     const storedProfile = getStoredProfile()
     if (storedProfile && (storedProfile.name || storedProfile.email || storedProfile.phone)) {
@@ -36,13 +40,118 @@ const BookAppointment = () => {
         phone: storedProfile.phone || ''
       })
     }
+    loadServices()
   }, [])
+
+  const loadServices = async () => {
+    try {
+      const data = await pricesAPI.getAll()
+      if (data && Array.isArray(data) && data.length > 0) {
+        setServices(data)
+      } else {
+        // Fallback to default services if API fails
+        setServices(getDefaultServices())
+      }
+    } catch (error) {
+      console.error('Error loading services:', error)
+      setServices(getDefaultServices())
+    }
+  }
+
+  const getDefaultServices = () => {
+    return [
+      { 
+        id: '1', 
+        name: 'Box Braids', 
+        basePrice: 250,
+        price: 250, 
+        duration: '4-6 hours', 
+        category: 'Protective Styles',
+        hasSizeOptions: true,
+        hasLengthOptions: true,
+        sizeOptions: {
+          'Small': 0,
+          'Medium': 30,
+          'Large': 50
+        },
+        lengthOptions: {
+          'Short (Shoulder Length)': 0,
+          'Medium (Mid-Back)': 40,
+          'Long (Waist Length)': 80,
+          'Extra Long (Hip Length)': 120
+        }
+      },
+      { id: '2', name: 'Cornrows', price: 80, duration: '2-3 hours', category: 'Traditional' },
+      { id: '3', name: 'Goddess Braids', price: 180, duration: '5-7 hours', category: 'Specialty' },
+      { id: '4', name: 'Fulani Braids', price: 160, duration: '4-6 hours', category: 'Traditional' },
+      { id: '5', name: 'Lemonade Braids', price: 140, duration: '4-5 hours', category: 'Protective Styles' },
+      { id: '6', name: 'Knotless Braids', price: 170, duration: '5-7 hours', category: 'Protective Styles' },
+      { id: '7', name: 'Feed-in Braids', price: 140, duration: '4-5 hours', category: 'Protective Styles' },
+      { id: '8', name: 'Micro Braids', price: 200, duration: '6-8 hours', category: 'Protective Styles' },
+      { id: '9', name: 'Senegalese Twists', price: 130, duration: '3-4 hours', category: 'Protective Styles' },
+      { id: '10', name: 'Marley Twists', price: 120, duration: '3-4 hours', category: 'Protective Styles' },
+      { id: '11', name: 'Retwist Service', price: 50, duration: '1-2 hours', category: 'Maintenance' },
+      { id: '12', name: 'Eyebrow Shaping', price: 25, duration: '30 minutes', category: 'Beauty' },
+      { id: '13', name: 'Hair Wash & Condition', price: 30, duration: '1 hour', category: 'Maintenance' },
+      { id: '14', name: 'Haircut', price: 40, duration: '1 hour', category: 'Styling' },
+      { id: '15', name: 'Hair Consultation', price: 0, duration: '30 minutes', category: 'Consultation' }
+    ]
+  }
 
   const handleBraiderSelect = (braider) => {
     setSelectedBraider(braider)
-    setStep(2)
+    setStep(2) // Move to service selection
+    setSelectedService(null)
     setSelectedDate(null)
     setSelectedTimeSlot(null)
+  }
+
+  const handleServiceSelect = (service) => {
+    setSelectedService(service)
+    // If service has size/length options, show those first, otherwise go to date selection
+    if (service.hasSizeOptions || service.hasLengthOptions) {
+      setStep(3) // Move to size/length selection
+    } else {
+      setStep(4) // Move directly to date selection
+    }
+    setSelectedSize(null)
+    setSelectedLength(null)
+    setSelectedDate(null)
+    setSelectedTimeSlot(null)
+  }
+
+  const handleSizeLengthSelect = () => {
+    // Move to date selection after size/length is selected
+    setStep(4)
+    setSelectedDate(null)
+    setSelectedTimeSlot(null)
+  }
+
+  const canProceedFromSizeLength = () => {
+    // Check if required options are selected
+    if (selectedService?.hasSizeOptions && !selectedSize) return false
+    if (selectedService?.hasLengthOptions && !selectedLength) return false
+    return true
+  }
+
+  const calculateServicePrice = () => {
+    if (!selectedService) return 0
+    
+    let price = selectedService.basePrice || selectedService.price || 0
+    
+    // Add size premium
+    if (selectedSize && selectedService.sizeOptions) {
+      const sizePremium = selectedService.sizeOptions[selectedSize] || 0
+      price += sizePremium
+    }
+    
+    // Add length premium
+    if (selectedLength && selectedService.lengthOptions) {
+      const lengthPremium = selectedService.lengthOptions[selectedLength] || 0
+      price += lengthPremium
+    }
+    
+    return price
   }
 
   const handleDateSelect = (date) => {
@@ -53,7 +162,7 @@ const BookAppointment = () => {
     if (availableDays.includes(dayName)) {
       setSelectedDate(date)
       setSelectedTimeSlot(null)
-      setStep(3)
+      setStep(5) // Moved to step 5
     } else {
       alert(`${selectedBraider.name} is not available on ${dayName}. Please select another date.`)
     }
@@ -62,7 +171,7 @@ const BookAppointment = () => {
   const handleTimeSlotSelect = (timeSlot) => {
     if (isTimeSlotAvailable(formatDateStorage(selectedDate), timeSlot, selectedBraider.id)) {
       setSelectedTimeSlot(timeSlot)
-      setStep(4)
+      setStep(6) // Moved to step 6
     } else {
       alert('This time slot is already booked. Please select another time.')
     }
@@ -80,30 +189,32 @@ const BookAppointment = () => {
     setIsSubmitting(true)
 
     try {
-      // Check if user is logged in
-      const user = getCurrentUser()
-      if (!user) {
-        // Redirect to login if not authenticated
-        if (window.confirm('Please login to book an appointment. Would you like to login now?')) {
-          navigate('/login', { state: { from: { pathname: '/book-appointment' } } })
-        }
-        setIsSubmitting(false)
-        return
+      // Convert time slot from 24-hour format (09:00) to 12-hour format (9:00 AM)
+      const convertTo12Hour = (time24) => {
+        const [hours, minutes] = time24.split(':')
+        const hour12 = parseInt(hours)
+        const period = hour12 >= 12 ? 'PM' : 'AM'
+        const displayHour = hour12 === 0 ? 12 : hour12 > 12 ? hour12 - 12 : hour12
+        return `${displayHour}:${minutes} ${period}`
       }
 
+      const finalPrice = calculateServicePrice()
+      
       const bookingData = {
-        braiderId: selectedBraider.id,
+        braiderId: selectedBraider.id.toString(),
         braiderName: selectedBraider.name,
         date: formatDateStorage(selectedDate),
-        timeSlot: selectedTimeSlot,
-        customerName: customerInfo.name,
-        customerEmail: customerInfo.email,
-        customerPhone: customerInfo.phone,
-        serviceName: 'Hair Braiding',
-        servicePrice: 0 // You can get this from selected service if needed
+        timeSlot: convertTo12Hour(selectedTimeSlot),
+        customerName: customerInfo.name.trim(),
+        customerEmail: customerInfo.email.trim().toLowerCase(),
+        customerPhone: customerInfo.phone.trim(),
+        serviceName: selectedService?.name || 'Hair Braiding',
+        servicePrice: finalPrice,
+        serviceSize: selectedSize || null,
+        serviceLength: selectedLength || null
       }
 
-      // Save to backend
+      // Save to backend (works for both logged-in users and guests)
       const response = await appointmentsAPI.create(bookingData)
       
       // Also save to localStorage as backup (optional)
@@ -123,7 +234,7 @@ const BookAppointment = () => {
           clientEmail: customerInfo.email,
           clientPhone: customerInfo.phone,
           notes: '',
-          serviceName: 'Hair Braiding',
+          serviceName: selectedService?.name || 'Hair Braiding',
           braiderName: selectedBraider.name,
           dateTimeDisplay: `${formatDateDisplay(selectedDate)} at ${selectedTimeSlot}`
         })
@@ -132,12 +243,39 @@ const BookAppointment = () => {
         // Don't block the booking if email fails
       }
       
-      alert('Booking confirmed! You will receive a confirmation email shortly.')
-      navigate('/my-bookings')
+      // Check if user is logged in to determine redirect
+      const user = getCurrentUser()
+      if (user) {
+        alert('Booking confirmed! You will receive a confirmation email shortly.')
+        navigate('/my-bookings')
+      } else {
+        alert('Booking confirmed! You will receive a confirmation email shortly. You can create an account to view and manage your bookings.')
+        navigate('/')
+      }
     } catch (error) {
-      const errorMessage = error.message || 'Error booking appointment. Please try again.'
+      // Extract detailed error message
+      let errorMessage = 'Error booking appointment. Please try again.'
+      
+      if (error.message) {
+        errorMessage = error.message
+      }
+      
+      // If there's a response object with validation errors, show those
+      if (error.response && error.response.errors) {
+        const validationErrors = error.response.errors.map(err => err.msg || err.message).join('\n')
+        if (validationErrors) {
+          errorMessage = `Validation errors:\n${validationErrors}`
+        }
+      }
+      
       alert(errorMessage)
       console.error('Booking error:', error)
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response,
+        status: error.status,
+        stack: error.stack
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -165,14 +303,22 @@ const BookAppointment = () => {
           </div>
           <div className={`step-indicator ${step >= 2 ? 'active' : ''}`}>
             <span className="step-number">2</span>
-            <span className="step-label">Select Date</span>
+            <span className="step-label">Select Service</span>
           </div>
           <div className={`step-indicator ${step >= 3 ? 'active' : ''}`}>
             <span className="step-number">3</span>
-            <span className="step-label">Choose Time</span>
+            <span className="step-label">Size & Length</span>
           </div>
           <div className={`step-indicator ${step >= 4 ? 'active' : ''}`}>
             <span className="step-number">4</span>
+            <span className="step-label">Select Date</span>
+          </div>
+          <div className={`step-indicator ${step >= 5 ? 'active' : ''}`}>
+            <span className="step-number">5</span>
+            <span className="step-label">Choose Time</span>
+          </div>
+          <div className={`step-indicator ${step >= 6 ? 'active' : ''}`}>
+            <span className="step-number">6</span>
             <span className="step-label">Confirm</span>
           </div>
         </div>
@@ -205,12 +351,146 @@ const BookAppointment = () => {
             </div>
           )}
 
-          {/* Step 2: Select Date */}
+          {/* Step 2: Select Service */}
           {step === 2 && (
             <div className="booking-step">
               <button className="back-button" onClick={goBack}>← Back</button>
-              <h2 className="step-title">Select Date</h2>
+              <h2 className="step-title">Select Your Service</h2>
               <p className="selected-braider-info">Stylist: <strong>{selectedBraider.name}</strong></p>
+              <div className="services-grid">
+                {services.map(service => {
+                  const isSelected = selectedService?.id === service.id
+                  return (
+                    <div
+                      key={service.id}
+                      className={`service-card ${isSelected ? 'selected' : ''}`}
+                      onClick={() => handleServiceSelect(service)}
+                    >
+                      <div className="service-header">
+                        <h3 className="service-name">{service.name}</h3>
+                        <div className="service-price">
+                          ${service.basePrice || service.price}
+                          {(service.hasSizeOptions || service.hasLengthOptions) && (
+                            <span className="price-note">+ options</span>
+                          )}
+                        </div>
+                      </div>
+                      {service.duration && (
+                        <p className="service-duration">⏱️ {service.duration}</p>
+                      )}
+                      {service.category && (
+                        <span className="service-category">{service.category}</span>
+                      )}
+                      <button className="btn btn-primary btn-sm">Select</button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Select Size & Length */}
+          {step === 3 && selectedService && (selectedService.hasSizeOptions || selectedService.hasLengthOptions) && (
+            <div className="booking-step">
+              <button className="back-button" onClick={goBack}>← Back</button>
+              <h2 className="step-title">Select Size & Length</h2>
+              <p className="selected-info">
+                Service: <strong>{selectedService.name}</strong> | 
+                Base Price: <strong>${selectedService.basePrice || selectedService.price}</strong>
+              </p>
+              
+              {selectedService.hasSizeOptions && (
+                <div className="options-section">
+                  <h3 className="options-title">Braid Size</h3>
+                  <div className="options-grid">
+                    {Object.entries(selectedService.sizeOptions).map(([size, premium]) => (
+                      <button
+                        key={size}
+                        className={`option-card ${selectedSize === size ? 'selected' : ''}`}
+                        onClick={() => setSelectedSize(size)}
+                      >
+                        <div className="option-name">{size}</div>
+                        {premium > 0 && (
+                          <div className="option-premium">+${premium}</div>
+                        )}
+                        {premium === 0 && (
+                          <div className="option-premium">No extra charge</div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedService.hasLengthOptions && (
+                <div className="options-section">
+                  <h3 className="options-title">Hair Length</h3>
+                  <div className="options-grid">
+                    {Object.entries(selectedService.lengthOptions).map(([length, premium]) => (
+                      <button
+                        key={length}
+                        className={`option-card ${selectedLength === length ? 'selected' : ''}`}
+                        onClick={() => setSelectedLength(length)}
+                      >
+                        <div className="option-name">{length}</div>
+                        {premium > 0 && (
+                          <div className="option-premium">+${premium}</div>
+                        )}
+                        {premium === 0 && (
+                          <div className="option-premium">No extra charge</div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="price-summary">
+                <div className="price-breakdown">
+                  <div className="price-item">
+                    <span>Base Price:</span>
+                    <span>${selectedService.basePrice || selectedService.price}</span>
+                  </div>
+                  {selectedSize && selectedService.sizeOptions && (
+                    <div className="price-item">
+                      <span>Size ({selectedSize}):</span>
+                      <span>+${selectedService.sizeOptions[selectedSize] || 0}</span>
+                    </div>
+                  )}
+                  {selectedLength && selectedService.lengthOptions && (
+                    <div className="price-item">
+                      <span>Length ({selectedLength}):</span>
+                      <span>+${selectedService.lengthOptions[selectedLength] || 0}</span>
+                    </div>
+                  )}
+                  <div className="price-item total">
+                    <span>Total:</span>
+                    <span>${calculateServicePrice()}</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                className="btn btn-primary btn-large"
+                onClick={handleSizeLengthSelect}
+                disabled={!canProceedFromSizeLength()}
+              >
+                Continue to Date Selection
+              </button>
+            </div>
+          )}
+
+          {/* Step 4: Select Date */}
+          {step === 4 && (
+            <div className="booking-step">
+              <button className="back-button" onClick={goBack}>← Back</button>
+              <h2 className="step-title">Select Date</h2>
+              <p className="selected-info">
+                Stylist: <strong>{selectedBraider.name}</strong> | 
+                Service: <strong>{selectedService?.name}</strong>
+                {selectedSize && <span> | Size: <strong>{selectedSize}</strong></span>}
+                {selectedLength && <span> | Length: <strong>{selectedLength}</strong></span>}
+              </p>
               <div className="dates-grid">
                 {availableDates.map((date, index) => {
                   const dayName = getDayName(date)
@@ -237,13 +517,14 @@ const BookAppointment = () => {
             </div>
           )}
 
-          {/* Step 3: Select Time Slot */}
-          {step === 3 && (
+          {/* Step 5: Select Time Slot */}
+          {step === 5 && (
             <div className="booking-step">
               <button className="back-button" onClick={goBack}>← Back</button>
               <h2 className="step-title">Select Time</h2>
               <p className="selected-info">
                 Stylist: <strong>{selectedBraider.name}</strong> | 
+                Service: <strong>{selectedService?.name}</strong> | 
                 Date: <strong>{formatDateDisplay(selectedDate)}</strong>
               </p>
               <div className="time-slots-grid">
@@ -271,8 +552,8 @@ const BookAppointment = () => {
             </div>
           )}
 
-          {/* Step 4: Confirm Booking */}
-          {step === 4 && (
+          {/* Step 6: Confirm Booking */}
+          {step === 6 && (
             <div className="booking-step">
               <button className="back-button" onClick={goBack}>← Back</button>
               <h2 className="step-title">Confirm Your Booking</h2>
@@ -283,6 +564,26 @@ const BookAppointment = () => {
                   <div className="summary-item">
                     <span className="summary-label">Stylist:</span>
                     <span className="summary-value">{selectedBraider.name}</span>
+                  </div>
+                  <div className="summary-item">
+                    <span className="summary-label">Service:</span>
+                    <span className="summary-value">{selectedService?.name || 'Hair Braiding'}</span>
+                  </div>
+                  {selectedSize && (
+                    <div className="summary-item">
+                      <span className="summary-label">Size:</span>
+                      <span className="summary-value">{selectedSize}</span>
+                    </div>
+                  )}
+                  {selectedLength && (
+                    <div className="summary-item">
+                      <span className="summary-label">Length:</span>
+                      <span className="summary-value">{selectedLength}</span>
+                    </div>
+                  )}
+                  <div className="summary-item">
+                    <span className="summary-label">Price:</span>
+                    <span className="summary-value">${calculateServicePrice()}</span>
                   </div>
                   <div className="summary-item">
                     <span className="summary-label">Date:</span>

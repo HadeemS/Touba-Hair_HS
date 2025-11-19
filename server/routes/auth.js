@@ -51,10 +51,12 @@ router.post('/register', validate(registerValidation), async (req, res) => {
       token,
       user: {
         id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
         phone: user.phone,
-        role: user.role
+        role: user.role,
+        braiderId: user.braiderId || null
       }
     });
   } catch (error) {
@@ -122,11 +124,12 @@ router.get('/me', authenticate, async (req, res) => {
     res.json({
       user: {
         id: req.user._id,
+        _id: req.user._id,
         name: req.user.name,
         email: req.user.email,
         phone: req.user.phone,
         role: req.user.role,
-        braiderId: req.user.braiderId,
+        braiderId: req.user.braiderId || null,
         notes: req.user.notes
       }
     });

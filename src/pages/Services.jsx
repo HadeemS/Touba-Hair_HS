@@ -121,13 +121,16 @@ const Services = () => {
         id: '1',
         name: 'Box Braids',
         description: 'Classic box braids with premium hair extensions. Perfect for protective styling and long-lasting wear. These versatile braids can be styled in countless ways and protect your natural hair while you grow it out.',
-        price: 150,
+        basePrice: 250,
+        price: 250,
         duration: '4-6 hours',
         category: 'Protective Styles',
         icon: '📦',
         features: ['Long-lasting (6-8 weeks)', 'Low maintenance', 'Versatile styling options', 'Hair protection'],
-        details: 'Box braids are a timeless protective style that involves sectioning hair into square or rectangular parts and braiding synthetic or natural hair extensions into each section. Perfect for all hair types and lengths.',
-        popular: true
+        details: 'Box braids are a timeless protective style that involves sectioning hair into square or rectangular parts and braiding synthetic or natural hair extensions into each section. Perfect for all hair types and lengths. Price varies based on size and length.',
+        popular: true,
+        hasSizeOptions: true,
+        hasLengthOptions: true
       },
       {
         id: '2',

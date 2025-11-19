@@ -148,10 +148,37 @@ video.gallery-media {
   margin-top: var(--spacing-xs);
 }
 
+.gallery-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--light-pink);
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.1) 0%, rgba(255, 107, 157, 0.05) 100%);
+}
+
+.placeholder-emoji {
+  font-size: 5rem;
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+.gallery-item.placeholder-item:hover .gallery-placeholder {
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.15) 0%, rgba(255, 107, 157, 0.1) 100%);
+}
+
 @media (max-width: 768px) {
   .gallery-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: var(--spacing-md);
+  }
+  
+  .placeholder-emoji {
+    font-size: 4rem;
   }
 }
 

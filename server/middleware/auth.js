@@ -3,7 +3,7 @@ import User from '../models/User.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
-// Middleware to verify JWT token
+// Middleware to verify JWT token (required)
 export const authenticate = async (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1] || req.headers['x-auth-token'];
@@ -29,6 +29,33 @@ export const authenticate = async (req, res, next) => {
       return res.status(401).json({ error: 'Token expired. Please login again.' });
     }
     res.status(500).json({ error: 'Authentication error.' });
+  }
+};
+
+// Optional authentication middleware (doesn't fail if no token)
+export const optionalAuthenticate = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1] || req.headers['x-auth-token'];
+    
+    if (!token) {
+      req.user = null; // No user, but continue
+      return next();
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.userId).select('-password');
+    
+    if (user && user.isActive) {
+      req.user = user;
+    } else {
+      req.user = null;
+    }
+    
+    next();
+  } catch (error) {
+    // If token is invalid, just continue without user (guest booking)
+    req.user = null;
+    next();
   }
 };
 

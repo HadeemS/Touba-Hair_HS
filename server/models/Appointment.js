@@ -4,12 +4,14 @@ const appointmentSchema = new mongoose.Schema({
   clientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'Client ID is required']
+    required: false, // Optional for guest bookings
+    default: null
   },
   employeeId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'Employee ID is required']
+    required: false, // Will be set when employee is found
+    default: null
   },
   braiderId: {
     type: String,

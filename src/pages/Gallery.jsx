@@ -14,7 +14,9 @@ const Gallery = () => {
   const loadGallery = async () => {
     try {
       setLoading(true)
-      const data = await galleryAPI.getAll()
+      // Add cache-busting query parameter to ensure fresh data
+      const cacheBuster = `?t=${Date.now()}`
+      const data = await galleryAPI.getAll(cacheBuster)
       console.log('Gallery data loaded:', data)
       if (data && Array.isArray(data)) {
         setImages(data)
@@ -70,23 +72,20 @@ const Gallery = () => {
         ) : (
           <div className="gallery-grid">
             {images.map((item) => {
-              const isVideo = item.type === 'video' || item.videoUrl || (item.imageUrl && item.imageUrl.match(/\.(mp4|webm|ogg)$/i))
-              
-              // Check if imageUrl is already a full URL (starts with http:// or https://)
-              const isFullUrl = item.imageUrl && (item.imageUrl.startsWith('http://') || item.imageUrl.startsWith('https://'))
-              
-              const mediaUrl = isVideo 
-                ? (item.videoUrl || item.imageUrl)
-                : isFullUrl 
-                  ? item.imageUrl 
-                  : `${import.meta.env.VITE_API_URL || 'https://touba-hair-hs.onrender.com'}${item.imageUrl}`
+              // Check for placeholder: type is 'placeholder' OR imageUrl is null/empty
+              const isPlaceholder = item.type === 'placeholder' || !item.imageUrl || item.imageUrl === null
+              const isVideo = !isPlaceholder && (item.type === 'video' || item.videoUrl || (item.imageUrl && item.imageUrl.match(/\.(mp4|webm|ogg)$/i)))
               
               return (
-                <div key={item.id} className={`gallery-item ${isVideo ? 'video-item' : ''}`}>
+                <div key={item.id} className={`gallery-item ${isVideo ? 'video-item' : ''} ${isPlaceholder ? 'placeholder-item' : ''}`}>
                   <div className="gallery-media-wrapper">
-                    {isVideo ? (
+                    {isPlaceholder ? (
+                      <div className="gallery-placeholder">
+                        <span className="placeholder-emoji">{item.emoji || '📸'}</span>
+                      </div>
+                    ) : isVideo ? (
                       <video 
-                        src={mediaUrl}
+                        src={item.videoUrl || item.imageUrl}
                         className="gallery-media"
                         controls
                         preload="metadata"
@@ -96,13 +95,17 @@ const Gallery = () => {
                       </video>
                     ) : (
                       <img 
-                        src={mediaUrl}
+                        src={item.imageUrl.startsWith('http') ? item.imageUrl : `${import.meta.env.VITE_API_URL || 'https://touba-hair-hs.onrender.com'}${item.imageUrl}`}
                         alt={item.title || 'Gallery image'}
                         className="gallery-media"
                         loading="lazy"
                         onError={(e) => {
-                          console.error('Failed to load image:', mediaUrl)
-                          e.target.style.display = 'none'
+                          console.error('Failed to load image:', item.imageUrl)
+                          // Fallback to placeholder if image fails to load
+                          const wrapper = e.target.parentElement
+                          if (wrapper) {
+                            wrapper.innerHTML = `<div class="gallery-placeholder"><span class="placeholder-emoji">${item.emoji || '📸'}</span></div>`
+                          }
                         }}
                       />
                     )}

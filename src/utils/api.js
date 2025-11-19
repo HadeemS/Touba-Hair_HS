@@ -28,9 +28,16 @@ async function apiCall(endpoint, options = {}) {
     console.log('API Response data:', responseData);
     
     if (!response.ok) {
-      const errorMessage = responseData.error || responseData.message || `HTTP error! status: ${response.status}`;
+      // Prefer detailed message, then error, then generic message
+      const errorMessage = responseData.message || responseData.error || `HTTP error! status: ${response.status}`;
       console.error('API Error:', errorMessage);
-      throw new Error(errorMessage);
+      console.error('Full error response:', responseData);
+      
+      // Create error with more details
+      const error = new Error(errorMessage);
+      error.response = responseData;
+      error.status = response.status;
+      throw error;
     }
     
     return responseData;
@@ -47,7 +54,7 @@ async function apiCall(endpoint, options = {}) {
 
 // Gallery API functions
 export const galleryAPI = {
-  getAll: () => apiCall('/api/gallery'),
+  getAll: (query = '') => apiCall(`/api/gallery${query}`),
   getById: (id) => apiCall(`/api/gallery/${id}`),
   create: (formData) => apiCall('/api/gallery', {
     method: 'POST',
@@ -144,11 +151,18 @@ export const appointmentsAPI = {
   },
   create: (data) => {
     const token = localStorage.getItem('auth_token');
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    
+    // Only add Authorization header if token exists (for logged-in users)
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     return apiCall('/api/appointments', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
+      headers: headers,
       body: JSON.stringify(data),
     });
   },

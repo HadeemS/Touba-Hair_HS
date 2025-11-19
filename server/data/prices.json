@@ -3,9 +3,23 @@
     "id": "1",
     "name": "Box Braids",
     "description": "Classic box braids with premium hair extensions. Perfect for protective styling and long-lasting wear.",
-    "price": 150,
+    "basePrice": 250,
+    "price": 250,
     "duration": "4-6 hours",
-    "category": "Protective Styles"
+    "category": "Protective Styles",
+    "hasSizeOptions": true,
+    "hasLengthOptions": true,
+    "sizeOptions": {
+      "Small": 0,
+      "Medium": 30,
+      "Large": 50
+    },
+    "lengthOptions": {
+      "Short (Shoulder Length)": 0,
+      "Medium (Mid-Back)": 40,
+      "Long (Waist Length)": 80,
+      "Extra Long (Hip Length)": 120
+    }
   },
   {
     "id": "2",

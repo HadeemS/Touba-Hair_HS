@@ -1,7 +1,8 @@
 import express from 'express';
 import Appointment from '../models/Appointment.js';
 import Reward from '../models/Reward.js';
-import { authenticate, requireEmployee } from '../middleware/auth.js';
+import User from '../models/User.js';
+import { authenticate, optionalAuthenticate, requireEmployee } from '../middleware/auth.js';
 import { validate, appointmentValidation } from '../middleware/validation.js';
 
 const router = express.Router();
@@ -22,8 +23,8 @@ const parseDateTime = (date, timeSlot) => {
   return dateTime;
 };
 
-// Create appointment (client or employee can create)
-router.post('/', authenticate, validate(appointmentValidation), async (req, res) => {
+// Create appointment (guest, client, or employee can create)
+router.post('/', optionalAuthenticate, validate(appointmentValidation), async (req, res) => {
   try {
     const {
       braiderId,
@@ -38,10 +39,6 @@ router.post('/', authenticate, validate(appointmentValidation), async (req, res)
       notes
     } = req.body;
 
-    // Find employee by braiderId (assuming braiderId maps to employee)
-    // For now, we'll use the braiderId directly
-    // In production, you'd want to map braiderId to actual employee User ID
-    
     // Check if time slot is already booked
     const existingAppointment = await Appointment.findOne({
       date,
@@ -54,17 +51,34 @@ router.post('/', authenticate, validate(appointmentValidation), async (req, res)
       return res.status(400).json({ error: 'This time slot is already booked.' });
     }
 
-    // Determine clientId and employeeId
-    let clientId = req.user._id;
-    let employeeId = req.user._id; // Default to current user
+    // Find employee user by braiderId (required for all bookings)
+    const employee = await User.findOne({ 
+      role: 'employee', 
+      braiderId: braiderId.toString() 
+    });
     
-    // If current user is a client, we need to find the employee
-    // For now, we'll use a placeholder - in production, map braiderId to employee User
-    if (req.user.role === 'client') {
-      // Find employee by braiderId (you'll need to set braiderId on User model)
-      // For now, we'll create appointment with braiderId reference
-      employeeId = req.user._id; // This will need to be updated when you link braiders to users
+    if (!employee) {
+      return res.status(400).json({ 
+        error: `Employee with braider ID ${braiderId} not found. Please contact support.` 
+      });
     }
+    
+    const employeeId = employee._id;
+
+    // Determine clientId (optional for guest bookings)
+    let clientId = null;
+    
+    if (req.user) {
+      // User is logged in
+      if (req.user.role === 'client') {
+        clientId = req.user._id;
+      } else if (req.user.role === 'employee') {
+        // If employee is creating for someone else, use their ID as clientId
+        // Or leave as null if it's a guest booking made by employee
+        clientId = null; // Employee creating guest booking
+      }
+    }
+    // If req.user is null, it's a guest booking (clientId stays null)
 
     const dateTime = parseDateTime(date, timeSlot);
 
@@ -87,9 +101,13 @@ router.post('/', authenticate, validate(appointmentValidation), async (req, res)
 
     await appointment.save();
 
-    // Populate user references for response
-    await appointment.populate('clientId', 'name email');
-    await appointment.populate('employeeId', 'name email');
+    // Populate user references for response (if they exist)
+    if (appointment.clientId) {
+      await appointment.populate('clientId', 'name email');
+    }
+    if (appointment.employeeId) {
+      await appointment.populate('employeeId', 'name email');
+    }
 
     res.status(201).json({
       message: 'Appointment booked successfully',
@@ -97,7 +115,23 @@ router.post('/', authenticate, validate(appointmentValidation), async (req, res)
     });
   } catch (error) {
     console.error('Create appointment error:', error);
-    res.status(500).json({ error: 'Failed to create appointment.' });
+    
+    // Provide more specific error messages
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ 
+        error: 'Validation failed', 
+        details: Object.values(error.errors).map(e => e.message).join(', ')
+      });
+    }
+    
+    if (error.name === 'MongoServerError' && error.code === 11000) {
+      return res.status(400).json({ error: 'Duplicate appointment detected.' });
+    }
+    
+    res.status(500).json({ 
+      error: 'Failed to create appointment.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
@@ -113,14 +147,37 @@ router.get('/', authenticate, async (req, res) => {
     
     // Employees see appointments assigned to them
     if (req.user.role === 'employee') {
-      // Match by employeeId or braiderId
-      query.$or = [
-        { employeeId: req.user._id },
-        { braiderId: req.user.braiderId }
-      ];
+      // Match by employeeId OR braiderId (to handle both cases)
+      // This ensures braiders see appointments even if employeeId wasn't set correctly
+      const conditions = [];
+      
+      // Match by employeeId (if appointment was linked to employee user)
+      if (req.user._id) {
+        conditions.push({ employeeId: req.user._id });
+      }
+      
+      // Match by braiderId (primary method - matches the braiderId from booking)
+      // Convert to string for comparison to handle both string and number IDs
+      if (req.user.braiderId) {
+        const userBraiderId = req.user.braiderId.toString();
+        conditions.push({ braiderId: userBraiderId });
+        // Also try matching as number in case braiderId is stored as number
+        const braiderIdNum = parseInt(userBraiderId);
+        if (!isNaN(braiderIdNum)) {
+          conditions.push({ braiderId: braiderIdNum });
+        }
+      }
+      
+      // If no braiderId set, try to match by name (fallback)
+      if (conditions.length === 0) {
+        // This shouldn't happen if braiderId is set, but provides fallback
+        conditions.push({ braiderName: req.user.name });
+      }
+      
+      query.$or = conditions;
     }
     
-    // Admins see all appointments
+    // Admins see all appointments (including guest bookings where clientId is null)
     // (no query filter for admins)
 
     const { status, date, braiderId } = req.query;
@@ -139,8 +196,18 @@ router.get('/', authenticate, async (req, res) => {
 
     const appointments = await Appointment.find(query)
       .populate('clientId', 'name email phone')
-      .populate('employeeId', 'name email')
+      .populate('employeeId', 'name email braiderId')
       .sort({ dateTime: -1 });
+
+    // Log for debugging (remove in production)
+    if (process.env.NODE_ENV === 'development' && req.user.role === 'employee') {
+      console.log('Employee appointments query:', {
+        userId: req.user._id,
+        braiderId: req.user.braiderId,
+        query: query,
+        count: appointments.length
+      });
+    }
 
     res.json({ appointments });
   } catch (error) {

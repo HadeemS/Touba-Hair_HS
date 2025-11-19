@@ -10,8 +10,10 @@ export const validate = (validations) => {
       return next();
     }
     
+    const errorMessages = errors.array().map(err => err.msg).join(', ');
     return res.status(400).json({ 
       error: 'Validation failed',
+      message: errorMessages,
       errors: errors.array()
     });
   };
@@ -37,9 +39,14 @@ export const appointmentValidation = [
   body('braiderId').notEmpty().withMessage('Braider ID is required'),
   body('braiderName').trim().notEmpty().withMessage('Braider name is required'),
   body('date').matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Date must be in YYYY-MM-DD format'),
-  body('timeSlot').notEmpty().withMessage('Time slot is required'),
-  body('customerName').trim().isLength({ min: 2 }).withMessage('Customer name is required'),
+  body('timeSlot')
+    .notEmpty().withMessage('Time slot is required')
+    .matches(/^\d{1,2}:\d{2}\s?(AM|PM)$/i).withMessage('Time slot must be in format "HH:MM AM/PM"'),
+  body('customerName').trim().isLength({ min: 2 }).withMessage('Customer name must be at least 2 characters'),
   body('customerEmail').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
-  body('customerPhone').trim().notEmpty().withMessage('Customer phone is required')
+  body('customerPhone')
+    .trim()
+    .notEmpty().withMessage('Customer phone is required')
+    .isLength({ min: 10 }).withMessage('Phone number must be at least 10 characters')
 ];
 

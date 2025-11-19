@@ -24,12 +24,48 @@ const BraiderProfile = () => {
     try {
       setLoading(true)
       
-      // Fetch from backend API
+      // Fetch from backend API - backend automatically filters by employee/braider
       const response = await appointmentsAPI.getAll()
       const apiBookings = response.appointments || []
       
+      // Additional client-side filtering to ensure only this braider's appointments
+      // (Backend should handle this, but this is a safety check)
+      const userBraiderId = user?.braiderId?.toString()
+      const userId = user?._id || user?.id
+      
+      console.log('BraiderProfile - Filtering appointments:', {
+        userBraiderId,
+        userId,
+        userName: user?.name,
+        totalBookings: apiBookings.length
+      })
+      
+      const filteredBookings = apiBookings.filter(booking => {
+        // Match by braiderId (primary method - this is what's set when booking is created)
+        const bookingBraiderId = booking.braiderId?.toString()
+        if (userBraiderId && bookingBraiderId && bookingBraiderId === userBraiderId) {
+          console.log('Matched by braiderId:', bookingBraiderId, '===', userBraiderId)
+          return true
+        }
+        // Match by employeeId if user is the assigned employee
+        // Handle both populated object and ID string
+        const bookingEmployeeId = booking.employeeId?._id || booking.employeeId
+        if (bookingEmployeeId && userId && bookingEmployeeId.toString() === userId.toString()) {
+          console.log('Matched by employeeId:', bookingEmployeeId, '===', userId)
+          return true
+        }
+        // Match by braiderName as fallback (in case braiderId isn't set)
+        if (booking.braiderName && user?.name && booking.braiderName === user.name) {
+          console.log('Matched by braiderName:', booking.braiderName, '===', user.name)
+          return true
+        }
+        return false
+      })
+      
+      console.log('BraiderProfile - Filtered appointments:', filteredBookings.length)
+      
       // Transform API bookings to match expected format
-      const transformedBookings = apiBookings.map(booking => ({
+      const transformedBookings = filteredBookings.map(booking => ({
         id: booking._id,
         braiderId: booking.braiderId,
         braiderName: booking.braiderName,
