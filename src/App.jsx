@@ -6,6 +6,8 @@ import BookAppointment from './pages/BookAppointment'
 import Profile from './pages/Profile'
 import MyBookings from './pages/MyBookings'
 import Login from './pages/Login'
+import ClientRegister from './pages/ClientRegister'
+import BraiderRegister from './pages/BraiderRegister'
 import BraiderProfile from './pages/BraiderProfile'
 import BraiderSettings from './pages/BraiderSettings'
 import Gallery from './pages/Gallery'
@@ -49,6 +51,8 @@ function App() {
             <Route path="/policies" element={<Policies />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<ClientRegister />} />
+            <Route path="/braider-register" element={<BraiderRegister />} />
             <Route 
               path="/my-bookings" 
               element={

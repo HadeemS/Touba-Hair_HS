@@ -151,6 +151,11 @@ const Login = () => {
               </div>
             </div>
           </div>
+
+          <div className="login-footer">
+            <p>Don't have an account? <a href="/register">Sign up here</a></p>
+            <p>Are you a braider? <a href="/braider-register">Create braider account</a></p>
+          </div>
         </div>
       </div>
     </div>

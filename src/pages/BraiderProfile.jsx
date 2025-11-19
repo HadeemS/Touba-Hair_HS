@@ -153,6 +153,17 @@ const BraiderProfile = () => {
     }
   }
 
+  const handleConfirm = async (appointmentId) => {
+    try {
+      await appointmentsAPI.updateStatus(appointmentId, 'confirmed')
+      await loadBookings()
+      alert('Appointment confirmed successfully!')
+    } catch (error) {
+      console.error('Error confirming appointment:', error)
+      alert('Failed to confirm appointment. Please try again.')
+    }
+  }
+
   const handleCancel = async (appointmentId) => {
     if (!window.confirm('Are you sure you want to cancel this appointment?')) {
       return
@@ -278,6 +289,22 @@ const BraiderProfile = () => {
                     )}
                   </div>
                   
+                  {booking.status === 'pending' && (
+                    <div className="booking-actions">
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleConfirm(booking.id)}
+                      >
+                        Confirm Appointment
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleCancel(booking.id)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                   {booking.status === 'confirmed' && (
                     <div className="booking-actions">
                       <button

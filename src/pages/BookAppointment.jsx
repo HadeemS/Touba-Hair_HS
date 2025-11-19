@@ -547,11 +547,25 @@ const BookAppointment = () => {
     try {
       // Convert time slot from 24-hour format (09:00) to 12-hour format (9:00 AM)
       const convertTo12Hour = (time24) => {
+        if (!time24) return ''
         const [hours, minutes] = time24.split(':')
         const hour12 = parseInt(hours)
         const period = hour12 >= 12 ? 'PM' : 'AM'
         const displayHour = hour12 === 0 ? 12 : hour12 > 12 ? hour12 - 12 : hour12
         return `${displayHour}:${minutes} ${period}`
+      }
+
+      // Validate required fields
+      if (!selectedBraider || !selectedDate || !selectedTimeSlot) {
+        alert('Please complete all booking steps.')
+        setIsSubmitting(false)
+        return
+      }
+
+      if (!customerInfo.name.trim() || !customerInfo.email.trim() || !customerInfo.phone.trim()) {
+        alert('Please fill in all customer information fields.')
+        setIsSubmitting(false)
+        return
       }
 
       const finalPrice = calculateServicePrice()
@@ -571,8 +585,12 @@ const BookAppointment = () => {
         serviceBoho: selectedBoho || null
       }
 
+      console.log('Submitting booking:', bookingData)
+
       // Save to backend (works for both logged-in users and guests)
       const response = await appointmentsAPI.create(bookingData)
+      
+      console.log('Booking response:', response)
       
       // Also save to localStorage as backup (optional)
       try {

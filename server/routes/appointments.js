@@ -54,19 +54,15 @@ router.post('/', optionalAuthenticate, validate(appointmentValidation), async (r
       return res.status(400).json({ error: 'This time slot is already booked.' });
     }
 
-    // Find employee user by braiderId (required for all bookings)
+    // Find employee user by braiderId (optional - braider may not have registered yet)
     const employee = await User.findOne({ 
       role: 'employee', 
       braiderId: braiderId.toString() 
     });
     
-    if (!employee) {
-      return res.status(400).json({ 
-        error: `Employee with braider ID ${braiderId} not found. Please contact support.` 
-      });
-    }
-    
-    const employeeId = employee._id;
+    // Set employeeId if employee exists, otherwise null
+    // Appointments can still be created even if braider hasn't registered yet
+    const employeeId = employee ? employee._id : null;
 
     // Determine clientId (optional for guest bookings)
     let clientId = null;

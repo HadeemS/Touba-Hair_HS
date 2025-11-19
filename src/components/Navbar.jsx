@@ -200,17 +200,41 @@ const Navbar = () => {
               </li>
             </>
           ) : (
-            <li>
-              <NavLink
-                to="/login"
-                className={({ isActive }) =>
-                  `navbar-link ${isActive ? 'active' : ''}`
-                }
-                onClick={closeMenu}
-              >
-                Login
-              </NavLink>
-            </li>
+            <>
+              <li>
+                <NavLink
+                  to="/login"
+                  className={({ isActive }) =>
+                    `navbar-link ${isActive ? 'active' : ''}`
+                  }
+                  onClick={closeMenu}
+                >
+                  Login
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/register"
+                  className={({ isActive }) =>
+                    `navbar-link ${isActive ? 'active' : ''}`
+                  }
+                  onClick={closeMenu}
+                >
+                  Sign Up
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/braider-register"
+                  className={({ isActive }) =>
+                    `navbar-link ${isActive ? 'active' : ''}`
+                  }
+                  onClick={closeMenu}
+                >
+                  Braider Sign Up
+                </NavLink>
+              </li>
+            </>
           )}
         </ul>
       </div>
