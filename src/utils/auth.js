@@ -7,9 +7,7 @@ const TOKEN_KEY = 'auth_token'
 // Login with backend API
 export const login = async (email, password) => {
   try {
-    console.log('Attempting login for:', email)
     const response = await authAPI.login({ email, password })
-    console.log('Login API response:', response)
     
     if (response.token && response.user) {
       // Store token and user info
@@ -19,17 +17,11 @@ export const login = async (email, password) => {
         loggedIn: true,
         loginTime: new Date().toISOString()
       }))
-      console.log('Login successful, token stored')
       return { success: true, user: response.user }
     }
     
-    console.error('Login failed - invalid response:', response)
     return { success: false, error: 'Login failed - invalid response from server' }
   } catch (error) {
-    console.error('Login error details:', error)
-    console.error('Error message:', error.message)
-    console.error('Error stack:', error.stack)
-    
     // Extract error message from the error
     let errorMessage = 'Login failed. Please try again.'
     

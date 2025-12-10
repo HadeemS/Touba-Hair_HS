@@ -20,18 +20,24 @@ async function apiCall(endpoint, options = {}) {
   }
 
   try {
-    console.log('API Call:', url, options.method || 'GET');
+    // Only log in development
+    if (import.meta.env.DEV) {
+      console.log('API Call:', url, options.method || 'GET');
+    }
+    
     const response = await fetch(url, config);
-    console.log('API Response status:', response.status, response.statusText);
     
     const responseData = await response.json().catch(() => ({ error: 'Invalid JSON response' }));
-    console.log('API Response data:', responseData);
     
     if (!response.ok) {
       // Prefer detailed message, then error, then generic message
       const errorMessage = responseData.message || responseData.error || `HTTP error! status: ${response.status}`;
-      console.error('API Error:', errorMessage);
-      console.error('Full error response:', responseData);
+      
+      // Only log errors in development
+      if (import.meta.env.DEV) {
+        console.error('API Error:', errorMessage);
+        console.error('Full error response:', responseData);
+      }
       
       // Create error with more details
       const error = new Error(errorMessage);
@@ -42,12 +48,15 @@ async function apiCall(endpoint, options = {}) {
     
     return responseData;
   } catch (error) {
-    console.error('API Call Error:', error);
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      url: url
-    });
+    // Only log errors in development
+    if (import.meta.env.DEV) {
+      console.error('API Call Error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        url: url
+      });
+    }
     throw error;
   }
 }

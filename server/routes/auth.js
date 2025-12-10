@@ -187,8 +187,14 @@ router.put('/change-password', authenticate, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
-    if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+    }
+    
+    // Check password complexity
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({ error: 'Password must contain at least one uppercase letter, one lowercase letter, and one number.' });
     }
 
     const user = await User.findById(req.user._id);

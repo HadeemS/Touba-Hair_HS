@@ -1,26 +1,42 @@
-import React from 'react'
+import React, { lazy, Suspense } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
-import Home from './pages/Home'
-import BookAppointment from './pages/BookAppointment'
-import Profile from './pages/Profile'
-import MyBookings from './pages/MyBookings'
-import Login from './pages/Login'
-import ClientRegister from './pages/ClientRegister'
-import BraiderRegister from './pages/BraiderRegister'
-import BraiderProfile from './pages/BraiderProfile'
-import BraiderSettings from './pages/BraiderSettings'
-import Gallery from './pages/Gallery'
-import Services from './pages/Services'
-import Locations from './pages/Locations'
-import AdminDashboard from './pages/AdminDashboard'
-import About from './pages/About'
-import FAQs from './pages/FAQs'
-import Policies from './pages/Policies'
-import Contact from './pages/Contact'
 import ProtectedRoute from './components/ProtectedRoute'
 import Footer from './components/Footer'
 import './App.css'
+
+// Lazy load pages for better performance
+const Home = lazy(() => import('./pages/Home'))
+const BookAppointment = lazy(() => import('./pages/BookAppointment'))
+const Profile = lazy(() => import('./pages/Profile'))
+const MyBookings = lazy(() => import('./pages/MyBookings'))
+const Login = lazy(() => import('./pages/Login'))
+const ClientRegister = lazy(() => import('./pages/ClientRegister'))
+const BraiderRegister = lazy(() => import('./pages/BraiderRegister'))
+const BraiderProfile = lazy(() => import('./pages/BraiderProfile'))
+const BraiderSettings = lazy(() => import('./pages/BraiderSettings'))
+const Gallery = lazy(() => import('./pages/Gallery'))
+const Services = lazy(() => import('./pages/Services'))
+const Locations = lazy(() => import('./pages/Locations'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const About = lazy(() => import('./pages/About'))
+const FAQs = lazy(() => import('./pages/FAQs'))
+const Policies = lazy(() => import('./pages/Policies'))
+const Contact = lazy(() => import('./pages/Contact'))
+
+// Loading component
+const LoadingFallback = () => (
+  <div style={{ 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    minHeight: '50vh',
+    fontSize: '1.2rem',
+    color: '#666'
+  }}>
+    Loading...
+  </div>
+)
 
 // Get base path for GitHub Pages
 const getBasename = () => {
@@ -39,7 +55,8 @@ function App() {
       <div className="app">
         <Navbar />
         <main className="main-content">
-          <Routes>
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/book" element={<BookAppointment />} />
             <Route path="/book-appointment" element={<BookAppointment />} />
@@ -93,7 +110,8 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-          </Routes>
+            </Routes>
+          </Suspense>
         </main>
         <Footer />
       </div>

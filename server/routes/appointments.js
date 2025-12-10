@@ -4,6 +4,7 @@ import Reward from '../models/Reward.js';
 import User from '../models/User.js';
 import { authenticate, optionalAuthenticate, requireEmployee } from '../middleware/auth.js';
 import { validate, appointmentValidation } from '../middleware/validation.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -111,12 +112,14 @@ router.post('/', optionalAuthenticate, validate(appointmentValidation), async (r
       await appointment.populate('employeeId', 'name email');
     }
 
+    logger.info(`Appointment created: ${appointment._id} for ${appointment.customerName}`);
+
     res.status(201).json({
       message: 'Appointment booked successfully',
       appointment
     });
   } catch (error) {
-    console.error('Create appointment error:', error);
+    logger.error('Create appointment error:', error);
     
     // Provide more specific error messages
     if (error.name === 'ValidationError') {
@@ -201,9 +204,9 @@ router.get('/', authenticate, async (req, res) => {
       .populate('employeeId', 'name email braiderId')
       .sort({ dateTime: -1 });
 
-    // Log for debugging (remove in production)
+    // Log for debugging
     if (process.env.NODE_ENV === 'development' && req.user.role === 'employee') {
-      console.log('Employee appointments query:', {
+      logger.debug('Employee appointments query:', {
         userId: req.user._id,
         braiderId: req.user.braiderId,
         query: query,
@@ -213,7 +216,7 @@ router.get('/', authenticate, async (req, res) => {
 
     res.json({ appointments });
   } catch (error) {
-    console.error('Get appointments error:', error);
+    logger.error('Get appointments error:', error);
     res.status(500).json({ error: 'Failed to fetch appointments.' });
   }
 });
@@ -242,7 +245,7 @@ router.get('/:id', authenticate, async (req, res) => {
 
     res.json({ appointment });
   } catch (error) {
-    console.error('Get appointment error:', error);
+    logger.error('Get appointment error:', error);
     res.status(500).json({ error: 'Failed to fetch appointment.' });
   }
 });
@@ -294,12 +297,14 @@ router.patch('/:id/status', authenticate, requireEmployee, async (req, res) => {
 
     await appointment.save();
 
+    logger.info(`Appointment ${req.params.id} status updated to ${status} by ${req.user.role}`);
+
     res.json({
       message: 'Appointment status updated',
       appointment
     });
   } catch (error) {
-    console.error('Update appointment error:', error);
+    logger.error('Update appointment error:', error);
     res.status(500).json({ error: 'Failed to update appointment.' });
   }
 });
@@ -330,9 +335,11 @@ router.delete('/:id', authenticate, async (req, res) => {
     
     await appointment.save();
 
+    logger.info(`Appointment ${req.params.id} cancelled by ${req.user.role}`);
+
     res.json({ message: 'Appointment cancelled successfully' });
   } catch (error) {
-    console.error('Cancel appointment error:', error);
+    logger.error('Cancel appointment error:', error);
     res.status(500).json({ error: 'Failed to cancel appointment.' });
   }
 });

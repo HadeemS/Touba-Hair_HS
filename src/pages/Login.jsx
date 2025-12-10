@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { login, register } from '../utils/auth'
 import { isAdmin, isBraider } from '../utils/auth'
+import { toast } from '../utils/toast'
 import './Login.css'
 
 const Login = () => {
@@ -46,11 +47,14 @@ const Login = () => {
           }
         }, 100)
       } else {
-        setError(result.error || 'Invalid email or password')
+        const errorMsg = result.error || 'Invalid email or password'
+        toast.error(errorMsg)
+        setError(errorMsg)
       }
     } catch (err) {
-      console.error('Login error:', err)
-      setError(err.message || 'An error occurred. Please try again.')
+      const errorMessage = err.message || 'An error occurred. Please try again.'
+      toast.error(errorMessage)
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }

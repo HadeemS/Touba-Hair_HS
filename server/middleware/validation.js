@@ -26,7 +26,8 @@ export const registerValidation = [
   body('phone').optional().trim().isMobilePhone().withMessage('Please provide a valid phone number'),
   body('password')
     .optional()
-    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    .isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number'),
   body('role').optional().isIn(['client', 'employee', 'admin']).withMessage('Invalid role')
 ];
 

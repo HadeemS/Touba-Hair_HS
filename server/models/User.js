@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
       // Password required for employees, optional for clients (can use phone auth later)
       return this.role === 'employee' || this.role === 'admin';
     },
-    minlength: [6, 'Password must be at least 6 characters']
+    minlength: [8, 'Password must be at least 8 characters']
   },
   role: {
     type: String,

@@ -9,6 +9,7 @@ import { getBraiderAvailableDays } from '../utils/braiderSettings'
 import './BookAppointment.css'
 import { getStoredProfile } from '../utils/profileStorage'
 import { sendBookingEmail } from '../utils/sendBookingEmail'
+import { toast } from '../utils/toast'
 
 const BookAppointment = () => {
   const navigate = useNavigate()
@@ -54,7 +55,7 @@ const BookAppointment = () => {
         setServices(getDefaultServices())
       }
     } catch (error) {
-      console.error('Error loading services:', error)
+      // Silently fallback to default services
       setServices(getDefaultServices())
     }
   }
@@ -585,12 +586,8 @@ const BookAppointment = () => {
         serviceBoho: selectedBoho || null
       }
 
-      console.log('Submitting booking:', bookingData)
-
       // Save to backend (works for both logged-in users and guests)
       const response = await appointmentsAPI.create(bookingData)
-      
-      console.log('Booking response:', response)
       
       // Also save to localStorage as backup (optional)
       try {
@@ -599,7 +596,7 @@ const BookAppointment = () => {
           id: response.appointment._id
         })
       } catch (localError) {
-        console.warn('Failed to save to localStorage:', localError)
+        // Silently fail - localStorage is just a backup
       }
       
       // Try to send email notification
@@ -614,19 +611,22 @@ const BookAppointment = () => {
           dateTimeDisplay: `${formatDateDisplay(selectedDate)} at ${selectedTimeSlot}`
         })
       } catch (emailError) {
-        console.error('Email sending failed:', emailError)
         // Don't block the booking if email fails
+        toast.warning('Booking confirmed, but email notification failed to send.')
       }
+      
+      // Show success message
+      toast.success('Booking confirmed! You will receive a confirmation email shortly.')
       
       // Check if user is logged in to determine redirect
       const user = getCurrentUser()
-      if (user) {
-        alert('Booking confirmed! You will receive a confirmation email shortly.')
-        navigate('/my-bookings')
-      } else {
-        alert('Booking confirmed! You will receive a confirmation email shortly. You can create an account to view and manage your bookings.')
-        navigate('/')
-      }
+      setTimeout(() => {
+        if (user) {
+          navigate('/my-bookings')
+        } else {
+          navigate('/')
+        }
+      }, 1500)
     } catch (error) {
       // Extract detailed error message
       let errorMessage = 'Error booking appointment. Please try again.'
@@ -636,21 +636,20 @@ const BookAppointment = () => {
       }
       
       // If there's a response object with validation errors, show those
-      if (error.response && error.response.errors) {
-        const validationErrors = error.response.errors.map(err => err.msg || err.message).join('\n')
-        if (validationErrors) {
-          errorMessage = `Validation errors:\n${validationErrors}`
+      if (error.response) {
+        if (error.response.errors && Array.isArray(error.response.errors)) {
+          const validationErrors = error.response.errors.map(err => err.msg || err.message).join(', ')
+          if (validationErrors) {
+            errorMessage = `Validation errors: ${validationErrors}`
+          }
+        } else if (error.response.message) {
+          errorMessage = error.response.message
+        } else if (error.response.error) {
+          errorMessage = error.response.error
         }
       }
       
-      alert(errorMessage)
-      console.error('Booking error:', error)
-      console.error('Error details:', {
-        message: error.message,
-        response: error.response,
-        status: error.status,
-        stack: error.stack
-      })
+      toast.error(errorMessage)
     } finally {
       setIsSubmitting(false)
     }

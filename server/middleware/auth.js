@@ -1,7 +1,16 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+// Validate JWT_SECRET on startup
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET || JWT_SECRET === 'your-secret-key-change-in-production') {
+  console.error('⚠️  WARNING: JWT_SECRET is not set or using default value!');
+  console.error('⚠️  Set JWT_SECRET environment variable in production!');
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET must be set in production environment');
+  }
+}
+const SECRET = JWT_SECRET || 'development-secret-key-only';
 
 // Middleware to verify JWT token (required)
 export const authenticate = async (req, res, next) => {
@@ -12,7 +21,7 @@ export const authenticate = async (req, res, next) => {
       return res.status(401).json({ error: 'No token provided. Authentication required.' });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, SECRET);
     const user = await User.findById(decoded.userId).select('-password');
     
     if (!user || !user.isActive) {
@@ -42,7 +51,7 @@ export const optionalAuthenticate = async (req, res, next) => {
       return next();
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, SECRET);
     const user = await User.findById(decoded.userId).select('-password');
     
     if (user && user.isActive) {
@@ -87,8 +96,8 @@ export const requireAdmin = (req, res, next) => {
 
 // Helper to generate JWT token
 export const generateToken = (userId) => {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' }); // 7 days expiry
+  return jwt.sign({ userId }, SECRET, { expiresIn: '7d' }); // 7 days expiry
 };
 
-export { JWT_SECRET };
+export { SECRET as JWT_SECRET };
 

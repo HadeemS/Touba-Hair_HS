@@ -10,9 +10,19 @@ import { existsSync } from 'fs';
 import authRoutes from './routes/auth.js';
 import appointmentRoutes from './routes/appointments.js';
 import rewardRoutes from './routes/rewards.js';
+import { validateEnv } from './utils/env.js';
+import { logger } from './utils/logger.js';
 
 // Load environment variables
 dotenv.config();
+
+// Validate environment variables
+try {
+  validateEnv();
+} catch (error) {
+  console.error('Environment validation failed:', error.message);
+  process.exit(1);
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -38,31 +48,91 @@ if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
     socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
   })
   .then(() => {
-    console.log('✅ Connected to MongoDB');
-    console.log('📊 Database:', mongoose.connection.name);
+    logger.info('✅ Connected to MongoDB');
+    logger.info('📊 Database:', mongoose.connection.name);
   })
   .catch((error) => {
-    console.error('❌ MongoDB connection error:', error.message);
-    console.error('⚠️  Check your MONGODB_URI environment variable in Render');
-    console.error('⚠️  Make sure:');
-    console.error('   1. Password is correct and URL-encoded');
-    console.error('   2. IP whitelist includes 0.0.0.0/0');
-    console.error('   3. Database name is included in connection string');
-    console.error('   4. Connection string format: mongodb+srv://username:password@cluster.mongodb.net/database-name?retryWrites=true&w=majority');
+    logger.error('❌ MongoDB connection error:', error.message);
+    logger.error('⚠️  Check your MONGODB_URI environment variable in Render');
+    logger.error('⚠️  Make sure:');
+    logger.error('   1. Password is correct and URL-encoded');
+    logger.error('   2. IP whitelist includes 0.0.0.0/0');
+    logger.error('   3. Database name is included in connection string');
+    logger.error('   4. Connection string format: mongodb+srv://username:password@cluster.mongodb.net/database-name?retryWrites=true&w=majority');
+    
+    // Retry connection logic
+    let retries = 0;
+    const maxRetries = 5;
+    const retryDelay = 5000; // 5 seconds
+    
+    const retryConnection = () => {
+      if (retries < maxRetries) {
+        retries++;
+        logger.warn(`Retrying MongoDB connection (${retries}/${maxRetries})...`);
+        setTimeout(() => {
+          mongoose.connect(MONGODB_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 10000,
+            socketTimeoutMS: 45000,
+          })
+          .then(() => {
+            logger.info('✅ MongoDB reconnected successfully');
+          })
+          .catch((retryError) => {
+            logger.error(`Retry ${retries} failed:`, retryError.message);
+            retryConnection();
+          });
+        }, retryDelay);
+      } else {
+        logger.error('❌ Max retries reached. MongoDB connection failed.');
+      }
+    };
+    
+    retryConnection();
   });
 }
 
 // Middleware
+// CORS configuration - restrict in production
+const allowedOrigins = process.env.FRONTEND_URL 
+  ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+  : ['http://localhost:5173', 'http://localhost:3000', 'https://hadeems.github.io'];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*', // In production, set this to your frontend URL
-  credentials: true
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (process.env.NODE_ENV === 'production') {
+      // In production, only allow specific origins
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    } else {
+      // In development, allow all origins
+      callback(null, true);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Auth-Token']
 }));
 app.use(express.json());
 app.use(express.static('public'));
 
-// Request logging (optional, for debugging)
+// Request logging middleware
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
+  const start = Date.now();
+  
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    const logLevel = res.statusCode >= 400 ? 'error' : 'info';
+    logger[logLevel](`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
+  });
+  
   next();
 });
 
@@ -440,8 +510,9 @@ app.get('/', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📸 Gallery API: http://localhost:${PORT}/api/gallery`);
-  console.log(`💰 Prices API: http://localhost:${PORT}/api/prices`);
+  logger.info(`🚀 Server running on port ${PORT}`);
+  logger.info(`📸 Gallery API: http://localhost:${PORT}/api/gallery`);
+  logger.info(`💰 Prices API: http://localhost:${PORT}/api/prices`);
+  logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
