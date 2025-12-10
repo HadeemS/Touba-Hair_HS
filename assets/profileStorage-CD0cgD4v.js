@@ -1,0 +1,1 @@
+const t="touba-hair-profile";function n(){if(typeof window>"u")return null;const e=localStorage.getItem(t);if(!e)return{name:"",email:"",phone:"",notes:""};try{return JSON.parse(e)}catch{return{name:"",email:"",phone:"",notes:""}}}function o(e){typeof window>"u"||localStorage.setItem(t,JSON.stringify(e))}export{n as g,o as s};
