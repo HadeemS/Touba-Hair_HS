@@ -35,21 +35,61 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', true);
 
 // MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/touba-hair';
+let MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/touba-hair';
+
+// If connection string doesn't include database name, add it
+if (MONGODB_URI && !MONGODB_URI.includes('<db_password>')) {
+  // Check if it's a mongodb+srv:// connection without database name
+  if (MONGODB_URI.includes('mongodb+srv://') && !MONGODB_URI.match(/mongodb\+srv:\/\/[^/]+\/[^?]/)) {
+    // Add database name before query parameters
+    const dbName = process.env.MONGODB_DB_NAME || 'touba-hair';
+    if (MONGODB_URI.includes('?')) {
+      MONGODB_URI = MONGODB_URI.replace('?', `/${dbName}?`);
+    } else {
+      MONGODB_URI = `${MONGODB_URI}/${dbName}`;
+    }
+    logger.info(`📝 Added database name "${dbName}" to MongoDB connection string`);
+  }
+  
+  // Ensure retryWrites and w=majority are in the connection string for MongoDB Atlas
+  if (MONGODB_URI.includes('mongodb+srv://') && !MONGODB_URI.includes('retryWrites')) {
+    const separator = MONGODB_URI.includes('?') ? '&' : '?';
+    MONGODB_URI = `${MONGODB_URI}${separator}retryWrites=true&w=majority`;
+  }
+}
 
 if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
-  console.error('❌ MONGODB_URI not set or incomplete. Please set MONGODB_URI environment variable.');
-  console.error('⚠️  Current MONGODB_URI:', MONGODB_URI ? 'Set but incomplete' : 'Not set');
+  logger.error('❌ MONGODB_URI not set or incomplete. Please set MONGODB_URI environment variable.');
+  logger.error('⚠️  Current MONGODB_URI:', MONGODB_URI ? 'Set but incomplete' : 'Not set');
 } else {
+  logger.info('🔌 Attempting to connect to MongoDB...');
+  
   mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 10000, // Timeout after 10s
+    serverSelectionTimeoutMS: 30000, // Increased to 30s for better reliability
     socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+    maxPoolSize: 10, // Maintain up to 10 socket connections
+    minPoolSize: 2, // Maintain at least 2 socket connections
   })
   .then(() => {
-    logger.info('✅ Connected to MongoDB');
+    logger.info('✅ Connected to MongoDB successfully!');
     logger.info('📊 Database:', mongoose.connection.name);
+    logger.info('🌐 Host:', mongoose.connection.host);
+    logger.info('🔌 Ready State:', mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected');
+    
+    // Handle connection events
+    mongoose.connection.on('error', (err) => {
+      logger.error('❌ MongoDB connection error:', err.message);
+    });
+    
+    mongoose.connection.on('disconnected', () => {
+      logger.warn('⚠️  MongoDB disconnected. Attempting to reconnect...');
+    });
+    
+    mongoose.connection.on('reconnected', () => {
+      logger.info('✅ MongoDB reconnected successfully');
+    });
   })
   .catch((error) => {
     logger.error('❌ MongoDB connection error:', error.message);
@@ -73,8 +113,10 @@ if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
           mongoose.connect(MONGODB_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 10000,
+            serverSelectionTimeoutMS: 30000,
             socketTimeoutMS: 45000,
+            maxPoolSize: 10,
+            minPoolSize: 2,
           })
           .then(() => {
             logger.info('✅ MongoDB reconnected successfully');

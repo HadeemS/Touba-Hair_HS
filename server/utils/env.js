@@ -4,7 +4,7 @@ dotenv.config();
 
 const requiredEnvVars = {
   production: ['MONGODB_URI', 'JWT_SECRET'],
-  development: []
+  development: ['MONGODB_URI'] // MongoDB URI recommended even in development
 };
 
 export const validateEnv = () => {
