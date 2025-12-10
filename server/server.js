@@ -141,9 +141,28 @@ if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
 
 // Middleware
 // CORS configuration - restrict in production
+const defaultAllowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://hadeems.github.io',
+  'https://hadeems.github.io/touba-hair_hs',
+  'https://hadeems.github.io/Touba-Hair_HS'
+];
+
 const allowedOrigins = process.env.FRONTEND_URL 
   ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
-  : ['http://localhost:5173', 'http://localhost:3000', 'https://hadeems.github.io', 'https://hadeems.github.io/Touba-Hair_HS'];
+  : defaultAllowedOrigins;
+
+const normalizeOrigin = (origin) => origin?.toLowerCase().replace(/\/+$/, '');
+
+const isOriginAllowed = (origin) => {
+  const normalizedOrigin = normalizeOrigin(origin);
+  if (!normalizedOrigin) return true;
+  return allowedOrigins.some((allowed) => {
+    const normalizedAllowed = normalizeOrigin(allowed);
+    return normalizedOrigin === normalizedAllowed || normalizedOrigin.startsWith(normalizedAllowed);
+  });
+};
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -152,9 +171,10 @@ app.use(cors({
     
     if (process.env.NODE_ENV === 'production') {
       // In production, only allow specific origins
-      if (allowedOrigins.includes(origin)) {
+      if (isOriginAllowed(origin)) {
         callback(null, true);
       } else {
+        logger.warn(`Blocked CORS origin: ${origin}`);
         callback(new Error('Not allowed by CORS'));
       }
     } else {
