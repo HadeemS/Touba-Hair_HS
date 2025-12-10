@@ -49,25 +49,7 @@ const getBasename = () => {
   return '/'
 }
 
-// Handle GitHub Pages 404 redirect
-const handle404Redirect = () => {
-  const search = window.location.search
-  if (search.includes('?/')) {
-    const hashPath = search.split('?/')[1].split('&')[0].replace(/~and~/g, '&')
-    if (hashPath) {
-      const newPath = hashPath.startsWith('/') ? hashPath : `/${hashPath}`
-      const basePath = getBasename()
-      const fullPath = basePath === '/' ? newPath : `${basePath}${newPath}`
-      window.history.replaceState(null, '', fullPath + window.location.hash)
-    }
-  }
-}
-
 function App() {
-  // Handle GitHub Pages 404 redirect on page load
-  React.useEffect(() => {
-    handle404Redirect()
-  }, [])
 
   return (
     <Router basename={getBasename()}>

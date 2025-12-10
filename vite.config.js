@@ -12,20 +12,16 @@ export default defineConfig({
   plugins: [
     react(),
     {
-      name: 'copy-404',
+      name: 'copy-redirects',
       closeBundle() {
-        // Copy 404.html and _redirects to dist folder for GitHub Pages SPA routing
+        // Copy _redirects to dist folder for GitHub Pages SPA routing
         try {
-          copyFileSync(
-            resolve(__dirname, '404.html'),
-            resolve(__dirname, 'dist', '404.html')
-          )
           copyFileSync(
             resolve(__dirname, 'public', '_redirects'),
             resolve(__dirname, 'dist', '_redirects')
           )
         } catch (err) {
-          console.warn('Could not copy files:', err.message)
+          console.warn('Could not copy _redirects:', err.message)
         }
       }
     }

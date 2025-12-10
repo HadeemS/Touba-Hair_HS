@@ -3,11 +3,27 @@ import User from '../models/User.js';
 
 // Validate JWT_SECRET on startup
 const JWT_SECRET = process.env.JWT_SECRET;
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER; // Render always sets RENDER env var
+
 if (!JWT_SECRET || JWT_SECRET === 'your-secret-key-change-in-production') {
   console.error('⚠️  WARNING: JWT_SECRET is not set or using default value!');
   console.error('⚠️  Set JWT_SECRET environment variable in production!');
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('JWT_SECRET must be set in production environment');
+  if (isProduction) {
+    console.error('');
+    console.error('═══════════════════════════════════════════════════════════');
+    console.error('❌ JWT_SECRET is required in production!');
+    console.error('═══════════════════════════════════════════════════════════');
+    console.error('To fix this:');
+    console.error('1. Go to Render Dashboard → Your Service → Environment');
+    console.error('2. Add environment variable: JWT_SECRET');
+    console.error('3. Generate a strong random string (32+ characters)');
+    console.error('4. Save and redeploy');
+    console.error('');
+    console.error('Generate JWT_SECRET:');
+    console.error('  node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"');
+    console.error('═══════════════════════════════════════════════════════════');
+    console.error('');
+    throw new Error('JWT_SECRET must be set in production environment. See logs above for instructions.');
   }
 }
 const SECRET = JWT_SECRET || 'development-secret-key-only';
