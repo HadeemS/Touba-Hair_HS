@@ -558,13 +558,13 @@ const BookAppointment = () => {
 
       // Validate required fields
       if (!selectedBraider || !selectedDate || !selectedTimeSlot) {
-        alert('Please complete all booking steps.')
+        toast.error('Please complete all booking steps.')
         setIsSubmitting(false)
         return
       }
 
       if (!customerInfo.name.trim() || !customerInfo.email.trim() || !customerInfo.phone.trim()) {
-        alert('Please fill in all customer information fields.')
+        toast.error('Please fill in all customer information fields.')
         setIsSubmitting(false)
         return
       }

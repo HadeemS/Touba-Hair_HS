@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: touba-hair-api
+    env: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false  # Set this in Render dashboard
+      - key: JWT_SECRET
+        sync: false  # Set this in Render dashboard
+      - key: FRONTEND_URL
+        value: https://hadeems.github.io
+      - key: PORT
+        fromService:
+          type: web
+          name: touba-hair-api
+          property: port
+

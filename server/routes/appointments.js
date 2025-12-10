@@ -233,14 +233,22 @@ router.get('/:id', authenticate, async (req, res) => {
     }
 
     // Check access: client can only see their own, employees can see assigned ones
-    if (req.user.role === 'client' && appointment.clientId._id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ error: 'Access denied.' });
+    if (req.user.role === 'client') {
+      // Handle guest bookings (clientId is null)
+      if (!appointment.clientId || appointment.clientId._id.toString() !== req.user._id.toString()) {
+        return res.status(403).json({ error: 'Access denied.' });
+      }
     }
 
-    if (req.user.role === 'employee' && 
-        appointment.employeeId._id.toString() !== req.user._id.toString() &&
-        appointment.braiderId !== req.user.braiderId) {
-      return res.status(403).json({ error: 'Access denied.' });
+    if (req.user.role === 'employee') {
+      // Handle cases where employeeId or clientId might be null
+      const isEmployeeAssigned = appointment.employeeId && 
+        appointment.employeeId._id.toString() === req.user._id.toString();
+      const isBraiderMatch = appointment.braiderId === req.user.braiderId;
+      
+      if (!isEmployeeAssigned && !isBraiderMatch) {
+        return res.status(403).json({ error: 'Access denied.' });
+      }
     }
 
     res.json({ appointment });
@@ -266,26 +274,35 @@ router.patch('/:id/status', authenticate, requireEmployee, async (req, res) => {
     }
 
     // Check if employee has access to this appointment
-    if (req.user.role === 'employee' && 
-        appointment.employeeId.toString() !== req.user._id.toString() &&
-        appointment.braiderId !== req.user.braiderId) {
-      return res.status(403).json({ error: 'Access denied.' });
+    if (req.user.role === 'employee') {
+      const isEmployeeAssigned = appointment.employeeId && 
+        appointment.employeeId.toString() === req.user._id.toString();
+      const isBraiderMatch = appointment.braiderId === req.user.braiderId;
+      
+      if (!isEmployeeAssigned && !isBraiderMatch) {
+        return res.status(403).json({ error: 'Access denied.' });
+      }
     }
 
     const oldStatus = appointment.status;
     appointment.status = status;
 
-    // If marking as completed, award points
-    if (status === 'completed' && oldStatus !== 'completed') {
+    // If marking as completed, award points (only if clientId exists)
+    if (status === 'completed' && oldStatus !== 'completed' && appointment.clientId) {
       // Award points based on service price (e.g., 1 point per dollar)
       const pointsToAward = Math.floor(appointment.servicePrice || 0);
       
       if (pointsToAward > 0) {
-        let reward = await Reward.findOne({ clientId: appointment.clientId });
-        if (!reward) {
-          reward = new Reward({ clientId: appointment.clientId });
+        try {
+          let reward = await Reward.findOne({ clientId: appointment.clientId });
+          if (!reward) {
+            reward = new Reward({ clientId: appointment.clientId });
+          }
+          await reward.addPoints(pointsToAward, `Appointment completed: ${appointment.serviceName}`);
+        } catch (rewardError) {
+          // Log but don't fail the status update if rewards fail
+          logger.error('Failed to award points:', rewardError);
         }
-        await reward.addPoints(pointsToAward, `Appointment completed: ${appointment.serviceName}`);
       }
     }
 
@@ -318,9 +335,10 @@ router.delete('/:id', authenticate, async (req, res) => {
     }
 
     // Check access
-    const isClientOwner = appointment.clientId.toString() === req.user._id.toString();
+    const isClientOwner = appointment.clientId && 
+      appointment.clientId.toString() === req.user._id.toString();
     const isEmployeeAssigned = req.user.role === 'employee' && 
-      (appointment.employeeId.toString() === req.user._id.toString() || 
+      ((appointment.employeeId && appointment.employeeId.toString() === req.user._id.toString()) || 
        appointment.braiderId === req.user.braiderId);
     const isAdmin = req.user.role === 'admin';
 
