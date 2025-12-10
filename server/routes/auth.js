@@ -4,6 +4,7 @@ import User from '../models/User.js';
 import { authenticate, generateToken } from '../middleware/auth.js';
 import { validate, registerValidation, loginValidation } from '../middleware/validation.js';
 import rateLimit from 'express-rate-limit';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -73,13 +74,13 @@ router.post('/login', authLimiter, validate(loginValidation), async (req, res) =
   
   try {
     // Log login attempt (without sensitive data)
-    console.log(`[LOGIN] Attempt: ${email} at ${new Date().toISOString()}`);
+    logger.info(`[LOGIN] Attempt: ${email} at ${new Date().toISOString()}`);
     
     // Check MongoDB connection first
     const dbState = mongoose.connection.readyState;
     if (dbState !== 1) {
       const states = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
-      console.error(`[LOGIN] Database not ready. State: ${states[dbState] || 'unknown'} (${dbState})`);
+      logger.error(`[LOGIN] Database not ready. State: ${states[dbState] || 'unknown'} (${dbState})`);
       return res.status(503).json({ 
         error: 'Database connection unavailable. Please try again later.',
         databaseStatus: states[dbState] || 'unknown',
@@ -94,51 +95,60 @@ router.post('/login', authLimiter, validate(loginValidation), async (req, res) =
     // Find user
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      console.log(`[LOGIN] User not found: ${email}`);
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      logger.warn(`[LOGIN] User not found: ${email}`);
+      return res.status(401).json({ 
+        error: 'Invalid email or password.',
+        hint: 'User does not exist. Use /api/auth/create-demo-users to create demo accounts.'
+      });
     }
 
-    console.log(`[LOGIN] User found: ${user.email}, Role: ${user.role}, HasPassword: ${!!user.password}`);
+    logger.info(`[LOGIN] User found: ${user.email}, Role: ${user.role}, HasPassword: ${!!user.password}, IsActive: ${user.isActive}`);
 
     // Check if account is active
     if (!user.isActive) {
-      console.log(`[LOGIN] Account inactive: ${email}`);
+      logger.warn(`[LOGIN] Account inactive: ${email}`);
       return res.status(403).json({ error: 'Account is inactive. Please contact support.' });
     }
 
     // For employees/admins, password is REQUIRED
     if (user.role === 'employee' || user.role === 'admin') {
       if (!password) {
-        console.log(`[LOGIN] Password required but not provided for ${user.role}: ${email}`);
+        logger.warn(`[LOGIN] Password required but not provided for ${user.role}: ${email}`);
         return res.status(400).json({ error: 'Password is required for this account type.' });
       }
       
       if (!user.password) {
-        console.log(`[LOGIN] User has no password set: ${email}`);
-        return res.status(400).json({ error: 'Account has no password set. Please contact support to set a password.' });
+        logger.warn(`[LOGIN] User has no password set: ${email}`);
+        return res.status(400).json({ 
+          error: 'Account has no password set. Please contact support to set a password.',
+          hint: 'Use /api/auth/create-demo-users to reset password.'
+        });
       }
       
       const isPasswordValid = await user.comparePassword(password);
       if (!isPasswordValid) {
-        console.log(`[LOGIN] Invalid password for: ${email}`);
-        return res.status(401).json({ error: 'Invalid email or password.' });
+        logger.warn(`[LOGIN] Invalid password for: ${email}`);
+        return res.status(401).json({ 
+          error: 'Invalid email or password.',
+          hint: 'Password may have been changed. Use /api/auth/create-demo-users to reset.'
+        });
       }
       
-      console.log(`[LOGIN] Password verified for: ${email}`);
+      logger.info(`[LOGIN] Password verified for: ${email}`);
     } else {
       // For clients, password is optional but if provided, must be valid
       if (password && user.password) {
         const isPasswordValid = await user.comparePassword(password);
         if (!isPasswordValid) {
-          console.log(`[LOGIN] Invalid password for client: ${email}`);
+          logger.warn(`[LOGIN] Invalid password for client: ${email}`);
           return res.status(401).json({ error: 'Invalid email or password.' });
         }
-        console.log(`[LOGIN] Client password verified: ${email}`);
+        logger.info(`[LOGIN] Client password verified: ${email}`);
       } else if (password && !user.password) {
         // Client provided password but account has none - allow login (they can set password later)
-        console.log(`[LOGIN] Client ${email} provided password but account has none - allowing login`);
+        logger.info(`[LOGIN] Client ${email} provided password but account has none - allowing login`);
       } else {
-        console.log(`[LOGIN] Client login without password: ${email}`);
+        logger.info(`[LOGIN] Client login without password: ${email}`);
       }
     }
 
@@ -163,7 +173,7 @@ router.post('/login', authLimiter, validate(loginValidation), async (req, res) =
     });
   } catch (error) {
     const duration = Date.now() - startTime;
-    console.error(`[LOGIN] Error for ${email} after ${duration}ms:`, {
+    logger.error(`[LOGIN] Error for ${email} after ${duration}ms:`, {
       name: error.name,
       message: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined

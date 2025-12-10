@@ -38,24 +38,73 @@ app.set('trust proxy', true);
 // MongoDB connection
 let MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/touba-hair';
 
-// If connection string doesn't include database name, add it
+// Fix MongoDB connection string - ensure proper format
 if (MONGODB_URI && !MONGODB_URI.includes('<db_password>')) {
-  // Check if it's a mongodb+srv:// connection without database name
-  if (MONGODB_URI.includes('mongodb+srv://') && !MONGODB_URI.match(/mongodb\+srv:\/\/[^/]+\/[^?]/)) {
-    // Add database name before query parameters
-    const dbName = process.env.MONGODB_DB_NAME || 'touba-hair';
-    if (MONGODB_URI.includes('?')) {
-      MONGODB_URI = MONGODB_URI.replace('?', `/${dbName}?`);
-    } else {
-      MONGODB_URI = `${MONGODB_URI}/${dbName}`;
-    }
-    logger.info(`Added database name "${dbName}" to MongoDB connection string`);
-  }
+  const dbName = process.env.MONGODB_DB_NAME || 'touba-hair';
   
-  // Ensure retryWrites and w=majority are in the connection string for MongoDB Atlas
-  if (MONGODB_URI.includes('mongodb+srv://') && !MONGODB_URI.includes('retryWrites')) {
-    const separator = MONGODB_URI.includes('?') ? '&' : '?';
-    MONGODB_URI = `${MONGODB_URI}${separator}retryWrites=true&w=majority`;
+  try {
+    // Parse and reconstruct the connection string properly
+    if (MONGODB_URI.includes('mongodb+srv://')) {
+      // Extract components from mongodb+srv:// connection
+      const match = MONGODB_URI.match(/mongodb\+srv:\/\/([^@]+)@([^/?]+)(\/[^?]*)?(\?.*)?/);
+      
+      if (match) {
+        const credentials = match[1]; // username:password
+        const host = match[2]; // cluster.mongodb.net
+        const existingPath = match[3] || ''; // /database or empty
+        const queryString = match[4] || ''; // ?options
+        
+        // Clean existing path (remove leading/trailing slashes)
+        const cleanPath = existingPath.replace(/^\/+|\/+$/g, '');
+        
+        // Use existing database name if valid, otherwise use default
+        const finalDbName = cleanPath && cleanPath.length > 0 ? cleanPath : dbName;
+        
+        // Reconstruct URI with proper format: mongodb+srv://credentials@host/database?options
+        let newUri = `mongodb+srv://${credentials}@${host}/${finalDbName}`;
+        
+        // Add query parameters
+        if (queryString) {
+          // Merge retryWrites if not present
+          if (!queryString.includes('retryWrites')) {
+            // queryString already starts with ?, so append with &
+            newUri += `${queryString}&retryWrites=true&w=majority`;
+          } else {
+            // retryWrites already present, just add w=majority if missing
+            if (!queryString.includes('w=majority')) {
+              newUri += `${queryString}&w=majority`;
+            } else {
+              newUri += queryString;
+            }
+          }
+        } else {
+          // Add default query parameters
+          newUri += `?retryWrites=true&w=majority`;
+        }
+        
+        MONGODB_URI = newUri;
+        logger.info(`MongoDB URI configured. Database: ${finalDbName}`);
+      }
+    } else if (MONGODB_URI.includes('mongodb://')) {
+      // Standard MongoDB connection
+      const match = MONGODB_URI.match(/mongodb:\/\/([^@]+@)?([^/]+)(\/[^?]*)?(\?.*)?/);
+      
+      if (match) {
+        const auth = match[1] || ''; // username:password@ or empty
+        const host = match[2]; // host:port
+        const existingPath = match[3] || ''; // /database or empty
+        const queryString = match[4] || ''; // ?options
+        
+        const cleanPath = existingPath.replace(/^\/+|\/+$/g, '');
+        const finalDbName = cleanPath && cleanPath.length > 0 ? cleanPath : dbName;
+        
+        MONGODB_URI = `mongodb://${auth}${host}/${finalDbName}${queryString || ''}`;
+        logger.info(`MongoDB URI configured. Database: ${finalDbName}`);
+      }
+    }
+  } catch (error) {
+    logger.error('Error parsing MongoDB URI:', error.message);
+    logger.warn('Using original MONGODB_URI as-is');
   }
 }
 
@@ -598,14 +647,27 @@ app.post('/api/auth/create-admin', async (req, res) => {
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      return res.status(400).json({ error: 'User already exists', email: existingUser.email });
+      // Update existing user's password if it exists
+      existingUser.password = password;
+      existingUser.isActive = true;
+      await existingUser.save();
+      
+      return res.status(200).json({
+        message: 'Admin account updated (password reset)',
+        user: {
+          email: existingUser.email,
+          name: existingUser.name,
+          role: existingUser.role
+        }
+      });
     }
 
     const admin = new User({
       name,
       email: email.toLowerCase(),
       password,
-      role: 'admin'
+      role: 'admin',
+      isActive: true
     });
 
     await admin.save();
@@ -619,6 +681,120 @@ app.post('/api/auth/create-admin', async (req, res) => {
       }
     });
   } catch (error) {
+    logger.error('Create admin error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create all demo users endpoint
+app.post('/api/auth/create-demo-users', async (req, res) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: 'Database not connected' });
+    }
+
+    const demoUsers = [
+      {
+        name: 'Admin User',
+        email: 'admin@toubahair.com',
+        password: 'Admin123!@#',
+        role: 'admin'
+      },
+      {
+        name: 'Mariama',
+        email: 'mariama@toubahair.com',
+        password: 'Employee123!',
+        role: 'employee',
+        braiderId: '3'
+      },
+      {
+        name: 'Amina',
+        email: 'amina@toubahair.com',
+        password: 'Employee123!',
+        role: 'employee',
+        braiderId: '1'
+      },
+      {
+        name: 'Fatou',
+        email: 'fatou@toubahair.com',
+        password: 'Employee123!',
+        role: 'employee',
+        braiderId: '2'
+      },
+      {
+        name: 'Aissatou',
+        email: 'aissatou@toubahair.com',
+        password: 'Employee123!',
+        role: 'employee',
+        braiderId: '4'
+      },
+      {
+        name: 'Test Customer',
+        email: 'customer1@example.com',
+        password: 'Customer123!',
+        role: 'client'
+      }
+    ];
+
+    const results = {
+      created: [],
+      updated: [],
+      errors: []
+    };
+
+    for (const userData of demoUsers) {
+      try {
+        const existingUser = await User.findOne({ email: userData.email.toLowerCase() });
+        
+        if (existingUser) {
+          // Update existing user
+          existingUser.name = userData.name;
+          existingUser.password = userData.password;
+          existingUser.role = userData.role;
+          existingUser.isActive = true;
+          if (userData.braiderId) {
+            existingUser.braiderId = userData.braiderId;
+          }
+          await existingUser.save();
+          results.updated.push({
+            email: userData.email,
+            role: userData.role
+          });
+        } else {
+          // Create new user
+          const user = new User({
+            name: userData.name,
+            email: userData.email.toLowerCase(),
+            password: userData.password,
+            role: userData.role,
+            braiderId: userData.braiderId || null,
+            isActive: true
+          });
+          await user.save();
+          results.created.push({
+            email: userData.email,
+            role: userData.role
+          });
+        }
+      } catch (userError) {
+        results.errors.push({
+          email: userData.email,
+          error: userError.message
+        });
+      }
+    }
+
+    res.status(200).json({
+      message: 'Demo users processed',
+      results: {
+        created: results.created.length,
+        updated: results.updated.length,
+        errors: results.errors.length
+      },
+      details: results
+    });
+  } catch (error) {
+    logger.error('Create demo users error:', error);
     res.status(500).json({ error: error.message });
   }
 });
