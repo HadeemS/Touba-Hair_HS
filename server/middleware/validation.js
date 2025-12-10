@@ -33,7 +33,7 @@ export const registerValidation = [
 
 export const loginValidation = [
   body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
-  body('password').notEmpty().withMessage('Password is required')
+  body('password').optional().notEmpty().withMessage('Password cannot be empty if provided')
 ];
 
 export const appointmentValidation = [

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs/promises';
 import { existsSync } from 'fs';
+import User from './models/User.js';
 import authRoutes from './routes/auth.js';
 import appointmentRoutes from './routes/appointments.js';
 import rewardRoutes from './routes/rewards.js';
@@ -48,7 +49,7 @@ if (MONGODB_URI && !MONGODB_URI.includes('<db_password>')) {
     } else {
       MONGODB_URI = `${MONGODB_URI}/${dbName}`;
     }
-    logger.info(`📝 Added database name "${dbName}" to MongoDB connection string`);
+    logger.info(`Added database name "${dbName}" to MongoDB connection string`);
   }
   
   // Ensure retryWrites and w=majority are in the connection string for MongoDB Atlas
@@ -59,10 +60,10 @@ if (MONGODB_URI && !MONGODB_URI.includes('<db_password>')) {
 }
 
 if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
-  logger.error('❌ MONGODB_URI not set or incomplete. Please set MONGODB_URI environment variable.');
-  logger.error('⚠️  Current MONGODB_URI:', MONGODB_URI ? 'Set but incomplete' : 'Not set');
+  logger.error('MONGODB_URI not set or incomplete. Please set MONGODB_URI environment variable.');
+  logger.error('Current MONGODB_URI:', MONGODB_URI ? 'Set but incomplete' : 'Not set');
 } else {
-  logger.info('🔌 Attempting to connect to MongoDB...');
+  logger.info('Attempting to connect to MongoDB...');
   
   mongoose.connect(MONGODB_URI, {
     serverSelectionTimeoutMS: 30000, // Increased to 30s for better reliability
@@ -71,64 +72,39 @@ if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
     minPoolSize: 2, // Maintain at least 2 socket connections
   })
   .then(() => {
-    logger.info('');
-    logger.info('═══════════════════════════════════════════════════════════');
-    logger.info('✅ MongoDB Connected Successfully!');
-    logger.info('═══════════════════════════════════════════════════════════');
-    logger.info('📊 Database Name:', mongoose.connection.name);
-    logger.info('🌐 Host:', mongoose.connection.host);
-    logger.info('🔌 Connection State:', 'Connected (Ready)');
-    logger.info('💾 Ready to accept database operations');
-    logger.info('═══════════════════════════════════════════════════════════');
-    logger.info('');
-    
+    logger.info('MongoDB connected successfully');
+    logger.info('Database Name:', mongoose.connection.name);
+    logger.info('Host:', mongoose.connection.host);
+    logger.info('Connection State:', 'Connected (Ready)');
+    logger.info('Ready to accept database operations');
+
     // Handle connection events
     mongoose.connection.on('error', (err) => {
-      logger.error('');
-      logger.error('═══════════════════════════════════════════════════════════');
-      logger.error('❌ MongoDB Connection Error!');
-      logger.error('═══════════════════════════════════════════════════════════');
-      logger.error('Error:', err.message);
+      logger.error('MongoDB connection error:', err.message);
       logger.error('Check your MONGODB_URI and network access');
-      logger.error('═══════════════════════════════════════════════════════════');
-      logger.error('');
     });
     
     mongoose.connection.on('disconnected', () => {
-      logger.warn('');
-      logger.warn('⚠️  MongoDB Disconnected!');
-      logger.warn('Attempting to reconnect...');
-      logger.warn('');
+      logger.warn('MongoDB disconnected. Attempting to reconnect...');
     });
     
     mongoose.connection.on('reconnected', () => {
-      logger.info('');
-      logger.info('✅ MongoDB Reconnected Successfully!');
-      logger.info('');
+      logger.info('MongoDB reconnected successfully');
     });
   })
   .catch((error) => {
-    logger.error('');
-    logger.error('═══════════════════════════════════════════════════════════');
-    logger.error('❌ MongoDB Connection Failed!');
-    logger.error('═══════════════════════════════════════════════════════════');
-    logger.error('Error:', error.message);
-    logger.error('');
-    logger.error('🔍 Troubleshooting Steps:');
+    logger.error('MongoDB connection failed:', error.message);
+    logger.error('Troubleshooting Steps:');
     logger.error('   1. Check MONGODB_URI environment variable is set');
     logger.error('   2. Verify username and password are correct');
     logger.error('   3. Ensure IP whitelist includes 0.0.0.0/0 (or your server IP)');
     logger.error('   4. Check MongoDB Atlas cluster is running');
     logger.error('   5. Verify network connectivity');
-    logger.error('');
-    logger.error('📝 Connection String Format:');
+    logger.error('Connection String Format:');
     logger.error('   mongodb+srv://username:password@cluster.mongodb.net/database-name?retryWrites=true&w=majority');
-    logger.error('');
-    logger.error('🔗 Test Connection:');
+    logger.error('Test Connection:');
     logger.error('   GET /api/test-db - Test database connection');
     logger.error('   GET /api/health - Check server and database status');
-    logger.error('═══════════════════════════════════════════════════════════');
-    logger.error('');
     
     // Retry connection logic
     let retries = 0;
@@ -147,7 +123,7 @@ if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
             minPoolSize: 2,
           })
           .then(() => {
-            logger.info('✅ MongoDB reconnected successfully');
+            logger.info('MongoDB reconnected successfully');
           })
           .catch((retryError) => {
             logger.error(`Retry ${retries} failed:`, retryError.message);
@@ -155,7 +131,7 @@ if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
           });
         }, retryDelay);
       } else {
-        logger.error('❌ Max retries reached. MongoDB connection failed.');
+        logger.error('Max retries reached. MongoDB connection failed.');
       }
     };
     
@@ -688,9 +664,9 @@ app.get('/', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  logger.info(`🚀 Server running on port ${PORT}`);
-  logger.info(`📸 Gallery API: http://localhost:${PORT}/api/gallery`);
-  logger.info(`💰 Prices API: http://localhost:${PORT}/api/prices`);
-  logger.info(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  logger.info(`Server running on port ${PORT}`);
+  logger.info(`Gallery API: http://localhost:${PORT}/api/gallery`);
+  logger.info(`Prices API: http://localhost:${PORT}/api/prices`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 

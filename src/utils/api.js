@@ -104,6 +104,9 @@ export const pricesAPI = {
 // Health check
 export const healthCheck = () => apiCall('/api/health');
 
+// Test database connection
+export const testDatabase = () => apiCall('/api/test-db');
+
 // Auth API functions
 export const authAPI = {
   register: (data) => apiCall('/api/auth/register', {

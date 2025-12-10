@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 import { authenticate, generateToken } from '../middleware/auth.js';
 import { validate, registerValidation, loginValidation } from '../middleware/validation.js';
@@ -67,47 +68,85 @@ router.post('/register', validate(registerValidation), async (req, res) => {
 
 // Login
 router.post('/login', authLimiter, validate(loginValidation), async (req, res) => {
+  const startTime = Date.now();
+  const { email, password } = req.body;
+  
   try {
+    // Log login attempt (without sensitive data)
+    console.log(`[LOGIN] Attempt: ${email} at ${new Date().toISOString()}`);
+    
     // Check MongoDB connection first
-    if (mongoose.connection.readyState !== 1) {
+    const dbState = mongoose.connection.readyState;
+    if (dbState !== 1) {
+      const states = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
+      console.error(`[LOGIN] Database not ready. State: ${states[dbState] || 'unknown'} (${dbState})`);
       return res.status(503).json({ 
         error: 'Database connection unavailable. Please try again later.',
-        databaseStatus: mongoose.connection.readyState === 0 ? 'disconnected' : 'connecting',
-        readyState: mongoose.connection.readyState
+        databaseStatus: states[dbState] || 'unknown',
+        readyState: dbState
       });
     }
 
-    const { email, password } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required.' });
+    }
 
     // Find user
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
+      console.log(`[LOGIN] User not found: ${email}`);
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
+    console.log(`[LOGIN] User found: ${user.email}, Role: ${user.role}, HasPassword: ${!!user.password}`);
+
     // Check if account is active
     if (!user.isActive) {
+      console.log(`[LOGIN] Account inactive: ${email}`);
       return res.status(403).json({ error: 'Account is inactive. Please contact support.' });
     }
 
-    // For employees/admins, verify password
+    // For employees/admins, password is REQUIRED
     if (user.role === 'employee' || user.role === 'admin') {
       if (!password) {
-        return res.status(400).json({ error: 'Password is required.' });
+        console.log(`[LOGIN] Password required but not provided for ${user.role}: ${email}`);
+        return res.status(400).json({ error: 'Password is required for this account type.' });
+      }
+      
+      if (!user.password) {
+        console.log(`[LOGIN] User has no password set: ${email}`);
+        return res.status(400).json({ error: 'Account has no password set. Please contact support to set a password.' });
       }
       
       const isPasswordValid = await user.comparePassword(password);
       if (!isPasswordValid) {
+        console.log(`[LOGIN] Invalid password for: ${email}`);
         return res.status(401).json({ error: 'Invalid email or password.' });
       }
+      
+      console.log(`[LOGIN] Password verified for: ${email}`);
     } else {
-      // For clients, password is optional (can implement phone OTP later)
-      // For now, allow login without password for clients
-      // In production, you might want phone-based auth for clients
+      // For clients, password is optional but if provided, must be valid
+      if (password && user.password) {
+        const isPasswordValid = await user.comparePassword(password);
+        if (!isPasswordValid) {
+          console.log(`[LOGIN] Invalid password for client: ${email}`);
+          return res.status(401).json({ error: 'Invalid email or password.' });
+        }
+        console.log(`[LOGIN] Client password verified: ${email}`);
+      } else if (password && !user.password) {
+        // Client provided password but account has none - allow login (they can set password later)
+        console.log(`[LOGIN] Client ${email} provided password but account has none - allowing login`);
+      } else {
+        console.log(`[LOGIN] Client login without password: ${email}`);
+      }
     }
 
     // Generate token
     const token = generateToken(user._id);
+    const duration = Date.now() - startTime;
+
+    console.log(`[LOGIN] Success: ${email} (${user.role}) - ${duration}ms`);
 
     res.json({
       message: 'Login successful',
@@ -123,17 +162,25 @@ router.post('/login', authLimiter, validate(loginValidation), async (req, res) =
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
+    const duration = Date.now() - startTime;
+    console.error(`[LOGIN] Error for ${email} after ${duration}ms:`, {
+      name: error.name,
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
     
     // Check if it's a MongoDB connection error
-    if (error.name === 'MongoServerError' || error.name === 'MongooseError') {
+    if (error.name === 'MongoServerError' || error.name === 'MongooseError' || error.name === 'MongoNetworkError') {
       return res.status(503).json({ 
         error: 'Database connection error. Please try again later.',
         details: process.env.NODE_ENV === 'development' ? error.message : undefined
       });
     }
     
-    res.status(500).json({ error: 'Failed to login. Please try again.' });
+    res.status(500).json({ 
+      error: 'Failed to login. Please try again.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 

@@ -112,9 +112,9 @@ const Login = () => {
                   title={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    <span className="password-icon" aria-hidden="true">👁️</span>
+                    <span className="password-icon" aria-hidden="true">Hide</span>
                   ) : (
-                    <span className="password-icon" aria-hidden="true">👁️‍🗨️</span>
+                    <span className="password-icon" aria-hidden="true">Show</span>
                   )}
                 </button>
               </div>
@@ -133,25 +133,25 @@ const Login = () => {
             <h3>Demo Accounts</h3>
             <div className="demo-accounts">
               <div className="demo-account">
-                <strong>👑 Admin:</strong>
+                <strong>Admin:</strong>
                 <p>Email: admin@toubahair.com</p>
                 <p>Password: Admin123!@#</p>
                 <small>Full access to admin dashboard</small>
               </div>
               <div className="demo-account">
-                <strong>👨‍💼 Employee (Example):</strong>
+                <strong>Employee (Example):</strong>
                 <p>Email: mariama@toubahair.com</p>
                 <p>Password: Employee123!</p>
                 <small>Access braider dashboard</small>
               </div>
               <div className="demo-account">
-                <strong>👤 Client (Example):</strong>
+                <strong>Client (Example):</strong>
                 <p>Email: customer1@example.com</p>
                 <p>Password: Customer123!</p>
                 <small>Access bookings & rewards</small>
               </div>
               <div className="demo-account-note">
-                <small>📋 See DEMO_CREDENTIALS.md for all accounts</small>
+                <small>See DEMO_CREDENTIALS.md for all accounts</small>
               </div>
             </div>
           </div>
