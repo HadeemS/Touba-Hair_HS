@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { register } from '../utils/auth'
 import { braiders } from '../data/braiders'
+import { toast } from '../utils/toast'
 import './BraiderRegister.css'
 
 const BraiderRegister = () => {
@@ -60,14 +61,17 @@ const BraiderRegister = () => {
       })
 
       if (result.success) {
-        alert('Braider account created successfully! You can now log in.')
+        toast.success('Braider account created successfully! You can now log in.')
         navigate('/login', { state: { from: { pathname: '/braider-profile' } } })
       } else {
-        setError(result.error || 'Registration failed. Please try again.')
+        const errorMsg = result.error || 'Registration failed. Please try again.'
+        setError(errorMsg)
+        toast.error(errorMsg)
       }
     } catch (err) {
-      console.error('Registration error:', err)
-      setError(err.message || 'An error occurred. Please try again.')
+      const errorMsg = err.message || 'An error occurred. Please try again.'
+      setError(errorMsg)
+      toast.error(errorMsg)
     } finally {
       setIsLoading(false)
     }

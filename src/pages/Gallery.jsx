@@ -17,18 +17,15 @@ const Gallery = () => {
       // Add cache-busting query parameter to ensure fresh data
       const cacheBuster = `?t=${Date.now()}`
       const data = await galleryAPI.getAll(cacheBuster)
-      console.log('Gallery data loaded:', data)
       if (data && Array.isArray(data)) {
         setImages(data)
         setError(null)
       } else {
-        console.error('Invalid gallery data format:', data)
         setError('Invalid data format received from server.')
         setImages([])
       }
     } catch (err) {
-      console.error('Error loading gallery:', err)
-      setError(`Failed to load gallery: ${err.message}. Please check your connection and try again.`)
+      setError(`Failed to load gallery: ${err.message || 'Unknown error'}. Please check your connection and try again.`)
       setImages([])
     } finally {
       setLoading(false)

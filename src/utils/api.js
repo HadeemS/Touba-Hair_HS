@@ -3,6 +3,11 @@
 // API URL from environment variable or fallback to Render production URL
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://touba-hair-hs-1.onrender.com';
 
+// Log API URL in development for debugging
+if (import.meta.env.DEV) {
+  console.log('API Base URL:', API_BASE_URL);
+}
+
 // Helper function for API calls
 async function apiCall(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;

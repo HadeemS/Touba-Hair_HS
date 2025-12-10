@@ -16,9 +16,7 @@ const Services = () => {
   const loadServices = async () => {
     try {
       setLoading(true)
-      console.log('Loading services from API...')
       const data = await pricesAPI.getAll()
-      console.log('Services data received:', data)
       
       // Check if API returned data and has all 21 services
       if (data && Array.isArray(data) && data.length >= 21) {
@@ -36,15 +34,11 @@ const Services = () => {
           popular: isPopularService(service.name)
         }))
         setServices(transformedData)
-        console.log('Services set successfully:', transformedData.length, 'services')
       } else {
         // API returned less than 21 services (old data), use defaults
-        console.log(`API returned only ${data?.length || 0} services. Using default 21 services.`)
         setServices(getDefaultServices())
       }
     } catch (err) {
-      console.error('Error loading services:', err)
-      console.log('Falling back to default services')
       setServices(getDefaultServices())
     } finally {
       setLoading(false)

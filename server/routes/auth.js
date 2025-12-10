@@ -72,7 +72,8 @@ router.post('/login', authLimiter, validate(loginValidation), async (req, res) =
     if (mongoose.connection.readyState !== 1) {
       return res.status(503).json({ 
         error: 'Database connection unavailable. Please try again later.',
-        databaseStatus: mongoose.connection.readyState === 0 ? 'disconnected' : 'connecting'
+        databaseStatus: mongoose.connection.readyState === 0 ? 'disconnected' : 'connecting',
+        readyState: mongoose.connection.readyState
       });
     }
 
@@ -113,11 +114,12 @@ router.post('/login', authLimiter, validate(loginValidation), async (req, res) =
       token,
       user: {
         id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
         phone: user.phone,
         role: user.role,
-        braiderId: user.braiderId
+        braiderId: user.braiderId || null
       }
     });
   } catch (error) {

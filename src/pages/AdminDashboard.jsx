@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { appointmentsAPI, rewardsAPI } from '../utils/api'
 import { getCurrentUser } from '../utils/auth'
 import { formatDateDisplay } from '../utils/timeSlots'
+import { toast } from '../utils/toast'
 import './AdminDashboard.css'
 
 const AdminDashboard = () => {
@@ -54,8 +55,7 @@ const AdminDashboard = () => {
         cancelled: allAppointments.filter(a => a.status === 'cancelled').length
       })
     } catch (error) {
-      console.error('Error loading appointments:', error)
-      alert('Failed to load appointments. Please try again.')
+      toast.error('Failed to load appointments. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -65,10 +65,9 @@ const AdminDashboard = () => {
     try {
       await appointmentsAPI.updateStatus(appointmentId, newStatus)
       await loadAppointments()
-      alert(`Appointment status updated to ${newStatus}`)
+      toast.success(`Appointment status updated to ${newStatus}`)
     } catch (error) {
-      console.error('Error updating status:', error)
-      alert('Failed to update status. Please try again.')
+      toast.error('Failed to update status. Please try again.')
     }
   }
 
@@ -80,10 +79,9 @@ const AdminDashboard = () => {
     try {
       await appointmentsAPI.cancel(appointmentId)
       await loadAppointments()
-      alert('Appointment cancelled successfully')
+      toast.success('Appointment cancelled successfully')
     } catch (error) {
-      console.error('Error cancelling appointment:', error)
-      alert('Failed to cancel appointment. Please try again.')
+      toast.error('Failed to cancel appointment. Please try again.')
     }
   }
 

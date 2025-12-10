@@ -35,8 +35,8 @@ const Login = () => {
       const result = await login(formData.email, formData.password)
       
       if (result.success) {
-        // Small delay to ensure state is updated
-        setTimeout(() => {
+        // Wait for next tick to ensure localStorage and state are updated
+        requestAnimationFrame(() => {
           // Redirect based on user role
           if (isAdmin()) {
             navigate('/admin', { replace: true })
@@ -45,7 +45,7 @@ const Login = () => {
           } else {
             navigate(from, { replace: true })
           }
-        }, 100)
+        })
       } else {
         const errorMsg = result.error || 'Invalid email or password'
         toast.error(errorMsg)

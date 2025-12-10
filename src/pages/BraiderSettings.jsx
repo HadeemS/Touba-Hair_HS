@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { getCurrentUser } from '../utils/auth'
 import { getBraiderById } from '../data/braiders'
+import { toast } from '../utils/toast'
 import './BraiderSettings.css'
 
 const BraiderSettings = () => {
@@ -72,7 +73,7 @@ const BraiderSettings = () => {
         setSelectedSpecialties([braider.specialty])
       }
     } catch (error) {
-      console.error('Error loading braider settings:', error)
+      // Silently fail - will use defaults
     }
   }
 
@@ -99,10 +100,10 @@ const BraiderSettings = () => {
       localStorage.setItem(`braider_${user?.name}_specialties`, JSON.stringify(selectedSpecialties))
       
       setSavedMessage('Settings saved successfully!')
+      toast.success('Settings saved successfully!')
       setTimeout(() => setSavedMessage(''), 3000)
     } catch (error) {
-      console.error('Error saving settings:', error)
-      alert('Error saving settings. Please try again.')
+      toast.error('Error saving settings. Please try again.')
     }
   }
 

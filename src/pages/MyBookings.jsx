@@ -5,6 +5,7 @@ import { formatDateDisplay } from '../utils/timeSlots'
 import { getBraiderById } from '../data/braiders'
 import { getCurrentUser, isCustomer } from '../utils/auth'
 import { appointmentsAPI, rewardsAPI } from '../utils/api'
+import { toast } from '../utils/toast'
 import './MyBookings.css'
 
 const MyBookings = () => {
@@ -27,7 +28,7 @@ const MyBookings = () => {
         setRewards(response.reward)
       }
     } catch (error) {
-      console.error('Error loading rewards:', error)
+      // Silently fail - rewards are optional
     }
   }
 
@@ -66,7 +67,6 @@ const MyBookings = () => {
       
       setBookings(sorted)
     } catch (error) {
-      console.error('Error loading bookings:', error)
       // Fallback to localStorage if API fails
       try {
         const allBookings = getBookings()
@@ -80,7 +80,7 @@ const MyBookings = () => {
         })
         setBookings(sorted)
       } catch (fallbackError) {
-        console.error('Fallback loading failed:', fallbackError)
+        // Silently fail - user will see empty state
       }
     } finally {
       setLoading(false)
@@ -98,10 +98,9 @@ const MyBookings = () => {
           // Ignore localStorage errors
         }
         await loadBookings()
-        alert('Booking cancelled successfully.')
+        toast.success('Booking cancelled successfully.')
       } catch (error) {
-        console.error('Cancel error:', error)
-        alert(error.message || 'Error cancelling booking. Please try again.')
+        toast.error(error.message || 'Error cancelling booking. Please try again.')
       }
     }
   }

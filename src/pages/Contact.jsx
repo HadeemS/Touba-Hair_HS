@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { sendBookingEmail } from '../utils/sendBookingEmail'
+import { toast } from '../utils/toast'
 import './Contact.css'
 
 const Contact = () => {
@@ -72,8 +73,9 @@ const Contact = () => {
         message: ''
       })
     } catch (error) {
-      console.error('Error sending message:', error)
-      setSubmitMessage('Sorry, there was an error sending your message. Please try calling us directly.')
+      const errorMsg = 'Sorry, there was an error sending your message. Please try calling us directly.'
+      setSubmitMessage(errorMsg)
+      toast.error(errorMsg)
     } finally {
       setIsSubmitting(false)
     }

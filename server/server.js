@@ -65,8 +65,6 @@ if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
   logger.info('🔌 Attempting to connect to MongoDB...');
   
   mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     serverSelectionTimeoutMS: 30000, // Increased to 30s for better reliability
     socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
     maxPoolSize: 10, // Maintain up to 10 socket connections
@@ -143,8 +141,6 @@ if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
         logger.warn(`Retrying MongoDB connection (${retries}/${maxRetries})...`);
         setTimeout(() => {
           mongoose.connect(MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
             serverSelectionTimeoutMS: 30000,
             socketTimeoutMS: 45000,
             maxPoolSize: 10,
@@ -171,7 +167,7 @@ if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
 // CORS configuration - restrict in production
 const allowedOrigins = process.env.FRONTEND_URL 
   ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
-  : ['http://localhost:5173', 'http://localhost:3000', 'https://hadeems.github.io'];
+  : ['http://localhost:5173', 'http://localhost:3000', 'https://hadeems.github.io', 'https://hadeems.github.io/Touba-Hair_HS'];
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -593,6 +589,42 @@ app.get('/api/health', (req, res) => {
       memory: process.memoryUsage()
     }
   });
+});
+
+// Create admin account endpoint
+app.post('/api/auth/create-admin', async (req, res) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: 'Database not connected' });
+    }
+
+    const { name = 'Admin', email = 'admin@toubahair.com', password = 'Admin123!@#' } = req.body;
+
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(400).json({ error: 'User already exists', email: existingUser.email });
+    }
+
+    const admin = new User({
+      name,
+      email: email.toLowerCase(),
+      password,
+      role: 'admin'
+    });
+
+    await admin.save();
+
+    res.status(201).json({
+      message: 'Admin account created',
+      user: {
+        email: admin.email,
+        name: admin.name,
+        role: admin.role
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // MongoDB connection test endpoint

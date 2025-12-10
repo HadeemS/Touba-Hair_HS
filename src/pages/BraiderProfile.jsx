@@ -3,6 +3,7 @@ import { getBookings } from '../utils/bookingStorage'
 import { getCurrentUser } from '../utils/auth'
 import { formatDateDisplay } from '../utils/timeSlots'
 import { appointmentsAPI } from '../utils/api'
+import { toast } from '../utils/toast'
 import './BraiderProfile.css'
 
 const BraiderProfile = () => {
@@ -33,36 +34,24 @@ const BraiderProfile = () => {
       const userBraiderId = user?.braiderId?.toString()
       const userId = user?._id || user?.id
       
-      console.log('BraiderProfile - Filtering appointments:', {
-        userBraiderId,
-        userId,
-        userName: user?.name,
-        totalBookings: apiBookings.length
-      })
-      
       const filteredBookings = apiBookings.filter(booking => {
         // Match by braiderId (primary method - this is what's set when booking is created)
         const bookingBraiderId = booking.braiderId?.toString()
         if (userBraiderId && bookingBraiderId && bookingBraiderId === userBraiderId) {
-          console.log('Matched by braiderId:', bookingBraiderId, '===', userBraiderId)
           return true
         }
         // Match by employeeId if user is the assigned employee
         // Handle both populated object and ID string
         const bookingEmployeeId = booking.employeeId?._id || booking.employeeId
         if (bookingEmployeeId && userId && bookingEmployeeId.toString() === userId.toString()) {
-          console.log('Matched by employeeId:', bookingEmployeeId, '===', userId)
           return true
         }
         // Match by braiderName as fallback (in case braiderId isn't set)
         if (booking.braiderName && user?.name && booking.braiderName === user.name) {
-          console.log('Matched by braiderName:', booking.braiderName, '===', user.name)
           return true
         }
         return false
       })
-      
-      console.log('BraiderProfile - Filtered appointments:', filteredBookings.length)
       
       // Transform API bookings to match expected format
       const transformedBookings = filteredBookings.map(booking => ({
@@ -88,7 +77,6 @@ const BraiderProfile = () => {
       
       setBookings(sorted)
     } catch (error) {
-      console.error('Error loading bookings:', error)
       // Fallback to localStorage if API fails
       try {
         const allBookings = getBookings()
@@ -102,7 +90,7 @@ const BraiderProfile = () => {
         })
         setBookings(sorted)
       } catch (fallbackError) {
-        console.error('Fallback loading failed:', fallbackError)
+        // Silently fail - user will see empty state
       }
     } finally {
       setLoading(false)
@@ -146,10 +134,9 @@ const BraiderProfile = () => {
     try {
       await appointmentsAPI.updateStatus(appointmentId, newStatus)
       await loadBookings()
-      alert(`Appointment marked as ${newStatus}`)
+      toast.success(`Appointment marked as ${newStatus}`)
     } catch (error) {
-      console.error('Error updating status:', error)
-      alert('Failed to update appointment status. Please try again.')
+      toast.error('Failed to update appointment status. Please try again.')
     }
   }
 
@@ -157,10 +144,9 @@ const BraiderProfile = () => {
     try {
       await appointmentsAPI.updateStatus(appointmentId, 'confirmed')
       await loadBookings()
-      alert('Appointment confirmed successfully!')
+      toast.success('Appointment confirmed successfully!')
     } catch (error) {
-      console.error('Error confirming appointment:', error)
-      alert('Failed to confirm appointment. Please try again.')
+      toast.error('Failed to confirm appointment. Please try again.')
     }
   }
 
@@ -172,10 +158,9 @@ const BraiderProfile = () => {
     try {
       await appointmentsAPI.cancel(appointmentId)
       await loadBookings()
-      alert('Appointment cancelled successfully')
+      toast.success('Appointment cancelled successfully')
     } catch (error) {
-      console.error('Error cancelling appointment:', error)
-      alert('Failed to cancel appointment. Please try again.')
+      toast.error('Failed to cancel appointment. Please try again.')
     }
   }
 

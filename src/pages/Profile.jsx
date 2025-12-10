@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { getStoredProfile, saveProfile } from '../utils/profileStorage';
 import { getCurrentUser, isBraider, isCustomer } from '../utils/auth';
 import { authAPI, rewardsAPI } from '../utils/api';
+import { toast } from '../utils/toast';
 import { Link } from 'react-router-dom';
 import './Profile.css';
 
@@ -54,7 +55,7 @@ const Profile = () => {
         });
       }
     } catch (error) {
-      console.error('Error loading profile:', error);
+      // Silently fail - will use localStorage fallback
     }
   };
 
@@ -66,7 +67,7 @@ const Profile = () => {
         setRewards(response.reward);
       }
     } catch (error) {
-      console.error('Error loading rewards:', error);
+      // Silently fail - rewards are optional
     } finally {
       setLoadingRewards(false);
     }
@@ -102,10 +103,12 @@ const Profile = () => {
       // Also save to localStorage as backup
       saveProfile(profile);
       setSavedMessage('Profile saved successfully!');
+      toast.success('Profile saved successfully!');
       setTimeout(() => setSavedMessage(''), 3000);
     } catch (error) {
-      console.error('Error saving profile:', error);
-      setSavedMessage(error.message || 'Error saving profile. Please try again.');
+      const errorMsg = error.message || 'Error saving profile. Please try again.';
+      setSavedMessage(errorMsg);
+      toast.error(errorMsg);
       setTimeout(() => setSavedMessage(''), 3000);
     }
   };
@@ -140,6 +143,7 @@ const Profile = () => {
       });
 
       setPasswordMessage('Password changed successfully!');
+      toast.success('Password changed successfully!');
       setPasswordData({
         currentPassword: '',
         newPassword: '',
@@ -149,8 +153,9 @@ const Profile = () => {
       
       setTimeout(() => setPasswordMessage(''), 3000);
     } catch (error) {
-      console.error('Error changing password:', error);
-      setPasswordMessage(error.message || 'Failed to change password. Please try again.');
+      const errorMsg = error.message || 'Failed to change password. Please try again.';
+      setPasswordMessage(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setChangingPassword(false);
     }

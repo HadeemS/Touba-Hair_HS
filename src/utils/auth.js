@@ -17,6 +17,8 @@ export const login = async (email, password) => {
         loggedIn: true,
         loginTime: new Date().toISOString()
       }))
+      // Dispatch custom event for same-tab auth updates
+      window.dispatchEvent(new Event('auth-changed'))
       return { success: true, user: response.user }
     }
     
@@ -25,20 +27,22 @@ export const login = async (email, password) => {
     // Extract error message from the error
     let errorMessage = 'Login failed. Please try again.'
     
-    if (error.message) {
+    // Check error response for detailed message
+    if (error.response) {
+      errorMessage = error.response.error || error.response.message || errorMessage
+    } else if (error.message) {
       errorMessage = error.message
-      // Check for rate limiting
-      if (error.message.includes('Too many') || error.message.includes('rate limit')) {
-        errorMessage = 'Too many login attempts. Please wait 15 minutes and try again.'
-      }
-      // Check for network errors
-      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-        errorMessage = 'Cannot connect to server. Please check your internet connection and API URL.'
-      }
-      // Check for invalid credentials
-      if (error.message.includes('Invalid email or password') || error.message.includes('401')) {
-        errorMessage = 'Invalid email or password. Please check your credentials and try again.'
-      }
+    }
+    
+    // Check for specific error types
+    if (errorMessage.includes('Database connection unavailable') || errorMessage.includes('503')) {
+      errorMessage = 'Server is connecting to database. Please wait a moment and try again.'
+    } else if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError') || errorMessage.includes('CORS')) {
+      errorMessage = 'Cannot connect to server. The backend may be starting up. Please try again in a moment.'
+    } else if (errorMessage.includes('Invalid email or password') || errorMessage.includes('401')) {
+      errorMessage = 'Invalid email or password. Please check your credentials.'
+    } else if (errorMessage.includes('Too many') || errorMessage.includes('rate limit')) {
+      errorMessage = 'Too many login attempts. Please wait 15 minutes and try again.'
     }
     
     return { success: false, error: errorMessage }
@@ -71,6 +75,8 @@ export const register = async (userData) => {
 export const logout = () => {
   localStorage.removeItem(AUTH_KEY)
   localStorage.removeItem(TOKEN_KEY)
+  // Dispatch custom event for same-tab auth updates
+  window.dispatchEvent(new Event('auth-changed'))
 }
 
 // Get current user from localStorage (for quick access)

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { register } from '../utils/auth'
+import { toast } from '../utils/toast'
 import './ClientRegister.css'
 
 const ClientRegister = () => {
@@ -64,14 +65,17 @@ const ClientRegister = () => {
       })
 
       if (result.success) {
-        alert('Account created successfully! You can now log in.')
+        toast.success('Account created successfully! You can now log in.')
         navigate('/login', { state: { from: { pathname: '/my-bookings' } } })
       } else {
-        setError(result.error || 'Registration failed. Please try again.')
+        const errorMsg = result.error || 'Registration failed. Please try again.'
+        setError(errorMsg)
+        toast.error(errorMsg)
       }
     } catch (err) {
-      console.error('Registration error:', err)
-      setError(err.message || 'An error occurred. Please try again.')
+      const errorMsg = err.message || 'An error occurred. Please try again.'
+      setError(errorMsg)
+      toast.error(errorMsg)
     } finally {
       setIsLoading(false)
     }

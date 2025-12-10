@@ -10,24 +10,24 @@ const Navbar = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Check auth status on mount and when route changes
     const currentUser = getCurrentUser()
     setUser(currentUser)
     
-    // Listen for storage changes (login/logout)
+    // Listen for storage changes (login/logout from other tabs)
     const handleStorageChange = () => {
       setUser(getCurrentUser())
     }
     window.addEventListener('storage', handleStorageChange)
     
-    // Check periodically for auth changes
-    const interval = setInterval(() => {
+    // Listen for custom auth events (same-tab login/logout)
+    const handleAuthChange = () => {
       setUser(getCurrentUser())
-    }, 1000)
+    }
+    window.addEventListener('auth-changed', handleAuthChange)
     
     return () => {
       window.removeEventListener('storage', handleStorageChange)
-      clearInterval(interval)
+      window.removeEventListener('auth-changed', handleAuthChange)
     }
   }, [])
 
