@@ -7,7 +7,12 @@ const TOKEN_KEY = 'auth_token'
 // Login with backend API
 export const login = async (email, password) => {
   try {
-    const response = await authAPI.login({ email, password })
+    // Validate inputs
+    if (!email || !email.trim()) {
+      return { success: false, error: 'Email is required.' }
+    }
+
+    const response = await authAPI.login({ email: email.trim(), password: password || '' })
     
     if (response.token && response.user) {
       // Store token and user info
@@ -30,17 +35,32 @@ export const login = async (email, password) => {
     // Check error response for detailed message
     if (error.response) {
       errorMessage = error.response.error || error.response.message || errorMessage
+      
+      // Check for database status in response
+      if (error.response.databaseStatus) {
+        errorMessage = `Database ${error.response.databaseStatus}. Please wait a moment and try again.`
+      }
     } else if (error.message) {
       errorMessage = error.message
     }
     
     // Check for specific error types
-    if (errorMessage.includes('Database connection unavailable') || errorMessage.includes('503')) {
+    if (errorMessage.includes('Database connection unavailable') || 
+        errorMessage.includes('Database connection error') ||
+        errorMessage.includes('503') ||
+        errorMessage.includes('disconnected') ||
+        errorMessage.includes('connecting')) {
       errorMessage = 'Server is connecting to database. Please wait a moment and try again.'
-    } else if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError') || errorMessage.includes('CORS')) {
+    } else if (errorMessage.includes('Failed to fetch') || 
+               errorMessage.includes('NetworkError') || 
+               errorMessage.includes('CORS') ||
+               errorMessage.includes('Network request failed')) {
       errorMessage = 'Cannot connect to server. The backend may be starting up. Please try again in a moment.'
-    } else if (errorMessage.includes('Invalid email or password') || errorMessage.includes('401')) {
-      errorMessage = 'Invalid email or password. Please check your credentials.'
+    } else if (errorMessage.includes('Invalid email or password') || 
+               errorMessage.includes('401') ||
+               errorMessage.includes('Password is required')) {
+      // Keep original message for auth errors
+      errorMessage = errorMessage
     } else if (errorMessage.includes('Too many') || errorMessage.includes('rate limit')) {
       errorMessage = 'Too many login attempts. Please wait 15 minutes and try again.'
     }

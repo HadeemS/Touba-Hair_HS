@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { login, register } from '../utils/auth'
 import { isAdmin, isBraider } from '../utils/auth'
+import { healthCheck } from '../utils/api'
 import { toast } from '../utils/toast'
 import './Login.css'
 
@@ -15,8 +16,28 @@ const Login = () => {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [serverStatus, setServerStatus] = useState('checking')
 
   const from = location.state?.from?.pathname || '/my-bookings'
+
+  // Check server health on mount
+  useEffect(() => {
+    const checkServer = async () => {
+      try {
+        const health = await healthCheck()
+        if (health.status === 'ok' && health.database?.isConnected) {
+          setServerStatus('online')
+        } else {
+          setServerStatus('degraded')
+          setError('Server is starting up. Please wait a moment and try again.')
+        }
+      } catch (err) {
+        setServerStatus('offline')
+        setError('Cannot connect to server. The backend may be starting up. Please wait a moment.')
+      }
+    }
+    checkServer()
+  }, [])
 
   const handleChange = (e) => {
     setFormData({
@@ -69,7 +90,17 @@ const Login = () => {
             <p className="login-subtitle">Sign in to access your account</p>
           </div>
 
-          {error && (
+          {serverStatus === 'offline' && (
+            <div className="error-message" style={{ backgroundColor: '#fff3cd', color: '#856404', border: '1px solid #ffc107' }}>
+              ⚠️ Server is offline. The backend may be starting up. Please wait a moment and refresh.
+            </div>
+          )}
+          {serverStatus === 'degraded' && (
+            <div className="error-message" style={{ backgroundColor: '#fff3cd', color: '#856404', border: '1px solid #ffc107' }}>
+              ⚠️ Database is connecting. Please wait a moment and try again.
+            </div>
+          )}
+          {error && serverStatus === 'online' && (
             <div className="error-message">
               {error}
             </div>
