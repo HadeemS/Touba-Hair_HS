@@ -68,6 +68,14 @@ router.post('/register', validate(registerValidation), async (req, res) => {
 // Login
 router.post('/login', authLimiter, validate(loginValidation), async (req, res) => {
   try {
+    // Check MongoDB connection first
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ 
+        error: 'Database connection unavailable. Please try again later.',
+        databaseStatus: mongoose.connection.readyState === 0 ? 'disconnected' : 'connecting'
+      });
+    }
+
     const { email, password } = req.body;
 
     // Find user
@@ -114,6 +122,15 @@ router.post('/login', authLimiter, validate(loginValidation), async (req, res) =
     });
   } catch (error) {
     console.error('Login error:', error);
+    
+    // Check if it's a MongoDB connection error
+    if (error.name === 'MongoServerError' || error.name === 'MongooseError') {
+      return res.status(503).json({ 
+        error: 'Database connection error. Please try again later.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+    
     res.status(500).json({ error: 'Failed to login. Please try again.' });
   }
 });

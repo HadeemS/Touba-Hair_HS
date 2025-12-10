@@ -2,17 +2,19 @@
 
 ## Your MongoDB Connection String
 
-Your MongoDB Atlas connection string:
+⚠️ **SECURITY**: Your MongoDB connection string should be stored in environment variables only, never in code or documentation.
+
+Your MongoDB Atlas connection string format:
 ```
-mongodb+srv://hadeemsecka_db_user:VKlZvXscWjzLYwrG@cluster0.er5izge.mongodb.net/?appName=Cluster0
+mongodb+srv://[username]:[password]@cluster0.er5izge.mongodb.net/[database-name]?retryWrites=true&w=majority
 ```
 
-## ✅ Updated Connection String (with database name)
+## ✅ Connection String Format (with database name)
 
-For the application to work properly, add the database name to your connection string:
+For the application to work properly, your connection string should include the database name:
 
 ```
-mongodb+srv://hadeemsecka_db_user:VKlZvXscWjzLYwrG@cluster0.er5izge.mongodb.net/touba-hair?retryWrites=true&w=majority
+mongodb+srv://[username]:[password]@cluster0.er5izge.mongodb.net/touba-hair?retryWrites=true&w=majority
 ```
 
 ## 🔧 Setup Instructions
@@ -21,9 +23,9 @@ mongodb+srv://hadeemsecka_db_user:VKlZvXscWjzLYwrG@cluster0.er5izge.mongodb.net/
 
 1. **For Local Development:**
    - Create a `.env` file in the `server/` directory
-   - Add your connection string:
+   - Add your connection string (replace with your actual credentials):
      ```
-     MONGODB_URI=mongodb+srv://hadeemsecka_db_user:VKlZvXscWjzLYwrG@cluster0.er5izge.mongodb.net/touba-hair?retryWrites=true&w=majority
+     MONGODB_URI=mongodb+srv://[your-username]:[your-password]@cluster0.er5izge.mongodb.net/touba-hair?retryWrites=true&w=majority
      ```
 
 2. **For Render (Production):**
@@ -32,7 +34,8 @@ mongodb+srv://hadeemsecka_db_user:VKlZvXscWjzLYwrG@cluster0.er5izge.mongodb.net/
    - Go to "Environment" tab
    - Add environment variable:
      - **Key**: `MONGODB_URI`
-     - **Value**: `mongodb+srv://hadeemsecka_db_user:VKlZvXscWjzLYwrG@cluster0.er5izge.mongodb.net/touba-hair?retryWrites=true&w=majority`
+     - **Value**: `mongodb+srv://[your-username]:[your-password]@cluster0.er5izge.mongodb.net/touba-hair?retryWrites=true&w=majority`
+       - Replace `[your-username]` and `[your-password]` with your actual MongoDB credentials
 
 ### Option 2: Automatic Database Name Addition
 

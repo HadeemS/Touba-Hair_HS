@@ -73,32 +73,64 @@ if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
     minPoolSize: 2, // Maintain at least 2 socket connections
   })
   .then(() => {
-    logger.info('✅ Connected to MongoDB successfully!');
-    logger.info('📊 Database:', mongoose.connection.name);
+    logger.info('');
+    logger.info('═══════════════════════════════════════════════════════════');
+    logger.info('✅ MongoDB Connected Successfully!');
+    logger.info('═══════════════════════════════════════════════════════════');
+    logger.info('📊 Database Name:', mongoose.connection.name);
     logger.info('🌐 Host:', mongoose.connection.host);
-    logger.info('🔌 Ready State:', mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected');
+    logger.info('🔌 Connection State:', 'Connected (Ready)');
+    logger.info('💾 Ready to accept database operations');
+    logger.info('═══════════════════════════════════════════════════════════');
+    logger.info('');
     
     // Handle connection events
     mongoose.connection.on('error', (err) => {
-      logger.error('❌ MongoDB connection error:', err.message);
+      logger.error('');
+      logger.error('═══════════════════════════════════════════════════════════');
+      logger.error('❌ MongoDB Connection Error!');
+      logger.error('═══════════════════════════════════════════════════════════');
+      logger.error('Error:', err.message);
+      logger.error('Check your MONGODB_URI and network access');
+      logger.error('═══════════════════════════════════════════════════════════');
+      logger.error('');
     });
     
     mongoose.connection.on('disconnected', () => {
-      logger.warn('⚠️  MongoDB disconnected. Attempting to reconnect...');
+      logger.warn('');
+      logger.warn('⚠️  MongoDB Disconnected!');
+      logger.warn('Attempting to reconnect...');
+      logger.warn('');
     });
     
     mongoose.connection.on('reconnected', () => {
-      logger.info('✅ MongoDB reconnected successfully');
+      logger.info('');
+      logger.info('✅ MongoDB Reconnected Successfully!');
+      logger.info('');
     });
   })
   .catch((error) => {
-    logger.error('❌ MongoDB connection error:', error.message);
-    logger.error('⚠️  Check your MONGODB_URI environment variable in Render');
-    logger.error('⚠️  Make sure:');
-    logger.error('   1. Password is correct and URL-encoded');
-    logger.error('   2. IP whitelist includes 0.0.0.0/0');
-    logger.error('   3. Database name is included in connection string');
-    logger.error('   4. Connection string format: mongodb+srv://username:password@cluster.mongodb.net/database-name?retryWrites=true&w=majority');
+    logger.error('');
+    logger.error('═══════════════════════════════════════════════════════════');
+    logger.error('❌ MongoDB Connection Failed!');
+    logger.error('═══════════════════════════════════════════════════════════');
+    logger.error('Error:', error.message);
+    logger.error('');
+    logger.error('🔍 Troubleshooting Steps:');
+    logger.error('   1. Check MONGODB_URI environment variable is set');
+    logger.error('   2. Verify username and password are correct');
+    logger.error('   3. Ensure IP whitelist includes 0.0.0.0/0 (or your server IP)');
+    logger.error('   4. Check MongoDB Atlas cluster is running');
+    logger.error('   5. Verify network connectivity');
+    logger.error('');
+    logger.error('📝 Connection String Format:');
+    logger.error('   mongodb+srv://username:password@cluster.mongodb.net/database-name?retryWrites=true&w=majority');
+    logger.error('');
+    logger.error('🔗 Test Connection:');
+    logger.error('   GET /api/test-db - Test database connection');
+    logger.error('   GET /api/health - Check server and database status');
+    logger.error('═══════════════════════════════════════════════════════════');
+    logger.error('');
     
     // Retry connection logic
     let retries = 0;
@@ -523,14 +555,86 @@ app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/rewards', rewardRoutes);
 
-// Health check
+// MongoDB connection status helper
+const getMongoDBStatus = () => {
+  const states = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting'
+  };
+  const readyState = mongoose.connection.readyState;
+  return {
+    status: states[readyState] || 'unknown',
+    readyState: readyState,
+    isConnected: readyState === 1,
+    host: mongoose.connection.host || 'N/A',
+    port: mongoose.connection.port || 'N/A',
+    name: mongoose.connection.name || 'N/A'
+  };
+};
+
+// Health check with detailed MongoDB status
 app.get('/api/health', (req, res) => {
-  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
-  res.json({ 
-    status: 'ok', 
+  const mongoStatus = getMongoDBStatus();
+  const isHealthy = mongoStatus.isConnected;
+  
+  res.status(isHealthy ? 200 : 503).json({ 
+    status: isHealthy ? 'ok' : 'degraded',
     timestamp: new Date().toISOString(),
-    database: dbStatus
+    database: {
+      ...mongoStatus,
+      message: mongoStatus.isConnected 
+        ? 'MongoDB is connected and ready' 
+        : `MongoDB is ${mongoStatus.status}. Check connection string and network access.`
+    },
+    server: {
+      uptime: process.uptime(),
+      memory: process.memoryUsage()
+    }
   });
+});
+
+// MongoDB connection test endpoint
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const mongoStatus = getMongoDBStatus();
+    
+    if (!mongoStatus.isConnected) {
+      return res.status(503).json({
+        success: false,
+        error: 'MongoDB is not connected',
+        status: mongoStatus,
+        troubleshooting: {
+          checkConnectionString: 'Verify MONGODB_URI environment variable is set correctly',
+          checkIPWhitelist: 'Ensure MongoDB Atlas IP whitelist includes 0.0.0.0/0 or your server IP',
+          checkCredentials: 'Verify username and password are correct',
+          checkNetwork: 'Check if MongoDB Atlas cluster is accessible'
+        }
+      });
+    }
+    
+    // Try a simple database operation
+    const testResult = await mongoose.connection.db.admin().ping();
+    
+    res.json({
+      success: true,
+      message: 'MongoDB connection is working!',
+      status: mongoStatus,
+      test: {
+        ping: testResult,
+        database: mongoose.connection.name,
+        collections: await mongoose.connection.db.listCollections().toArray()
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'MongoDB test failed',
+      message: error.message,
+      status: getMongoDBStatus()
+    });
+  }
 });
 
 // Root route
