@@ -309,5 +309,88 @@ router.put('/change-password', authenticate, async (req, res) => {
   }
 });
 
+// Initialize braider accounts from config (admin only)
+router.post('/initialize-braiders', authenticate, async (req, res) => {
+  try {
+    // Only admins can initialize braiders
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can initialize braider accounts.' });
+    }
+
+    const { braiderCredentials } = await import('../config/braiderCredentials.js');
+    const results = {
+      created: [],
+      updated: [],
+      errors: []
+    };
+
+    for (const cred of braiderCredentials) {
+      try {
+        const existingUser = await User.findOne({ email: cred.email.toLowerCase() });
+        
+        if (existingUser) {
+          // Update existing user
+          existingUser.name = cred.name;
+          existingUser.phone = cred.phone;
+          existingUser.braiderId = cred.braiderId;
+          existingUser.role = cred.role;
+          existingUser.password = cred.password; // Will be hashed by pre-save hook
+          existingUser.isActive = true;
+          await existingUser.save();
+          results.updated.push(cred.email);
+        } else {
+          // Create new user
+          const newUser = new User({
+            name: cred.name,
+            email: cred.email.toLowerCase(),
+            phone: cred.phone,
+            password: cred.password,
+            role: cred.role,
+            braiderId: cred.braiderId,
+            isActive: true
+          });
+          await newUser.save();
+          results.created.push(cred.email);
+        }
+      } catch (error) {
+        results.errors.push({ email: cred.email, error: error.message });
+      }
+    }
+
+    res.json({
+      message: 'Braider accounts initialized',
+      results
+    });
+  } catch (error) {
+    logger.error('Initialize braiders error:', error);
+    res.status(500).json({ error: 'Failed to initialize braider accounts.' });
+  }
+});
+
+// Get braider credentials list (admin only, without passwords)
+router.get('/braider-credentials', authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can view braider credentials.' });
+    }
+
+    const { braiderCredentials } = await import('../config/braiderCredentials.js');
+    
+    // Return credentials without passwords for security
+    const safeCredentials = braiderCredentials.map(cred => ({
+      braiderId: cred.braiderId,
+      name: cred.name,
+      email: cred.email,
+      phone: cred.phone,
+      role: cred.role
+    }));
+
+    res.json({ credentials: safeCredentials });
+  } catch (error) {
+    logger.error('Get braider credentials error:', error);
+    res.status(500).json({ error: 'Failed to fetch braider credentials.' });
+  }
+});
+
 export default router;
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { login, register } from '../utils/auth'
-import { isAdmin, isBraider } from '../utils/auth'
+import { login } from '../utils/auth'
+import { isAdmin, isBraider, getCurrentUser } from '../utils/auth'
 import { healthCheck } from '../utils/api'
 import { toast } from '../utils/toast'
 import './Login.css'
@@ -17,8 +17,25 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [serverStatus, setServerStatus] = useState('checking')
+  const [currentUser, setCurrentUser] = useState(null)
 
   const from = location.state?.from?.pathname || '/my-bookings'
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const user = getCurrentUser()
+    if (user) {
+      setCurrentUser(user)
+      // Redirect if already logged in
+      if (isAdmin()) {
+        navigate('/admin', { replace: true })
+      } else if (isBraider()) {
+        navigate('/braider-profile', { replace: true })
+      } else {
+        navigate(from, { replace: true })
+      }
+    }
+  }, [navigate, from])
 
   // Check server health on mount
   useEffect(() => {
@@ -160,32 +177,21 @@ const Login = () => {
             </button>
           </form>
 
-          <div className="login-demo">
-            <h3>Demo Accounts</h3>
-            <div className="demo-accounts">
-              <div className="demo-account">
-                <strong>Admin:</strong>
-                <p>Email: admin@toubahair.com</p>
-                <p>Password: Admin123!@#</p>
-                <small>Full access to admin dashboard</small>
-              </div>
-              <div className="demo-account">
-                <strong>Employee (Example):</strong>
-                <p>Email: mariama@toubahair.com</p>
-                <p>Password: Employee123!</p>
-                <small>Access braider dashboard</small>
-              </div>
-              <div className="demo-account">
-                <strong>Client (Example):</strong>
-                <p>Email: customer1@example.com</p>
-                <p>Password: Customer123!</p>
-                <small>Access bookings & rewards</small>
-              </div>
-              <div className="demo-account-note">
-                <small>See DEMO_CREDENTIALS.md for all accounts</small>
-              </div>
+          {/* Admin login section - only visible to admins */}
+          {isAdmin() && (
+            <div className="login-admin-section" style={{ 
+              marginTop: '20px', 
+              padding: '15px', 
+              backgroundColor: '#f8f9fa', 
+              borderRadius: '8px',
+              border: '1px solid #dee2e6'
+            }}>
+              <h3 style={{ fontSize: '14px', marginBottom: '10px', color: '#6c757d' }}>Admin Access</h3>
+              <p style={{ fontSize: '12px', color: '#6c757d', margin: 0 }}>
+                You are logged in as an administrator.
+              </p>
             </div>
-          </div>
+          )}
 
           <div className="login-footer">
             <p>Don't have an account? <a href="/register">Sign up here</a></p>

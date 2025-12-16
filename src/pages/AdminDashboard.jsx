@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { appointmentsAPI, rewardsAPI } from '../utils/api'
+import { appointmentsAPI, rewardsAPI, authAPI } from '../utils/api'
 import { getCurrentUser } from '../utils/auth'
 import { formatDateDisplay } from '../utils/timeSlots'
 import { toast } from '../utils/toast'
@@ -16,12 +16,42 @@ const AdminDashboard = () => {
   })
   const [filter, setFilter] = useState('all') // all, upcoming, completed, cancelled
   const [selectedDate, setSelectedDate] = useState('')
+  const [braiderCredentials, setBraiderCredentials] = useState([])
+  const [showBraiderSection, setShowBraiderSection] = useState(false)
+  const [initializingBraiders, setInitializingBraiders] = useState(false)
 
   const user = getCurrentUser()
 
   useEffect(() => {
     loadAppointments()
+    loadBraiderCredentials()
   }, [filter, selectedDate])
+
+  const loadBraiderCredentials = async () => {
+    try {
+      const response = await authAPI.getBraiderCredentials()
+      setBraiderCredentials(response.credentials || [])
+    } catch (error) {
+      // Silently fail - credentials might not be loaded yet
+    }
+  }
+
+  const handleInitializeBraiders = async () => {
+    if (!window.confirm('This will create or update braider accounts with pre-set credentials. Continue?')) {
+      return
+    }
+
+    try {
+      setInitializingBraiders(true)
+      const response = await authAPI.initializeBraiders()
+      toast.success(`Braider accounts initialized! Created: ${response.results.created.length}, Updated: ${response.results.updated.length}`)
+      await loadBraiderCredentials()
+    } catch (error) {
+      toast.error(error.message || 'Failed to initialize braider accounts')
+    } finally {
+      setInitializingBraiders(false)
+    }
+  }
 
   const loadAppointments = async () => {
     try {
@@ -116,6 +146,65 @@ const AdminDashboard = () => {
         <div className="dashboard-header">
           <h1 className="page-title">Admin Dashboard</h1>
           <p className="page-subtitle">Welcome back, {user?.name || 'Admin'}!</p>
+        </div>
+
+        {/* Braider Management Section */}
+        <div className="admin-section" style={{ marginBottom: '30px', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <h2 style={{ margin: 0, fontSize: '20px' }}>Braider Account Management</h2>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowBraiderSection(!showBraiderSection)}
+            >
+              {showBraiderSection ? 'Hide' : 'Show'} Braider Credentials
+            </button>
+          </div>
+          
+          {showBraiderSection && (
+            <div>
+              <p style={{ marginBottom: '15px', color: '#6c757d' }}>
+                Manage pre-set braider credentials. Braiders use these credentials to log in.
+              </p>
+              
+              <button
+                className="btn btn-primary"
+                onClick={handleInitializeBraiders}
+                disabled={initializingBraiders}
+                style={{ marginBottom: '20px' }}
+              >
+                {initializingBraiders ? 'Initializing...' : 'Initialize Braider Accounts'}
+              </button>
+
+              {braiderCredentials.length > 0 && (
+                <div className="braider-credentials-table" style={{ marginTop: '20px' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ backgroundColor: '#e9ecef' }}>
+                        <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #dee2e6' }}>Braider</th>
+                        <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #dee2e6' }}>Email</th>
+                        <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #dee2e6' }}>Phone</th>
+                        <th style={{ padding: '10px', textAlign: 'left', border: '1px solid #dee2e6' }}>Braider ID</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {braiderCredentials.map((cred, index) => (
+                        <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f8f9fa' }}>
+                          <td style={{ padding: '10px', border: '1px solid #dee2e6' }}>{cred.name}</td>
+                          <td style={{ padding: '10px', border: '1px solid #dee2e6' }}>{cred.email}</td>
+                          <td style={{ padding: '10px', border: '1px solid #dee2e6' }}>{cred.phone || 'N/A'}</td>
+                          <td style={{ padding: '10px', border: '1px solid #dee2e6' }}>{cred.braiderId}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p style={{ marginTop: '15px', fontSize: '14px', color: '#6c757d' }}>
+                    <strong>Note:</strong> Passwords are stored securely and not displayed here. 
+                    Braiders should contact you for their login credentials.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Stats Cards */}

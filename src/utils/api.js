@@ -144,6 +144,23 @@ export const authAPI = {
       },
       body: JSON.stringify(data),
     });
+  },
+  initializeBraiders: () => {
+    const token = localStorage.getItem('auth_token');
+    return apiCall('/api/auth/initialize-braiders', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
+  getBraiderCredentials: () => {
+    const token = localStorage.getItem('auth_token');
+    return apiCall('/api/auth/braider-credentials', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
   }
 };
 
