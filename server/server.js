@@ -188,8 +188,6 @@ const defaultAllowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://hadeems.github.io',
-  'https://hadeems.github.io/touba-hair_hs',
-  'https://hadeems.github.io/Touba-Hair_HS',
   'https://touba-hair-hs-1.onrender.com' // ✅ optional, but helpful for direct testing
 ];
 
@@ -202,11 +200,13 @@ const normalizeOrigin = (origin) => origin?.toLowerCase().replace(/\/+$/, '');
 const isOriginAllowed = (origin) => {
   const normalizedOrigin = normalizeOrigin(origin);
   if (!normalizedOrigin) return true;
-  return allowedOrigins.some((allowed) => {
-    const normalizedAllowed = normalizeOrigin(allowed);
-    return normalizedOrigin === normalizedAllowed || normalizedOrigin.startsWith(normalizedAllowed);
-  });
+
+  return allowedOrigins
+    .map(normalizeOrigin)
+    .filter(Boolean)
+    .includes(normalizedOrigin);
 };
+
 
 // ✅ FIXED CORS: do NOT throw errors in production; deny gracefully
 app.use(cors({

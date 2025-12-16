@@ -5,7 +5,43 @@
 **Email:** `admin@toubahair.com`  
 **Password:** `Admin123!@#`
 
-## How to Access
+## ⚠️ If Login Says "Wrong Credentials"
+
+**The admin account might not exist in your database yet!** You need to create it first.
+
+### Quick Fix: Create Admin Account (Browser Method)
+
+1. Go to your website: https://hadeems.github.io/Touba-Hair_HS
+2. Press `F12` to open Developer Tools
+3. Click the **Console** tab
+4. Copy and paste this code, then press Enter:
+
+```javascript
+fetch('https://touba-hair-hs-1.onrender.com/api/auth/create-demo-users', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' }
+})
+.then(res => res.json())
+.then(data => {
+  console.log('✅ Success!', data);
+  alert('Admin account created! You can now log in with:\nEmail: admin@toubahair.com\nPassword: Admin123!@#');
+})
+.catch(err => {
+  console.error('❌ Error:', err);
+  alert('Error: ' + err.message);
+});
+```
+
+5. Wait for the success message
+6. Go to the login page and use the credentials above
+
+### Alternative: Using Command Line
+
+```bash
+curl -X POST https://touba-hair-hs-1.onrender.com/api/auth/create-demo-users -H "Content-Type: application/json"
+```
+
+## How to Access (After Creating Account)
 
 1. Go to your site: https://hadeems.github.io/Touba-Hair_HS/login
 2. Enter the credentials above
