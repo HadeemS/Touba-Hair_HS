@@ -67,15 +67,9 @@ if (MONGODB_URI && !MONGODB_URI.includes('<db_password>')) {
         if (queryString) {
           // Merge retryWrites if not present
           if (!queryString.includes('retryWrites')) {
-            // queryString already starts with ?, so append with &
-            newUri += `${queryString}&retryWrites=true&w=majority`;
+            newUri += `${queryString.includes('?') ? '&' : '?'}retryWrites=true&w=majority`;
           } else {
-            // retryWrites already present, just add w=majority if missing
-            if (!queryString.includes('w=majority')) {
-              newUri += `${queryString}&w=majority`;
-            } else {
-              newUri += queryString;
-            }
+            newUri += queryString;
           }
         } else {
           // Add default query parameters
