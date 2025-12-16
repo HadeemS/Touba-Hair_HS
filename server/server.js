@@ -837,21 +837,71 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
-// Root route
+// Root route - simple API info page
 app.get('/', (req, res) => {
-  res.json({
-    message: 'Touba Hair API',
-    version: '2.0.0',
-    status: 'running',
-    endpoints: {
-      auth: '/api/auth',
-      appointments: '/api/appointments',
-      rewards: '/api/rewards',
-      gallery: '/api/gallery',
-      prices: '/api/prices',
-      health: '/api/health'
-    }
-  });
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Touba Hair API</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+          max-width: 800px;
+          margin: 50px auto;
+          padding: 20px;
+          background: #f5f5f5;
+        }
+        .container {
+          background: white;
+          padding: 30px;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #d63384; margin-top: 0; }
+        .status { 
+          display: inline-block;
+          padding: 4px 12px;
+          background: #28a745;
+          color: white;
+          border-radius: 4px;
+          font-size: 14px;
+          font-weight: bold;
+        }
+        .endpoints {
+          margin-top: 20px;
+        }
+        .endpoint {
+          padding: 8px;
+          margin: 5px 0;
+          background: #f8f9fa;
+          border-left: 3px solid #d63384;
+          font-family: monospace;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>✨ Touba Hair API</h1>
+        <p><span class="status">RUNNING</span> Version 2.0.0</p>
+        <p>Backend API for Touba Hair Salon booking system.</p>
+        <div class="endpoints">
+          <h3>Available Endpoints:</h3>
+          <div class="endpoint">GET /api/health - Health check</div>
+          <div class="endpoint">POST /api/auth/login - User login</div>
+          <div class="endpoint">POST /api/auth/register - User registration</div>
+          <div class="endpoint">GET /api/appointments - Get appointments</div>
+          <div class="endpoint">GET /api/rewards - Get rewards</div>
+          <div class="endpoint">GET /api/gallery - Get gallery</div>
+          <div class="endpoint">GET /api/prices - Get prices</div>
+        </div>
+        <p style="margin-top: 30px; color: #666; font-size: 14px;">
+          Frontend: <a href="https://hadeems.github.io/Touba-Hair_HS" target="_blank">https://hadeems.github.io/Touba-Hair_HS</a>
+        </p>
+      </div>
+    </body>
+    </html>
+  `);
 });
 
 // Start server

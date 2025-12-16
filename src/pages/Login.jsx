@@ -17,23 +17,37 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [serverStatus, setServerStatus] = useState('checking')
-  const [currentUser, setCurrentUser] = useState(null)
 
-  const from = location.state?.from?.pathname || '/my-bookings'
+  const from = location.state?.from?.pathname || '/'
 
-  // Check if user is already logged in
+  // Check if user is already logged in and redirect accordingly
   useEffect(() => {
-    const user = getCurrentUser()
-    if (user) {
-      setCurrentUser(user)
-      // Redirect if already logged in
-      if (isAdmin()) {
-        navigate('/admin', { replace: true })
-      } else if (isBraider()) {
-        navigate('/braider-profile', { replace: true })
-      } else {
-        navigate(from, { replace: true })
+    const checkAuth = () => {
+      const user = getCurrentUser()
+      if (user) {
+        // Redirect if already logged in
+        if (isAdmin()) {
+          navigate('/admin', { replace: true })
+        } else if (isBraider()) {
+          navigate('/braider-profile', { replace: true })
+        } else {
+          // For clients, go to home or my-bookings
+          const redirectTo = from === '/login' ? '/my-bookings' : from
+          navigate(redirectTo, { replace: true })
+        }
       }
+    }
+    
+    checkAuth()
+    
+    // Listen for auth changes (e.g., after registration)
+    const handleAuthChange = () => {
+      checkAuth()
+    }
+    window.addEventListener('auth-changed', handleAuthChange)
+    
+    return () => {
+      window.removeEventListener('auth-changed', handleAuthChange)
     }
   }, [navigate, from])
 
@@ -77,6 +91,7 @@ const Login = () => {
       const result = await login(formData.email, formData.password)
       
       if (result.success) {
+        toast.success('Login successful!')
         // Wait for next tick to ensure localStorage and state are updated
         requestAnimationFrame(() => {
           // Redirect based on user role
@@ -85,7 +100,9 @@ const Login = () => {
           } else if (isBraider()) {
             navigate('/braider-profile', { replace: true })
           } else {
-            navigate(from, { replace: true })
+            // For clients, redirect to my-bookings or home
+            const redirectTo = from === '/login' ? '/my-bookings' : from
+            navigate(redirectTo, { replace: true })
           }
         })
       } else {

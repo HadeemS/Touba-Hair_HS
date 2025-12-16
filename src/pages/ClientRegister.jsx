@@ -65,8 +65,11 @@ const ClientRegister = () => {
       })
 
       if (result.success) {
-        toast.success('Account created successfully! You can now log in.')
-        navigate('/login', { state: { from: { pathname: '/my-bookings' } } })
+        toast.success('Account created successfully! Welcome!')
+        // Auto-login after registration - redirect to home or my-bookings
+        requestAnimationFrame(() => {
+          navigate('/my-bookings', { replace: true })
+        })
       } else {
         const errorMsg = result.error || 'Registration failed. Please try again.'
         setError(errorMsg)

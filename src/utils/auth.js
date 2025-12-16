@@ -82,12 +82,22 @@ export const register = async (userData) => {
         loggedIn: true,
         loginTime: new Date().toISOString()
       }))
+      // Dispatch custom event for same-tab auth updates
+      window.dispatchEvent(new Event('auth-changed'))
       return { success: true, user: response.user }
     }
     
     return { success: false, error: 'Registration failed' }
   } catch (error) {
-    return { success: false, error: error.message || 'Registration failed. Please try again.' }
+    let errorMessage = 'Registration failed. Please try again.'
+    
+    if (error.response) {
+      errorMessage = error.response.error || error.response.message || errorMessage
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    return { success: false, error: errorMessage }
   }
 }
 

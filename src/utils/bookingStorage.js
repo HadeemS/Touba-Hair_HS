@@ -8,7 +8,7 @@ export const getBookings = () => {
     const bookings = localStorage.getItem(STORAGE_KEY)
     return bookings ? JSON.parse(bookings) : []
   } catch (error) {
-    console.error('Error getting bookings:', error)
+    // Silently fail - return empty array
     return []
   }
 }
@@ -25,7 +25,6 @@ export const saveBooking = (booking) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings))
     return newBooking
   } catch (error) {
-    console.error('Error saving booking:', error)
     throw error
   }
 }
@@ -37,7 +36,6 @@ export const deleteBooking = (bookingId) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered))
     return true
   } catch (error) {
-    console.error('Error deleting booking:', error)
     return false
   }
 }

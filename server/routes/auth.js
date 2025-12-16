@@ -62,7 +62,7 @@ router.post('/register', validate(registerValidation), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    logger.error('Registration error:', error);
     res.status(500).json({ error: 'Failed to register user. Please try again.' });
   }
 });
@@ -156,7 +156,7 @@ router.post('/login', authLimiter, validate(loginValidation), async (req, res) =
     const token = generateToken(user._id);
     const duration = Date.now() - startTime;
 
-    console.log(`[LOGIN] Success: ${email} (${user.role}) - ${duration}ms`);
+    logger.info(`[LOGIN] Success: ${email} (${user.role}) - ${duration}ms`);
 
     res.json({
       message: 'Login successful',
@@ -210,7 +210,7 @@ router.get('/me', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get user error:', error);
+    logger.error('Get user error:', error);
     res.status(500).json({ error: 'Failed to fetch user data.' });
   }
 });
@@ -253,7 +253,7 @@ router.put('/profile', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Update profile error:', error);
+    logger.error('Update profile error:', error);
     res.status(500).json({ error: 'Failed to update profile.' });
   }
 });
@@ -304,7 +304,7 @@ router.put('/change-password', authenticate, async (req, res) => {
       message: 'Password changed successfully'
     });
   } catch (error) {
-    console.error('Change password error:', error);
+    logger.error('Change password error:', error);
     res.status(500).json({ error: 'Failed to change password.' });
   }
 });

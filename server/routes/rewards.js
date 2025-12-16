@@ -1,6 +1,7 @@
 import express from 'express';
 import Reward from '../models/Reward.js';
 import { authenticate, requireEmployee } from '../middleware/auth.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -33,7 +34,7 @@ router.get('/me', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get rewards error:', error);
+    logger.error('Get rewards error:', error);
     res.status(500).json({ error: 'Failed to fetch rewards.' });
   }
 });
@@ -50,7 +51,7 @@ router.get('/client/:clientId', authenticate, requireEmployee, async (req, res) 
 
     res.json({ reward });
   } catch (error) {
-    console.error('Get client rewards error:', error);
+    logger.error('Get client rewards error:', error);
     res.status(500).json({ error: 'Failed to fetch client rewards.' });
   }
 });
@@ -92,7 +93,7 @@ router.post('/adjust', authenticate, requireEmployee, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Adjust points error:', error);
+    logger.error('Adjust points error:', error);
     res.status(500).json({ error: 'Failed to adjust points.' });
   }
 });
@@ -129,7 +130,7 @@ router.post('/redeem', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Redeem points error:', error);
+    logger.error('Redeem points error:', error);
     res.status(500).json({ error: 'Failed to redeem points.' });
   }
 });
