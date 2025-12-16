@@ -122,3 +122,4 @@ After running `/api/auth/create-demo-users`, you'll have:
 **Test Client:**
 - Email: `customer1@example.com` | Password: `Customer123!`
 
+

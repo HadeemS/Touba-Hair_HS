@@ -17,8 +17,27 @@ dist-ssr
 .env.local
 .env.production
 .env.development
+.env.*
 server/.env
 server/.env.local
+server/.env.*
+
+# Sensitive credential files - DO NOT COMMIT THESE!
+ADMIN_CREDENTIALS.md
+CREATE_ADMIN_ACCOUNT.md
+CREATE_ADMIN.md
+DEMO_CREDENTIALS.md
+*CREDENTIALS*.md
+*_CREDENTIALS*.md
+*CONNECTION_STRING*.txt
+YOUR_CONNECTION_STRING.txt
+*CONNECTION*.md
+
+# Configuration files with secrets - DO NOT COMMIT THESE!
+server/config/braiderCredentials.js
+**/config/*credentials*.js
+**/config/*secrets*.js
+**/config/*secrets*.json
 
 # Editor directories and files
 .vscode/*

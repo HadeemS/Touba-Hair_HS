@@ -1,6 +1,0 @@
-Your Complete MongoDB Connection String:
-
-mongodb+srv://Hvdeem:HXKekoskee6%24HS@toubacluster.enbxk.mongodb.net/touba-hair?retryWrites=true&w=majority
-
-IMPORTANT: Copy this EXACT string (the $ is encoded as %24)
-
