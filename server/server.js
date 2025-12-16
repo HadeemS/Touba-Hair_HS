@@ -41,28 +41,28 @@ let MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/touba-ha
 // Fix MongoDB connection string - ensure proper format
 if (MONGODB_URI && !MONGODB_URI.includes('<db_password>')) {
   const dbName = process.env.MONGODB_DB_NAME || 'touba-hair';
-  
+
   try {
     // Parse and reconstruct the connection string properly
     if (MONGODB_URI.includes('mongodb+srv://')) {
       // Extract components from mongodb+srv:// connection
       const match = MONGODB_URI.match(/mongodb\+srv:\/\/([^@]+)@([^/?]+)(\/[^?]*)?(\?.*)?/);
-      
+
       if (match) {
         const credentials = match[1]; // username:password
         const host = match[2]; // cluster.mongodb.net
         const existingPath = match[3] || ''; // /database or empty
         const queryString = match[4] || ''; // ?options
-        
+
         // Clean existing path (remove leading/trailing slashes)
         const cleanPath = existingPath.replace(/^\/+|\/+$/g, '');
-        
+
         // Use existing database name if valid, otherwise use default
         const finalDbName = cleanPath && cleanPath.length > 0 ? cleanPath : dbName;
-        
+
         // Reconstruct URI with proper format: mongodb+srv://credentials@host/database?options
         let newUri = `mongodb+srv://${credentials}@${host}/${finalDbName}`;
-        
+
         // Add query parameters
         if (queryString) {
           // Merge retryWrites if not present
@@ -75,23 +75,23 @@ if (MONGODB_URI && !MONGODB_URI.includes('<db_password>')) {
           // Add default query parameters
           newUri += `?retryWrites=true&w=majority`;
         }
-        
+
         MONGODB_URI = newUri;
         logger.info(`MongoDB URI configured. Database: ${finalDbName}`);
       }
     } else if (MONGODB_URI.includes('mongodb://')) {
       // Standard MongoDB connection
       const match = MONGODB_URI.match(/mongodb:\/\/([^@]+@)?([^/]+)(\/[^?]*)?(\?.*)?/);
-      
+
       if (match) {
         const auth = match[1] || ''; // username:password@ or empty
         const host = match[2]; // host:port
         const existingPath = match[3] || ''; // /database or empty
         const queryString = match[4] || ''; // ?options
-        
+
         const cleanPath = existingPath.replace(/^\/+|\/+$/g, '');
         const finalDbName = cleanPath && cleanPath.length > 0 ? cleanPath : dbName;
-        
+
         MONGODB_URI = `mongodb://${auth}${host}/${finalDbName}${queryString || ''}`;
         logger.info(`MongoDB URI configured. Database: ${finalDbName}`);
       }
@@ -107,79 +107,79 @@ if (!MONGODB_URI || MONGODB_URI.includes('<db_password>')) {
   logger.error('Current MONGODB_URI:', MONGODB_URI ? 'Set but incomplete' : 'Not set');
 } else {
   logger.info('Attempting to connect to MongoDB...');
-  
+
   mongoose.connect(MONGODB_URI, {
     serverSelectionTimeoutMS: 30000, // Increased to 30s for better reliability
     socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
     maxPoolSize: 10, // Maintain up to 10 socket connections
     minPoolSize: 2, // Maintain at least 2 socket connections
   })
-  .then(() => {
-    logger.info('MongoDB connected successfully');
-    logger.info('Database Name:', mongoose.connection.name);
-    logger.info('Host:', mongoose.connection.host);
-    logger.info('Connection State:', 'Connected (Ready)');
-    logger.info('Ready to accept database operations');
+    .then(() => {
+      logger.info('MongoDB connected successfully');
+      logger.info('Database Name:', mongoose.connection.name);
+      logger.info('Host:', mongoose.connection.host);
+      logger.info('Connection State:', 'Connected (Ready)');
+      logger.info('Ready to accept database operations');
 
-    // Handle connection events
-    mongoose.connection.on('error', (err) => {
-      logger.error('MongoDB connection error:', err.message);
-      logger.error('Check your MONGODB_URI and network access');
+      // Handle connection events
+      mongoose.connection.on('error', (err) => {
+        logger.error('MongoDB connection error:', err.message);
+        logger.error('Check your MONGODB_URI and network access');
+      });
+
+      mongoose.connection.on('disconnected', () => {
+        logger.warn('MongoDB disconnected. Attempting to reconnect...');
+      });
+
+      mongoose.connection.on('reconnected', () => {
+        logger.info('MongoDB reconnected successfully');
+      });
+    })
+    .catch((error) => {
+      logger.error('MongoDB connection failed:', error.message);
+      logger.error('Troubleshooting Steps:');
+      logger.error('   1. Check MONGODB_URI environment variable is set');
+      logger.error('   2. Verify username and password are correct');
+      logger.error('   3. Ensure IP whitelist includes 0.0.0.0/0 (or your server IP)');
+      logger.error('   4. Check MongoDB Atlas cluster is running');
+      logger.error('   5. Verify network connectivity');
+      logger.error('Connection String Format:');
+      logger.error('   mongodb+srv://username:password@cluster.mongodb.net/database-name?retryWrites=true&w=majority');
+      logger.error('Test Connection:');
+      logger.error('   GET /api/test-db - Test database connection');
+      logger.error('   GET /api/health - Check server and database status');
+
+      // Retry connection logic
+      let retries = 0;
+      const maxRetries = 5;
+      const retryDelay = 5000; // 5 seconds
+
+      const retryConnection = () => {
+        if (retries < maxRetries) {
+          retries++;
+          logger.warn(`Retrying MongoDB connection (${retries}/${maxRetries})...`);
+          setTimeout(() => {
+            mongoose.connect(MONGODB_URI, {
+              serverSelectionTimeoutMS: 30000,
+              socketTimeoutMS: 45000,
+              maxPoolSize: 10,
+              minPoolSize: 2,
+            })
+              .then(() => {
+                logger.info('MongoDB reconnected successfully');
+              })
+              .catch((retryError) => {
+                logger.error(`Retry ${retries} failed:`, retryError.message);
+                retryConnection();
+              });
+          }, retryDelay);
+        } else {
+          logger.error('Max retries reached. MongoDB connection failed.');
+        }
+      };
+
+      retryConnection();
     });
-    
-    mongoose.connection.on('disconnected', () => {
-      logger.warn('MongoDB disconnected. Attempting to reconnect...');
-    });
-    
-    mongoose.connection.on('reconnected', () => {
-      logger.info('MongoDB reconnected successfully');
-    });
-  })
-  .catch((error) => {
-    logger.error('MongoDB connection failed:', error.message);
-    logger.error('Troubleshooting Steps:');
-    logger.error('   1. Check MONGODB_URI environment variable is set');
-    logger.error('   2. Verify username and password are correct');
-    logger.error('   3. Ensure IP whitelist includes 0.0.0.0/0 (or your server IP)');
-    logger.error('   4. Check MongoDB Atlas cluster is running');
-    logger.error('   5. Verify network connectivity');
-    logger.error('Connection String Format:');
-    logger.error('   mongodb+srv://username:password@cluster.mongodb.net/database-name?retryWrites=true&w=majority');
-    logger.error('Test Connection:');
-    logger.error('   GET /api/test-db - Test database connection');
-    logger.error('   GET /api/health - Check server and database status');
-    
-    // Retry connection logic
-    let retries = 0;
-    const maxRetries = 5;
-    const retryDelay = 5000; // 5 seconds
-    
-    const retryConnection = () => {
-      if (retries < maxRetries) {
-        retries++;
-        logger.warn(`Retrying MongoDB connection (${retries}/${maxRetries})...`);
-        setTimeout(() => {
-          mongoose.connect(MONGODB_URI, {
-            serverSelectionTimeoutMS: 30000,
-            socketTimeoutMS: 45000,
-            maxPoolSize: 10,
-            minPoolSize: 2,
-          })
-          .then(() => {
-            logger.info('MongoDB reconnected successfully');
-          })
-          .catch((retryError) => {
-            logger.error(`Retry ${retries} failed:`, retryError.message);
-            retryConnection();
-          });
-        }, retryDelay);
-      } else {
-        logger.error('Max retries reached. MongoDB connection failed.');
-      }
-    };
-    
-    retryConnection();
-  });
 }
 
 // Middleware
@@ -189,10 +189,11 @@ const defaultAllowedOrigins = [
   'http://localhost:3000',
   'https://hadeems.github.io',
   'https://hadeems.github.io/touba-hair_hs',
-  'https://hadeems.github.io/Touba-Hair_HS'
+  'https://hadeems.github.io/Touba-Hair_HS',
+  'https://touba-hair-hs-1.onrender.com' // ✅ optional, but helpful for direct testing
 ];
 
-const allowedOrigins = process.env.FRONTEND_URL 
+const allowedOrigins = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
   : defaultAllowedOrigins;
 
@@ -207,41 +208,42 @@ const isOriginAllowed = (origin) => {
   });
 };
 
+// ✅ FIXED CORS: do NOT throw errors in production; deny gracefully
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
+    // Allow requests with no origin (Render health checks, curl, Postman, etc.)
     if (!origin) return callback(null, true);
-    
+
     if (process.env.NODE_ENV === 'production') {
-      // In production, only allow specific origins
       if (isOriginAllowed(origin)) {
-        callback(null, true);
-      } else {
-        logger.warn(`Blocked CORS origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
+        return callback(null, true);
       }
-    } else {
-      // In development, allow all origins
-      callback(null, true);
+
+      logger.warn(`Blocked CORS origin: ${origin}`);
+      return callback(null, false); // ✅ deny without crashing
     }
+
+    // In development, allow all origins
+    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Auth-Token']
 }));
+
 app.use(express.json());
 app.use(express.static('public'));
 
 // Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
-  
+
   res.on('finish', () => {
     const duration = Date.now() - start;
     const logLevel = res.statusCode >= 400 ? 'error' : 'info';
     logger[logLevel](`${req.method} ${req.path} - ${res.statusCode} - ${duration}ms`);
   });
-  
+
   next();
 });
 
@@ -254,12 +256,12 @@ async function ensureDataDir() {
   if (!existsSync(dataDir)) {
     await fs.mkdir(dataDir, { recursive: true });
   }
-  
+
   // Initialize gallery.json if it doesn't exist
   if (!existsSync(galleryFile)) {
     await fs.writeFile(galleryFile, JSON.stringify([], null, 2));
   }
-  
+
   // Initialize prices.json if it doesn't exist
   if (!existsSync(pricesFile)) {
     const defaultPrices = [
@@ -334,7 +336,7 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit for videos
   fileFilter: (req, file, cb) => {
@@ -412,7 +414,7 @@ app.post('/api/gallery', upload.single('media'), async (req, res) => {
     const gallery = await readGallery();
     const isVideo = req.file.mimetype.startsWith('video/');
     const mediaUrl = `/uploads/${req.file.filename}`;
-    
+
     const newItem = {
       id: Date.now().toString(),
       type: isVideo ? 'video' : 'image',
@@ -440,7 +442,7 @@ app.put('/api/gallery/:id', async (req, res) => {
   try {
     const gallery = await readGallery();
     const index = gallery.findIndex(img => img.id === req.params.id);
-    
+
     if (index === -1) {
       return res.status(404).json({ error: 'Image not found' });
     }
@@ -463,7 +465,7 @@ app.delete('/api/gallery/:id', async (req, res) => {
   try {
     const gallery = await readGallery();
     const index = gallery.findIndex(img => img.id === req.params.id);
-    
+
     if (index === -1) {
       return res.status(404).json({ error: 'Item not found' });
     }
@@ -548,7 +550,7 @@ app.put('/api/prices/:id', async (req, res) => {
   try {
     const prices = await readPrices();
     const index = prices.findIndex(p => p.id === req.params.id);
-    
+
     if (index === -1) {
       return res.status(404).json({ error: 'Price not found' });
     }
@@ -571,7 +573,7 @@ app.delete('/api/prices/:id', async (req, res) => {
   try {
     const prices = await readPrices();
     const index = prices.findIndex(p => p.id === req.params.id);
-    
+
     if (index === -1) {
       return res.status(404).json({ error: 'Price not found' });
     }
@@ -613,14 +615,14 @@ const getMongoDBStatus = () => {
 app.get('/api/health', (req, res) => {
   const mongoStatus = getMongoDBStatus();
   const isHealthy = mongoStatus.isConnected;
-  
-  res.status(isHealthy ? 200 : 503).json({ 
+
+  res.status(isHealthy ? 200 : 503).json({
     status: isHealthy ? 'ok' : 'degraded',
     timestamp: new Date().toISOString(),
     database: {
       ...mongoStatus,
-      message: mongoStatus.isConnected 
-        ? 'MongoDB is connected and ready' 
+      message: mongoStatus.isConnected
+        ? 'MongoDB is connected and ready'
         : `MongoDB is ${mongoStatus.status}. Check connection string and network access.`
     },
     server: {
@@ -645,7 +647,7 @@ app.post('/api/auth/create-admin', async (req, res) => {
       existingUser.password = password;
       existingUser.isActive = true;
       await existingUser.save();
-      
+
       return res.status(200).json({
         message: 'Admin account updated (password reset)',
         user: {
@@ -739,7 +741,7 @@ app.post('/api/auth/create-demo-users', async (req, res) => {
     for (const userData of demoUsers) {
       try {
         const existingUser = await User.findOne({ email: userData.email.toLowerCase() });
-        
+
         if (existingUser) {
           // Update existing user
           existingUser.name = userData.name;
@@ -797,7 +799,7 @@ app.post('/api/auth/create-demo-users', async (req, res) => {
 app.get('/api/test-db', async (req, res) => {
   try {
     const mongoStatus = getMongoDBStatus();
-    
+
     if (!mongoStatus.isConnected) {
       return res.status(503).json({
         success: false,
@@ -811,10 +813,10 @@ app.get('/api/test-db', async (req, res) => {
         }
       });
     }
-    
+
     // Try a simple database operation
     const testResult = await mongoose.connection.db.admin().ping();
-    
+
     res.json({
       success: true,
       message: 'MongoDB connection is working!',
@@ -837,8 +839,8 @@ app.get('/api/test-db', async (req, res) => {
 
 // Root route
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Touba Hair API', 
+  res.json({
+    message: 'Touba Hair API',
     version: '2.0.0',
     status: 'running',
     endpoints: {
@@ -859,4 +861,3 @@ app.listen(PORT, () => {
   logger.info(`Prices API: http://localhost:${PORT}/api/prices`);
   logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
-

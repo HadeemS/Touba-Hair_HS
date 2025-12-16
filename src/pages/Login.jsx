@@ -38,21 +38,25 @@ const Login = () => {
   }, [navigate, from])
 
   // Check server health on mount
-  useEffect(() => {
-    const checkServer = async () => {
-      try {
-        const health = await healthCheck()
-        if (health.status === 'ok' && health.database?.isConnected) {
-          setServerStatus('online')
-        } else {
-          setServerStatus('degraded')
-          setError('Server is starting up. Please wait a moment and try again.')
-        }
-      } catch (err) {
-        setServerStatus('offline')
-        setError('Cannot connect to server. The backend may be starting up. Please wait a moment.')
+  const checkServer = async () => {
+    setServerStatus('checking')
+    setError('')
+    try {
+      const health = await healthCheck()
+      if (health.status === 'ok' && health.database?.isConnected) {
+        setServerStatus('online')
+        setError('')
+      } else {
+        setServerStatus('degraded')
+        setError('Server is starting up. Please wait a moment and try again.')
       }
+    } catch (err) {
+      setServerStatus('offline')
+      setError('Cannot connect to server. The backend may be starting up. Please wait a moment.')
     }
+  }
+
+  useEffect(() => {
     checkServer()
   }, [])
 
@@ -108,13 +112,69 @@ const Login = () => {
           </div>
 
           {serverStatus === 'offline' && (
-            <div className="error-message" style={{ backgroundColor: '#fff3cd', color: '#856404', border: '1px solid #ffc107' }}>
-              ⚠️ Server is offline. The backend may be starting up. Please wait a moment and refresh.
+            <div className="error-message" style={{ backgroundColor: '#fff3cd', color: '#856404', border: '1px solid #ffc107', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <div>
+                  <strong>⚠️ Server is offline</strong>
+                  <p style={{ margin: '5px 0 0 0', fontSize: '0.9em' }}>
+                    The backend may be starting up. Free Render services sleep after 15 minutes of inactivity and take 30-60 seconds to wake up.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={checkServer}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#ffc107',
+                    color: '#856404',
+                    border: '1px solid #ffc107',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {serverStatus === 'checking' ? 'Checking...' : 'Check Server'}
+                </button>
+              </div>
             </div>
           )}
           {serverStatus === 'degraded' && (
-            <div className="error-message" style={{ backgroundColor: '#fff3cd', color: '#856404', border: '1px solid #ffc107' }}>
-              ⚠️ Database is connecting. Please wait a moment and try again.
+            <div className="error-message" style={{ backgroundColor: '#fff3cd', color: '#856404', border: '1px solid #ffc107', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <div>
+                  <strong>⚠️ Database is connecting</strong>
+                  <p style={{ margin: '5px 0 0 0', fontSize: '0.9em' }}>
+                    Please wait a moment and try again.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={checkServer}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#ffc107',
+                    color: '#856404',
+                    border: '1px solid #ffc107',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {serverStatus === 'checking' ? 'Checking...' : 'Refresh'}
+                </button>
+              </div>
+            </div>
+          )}
+          {serverStatus === 'checking' && (
+            <div className="error-message" style={{ backgroundColor: '#d1ecf1', color: '#0c5460', border: '1px solid #bee5eb', padding: '15px', borderRadius: '8px', marginBottom: '15px' }}>
+              🔄 Checking server status...
+            </div>
+          )}
+          {serverStatus === 'online' && (
+            <div className="error-message" style={{ backgroundColor: '#d4edda', color: '#155724', border: '1px solid #c3e6cb', padding: '10px 15px', borderRadius: '8px', marginBottom: '15px', fontSize: '0.9em' }}>
+              ✅ Server is online and ready
             </div>
           )}
           {error && serverStatus === 'online' && (
