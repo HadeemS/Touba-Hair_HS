@@ -32,8 +32,39 @@ export const registerValidation = [
 ];
 
 export const loginValidation = [
-  body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
-  body('password').optional().notEmpty().withMessage('Password cannot be empty if provided')
+  body('email').optional().isEmail().normalizeEmail().withMessage('Please provide a valid email'),
+  body('username').optional().trim().isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
+  body('password').notEmpty().withMessage('Password is required'),
+  body().custom((value, { req }) => {
+    // Either email or username must be provided
+    if (!req.body.email && !req.body.username) {
+      throw new Error('Either email or username is required');
+    }
+    return true;
+  })
+];
+
+export const changePasswordValidation = [
+  body('currentPassword').optional().notEmpty().withMessage('Current password cannot be empty if provided'),
+  body('newPassword')
+    .isLength({ min: 10 }).withMessage('Password must be at least 10 characters')
+    .matches(/^(?=.*[a-zA-Z])(?=.*\d)/).withMessage('Password must contain at least one letter and one number'),
+  body('confirmPassword')
+    .custom((value, { req }) => {
+      if (value !== req.body.newPassword) {
+        throw new Error('Passwords do not match');
+      }
+      return true;
+    })
+];
+
+export const createUserValidation = [
+  body('fullName').trim().isLength({ min: 2 }).withMessage('Full name must be at least 2 characters'),
+  body('username').optional().trim().isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
+  body('email').optional().isEmail().normalizeEmail().withMessage('Please provide a valid email'),
+  body('location').isIn(['Sandhills', 'Two Notch']).withMessage('Location must be Sandhills or Two Notch'),
+  body('role').isIn(['employee', 'admin']).withMessage('Role must be employee or admin'),
+  body('password').optional().isLength({ min: 10 }).withMessage('Password must be at least 10 characters')
 ];
 
 export const appointmentValidation = [

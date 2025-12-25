@@ -13,6 +13,8 @@ const MyBookings = lazy(() => import('./pages/MyBookings'))
 const Login = lazy(() => import('./pages/Login'))
 const ClientRegister = lazy(() => import('./pages/ClientRegister'))
 const BraiderRegister = lazy(() => import('./pages/BraiderRegister'))
+const ChangePassword = lazy(() => import('./pages/ChangePassword'))
+const StaffArea = lazy(() => import('./pages/StaffArea'))
 const BraiderProfile = lazy(() => import('./pages/BraiderProfile'))
 const BraiderSettings = lazy(() => import('./pages/BraiderSettings'))
 const Gallery = lazy(() => import('./pages/Gallery'))
@@ -71,6 +73,22 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<ClientRegister />} />
             <Route path="/braider-register" element={<BraiderRegister />} />
+            <Route 
+              path="/change-password" 
+              element={
+                <ProtectedRoute>
+                  <ChangePassword />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/staff" 
+              element={
+                <ProtectedRoute requireBraider={true}>
+                  <StaffArea />
+                </ProtectedRoute>
+              } 
+            />
             <Route 
               path="/my-bookings" 
               element={

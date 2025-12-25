@@ -38,6 +38,8 @@ server/config/braiderCredentials.js
 **/config/*credentials*.js
 **/config/*secrets*.js
 **/config/*secrets*.json
+employee_credentials.csv
+**/employee_credentials.csv
 
 # Editor directories and files
 .vscode/*

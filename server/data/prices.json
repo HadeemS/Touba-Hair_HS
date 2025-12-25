@@ -1,434 +1,211 @@
 [
   {
     "id": "1",
-    "name": "Box Braids",
-    "description": "Classic box braids with premium hair extensions. Perfect for protective styling and long-lasting wear.",
-    "basePrice": 250,
-    "price": 250,
-    "duration": "4-6 hours",
-    "category": "Protective Styles",
-    "hasSizeOptions": true,
-    "hasLengthOptions": true,
-    "hasBohoOptions": true,
-    "sizeOptions": {
-      "Small": 0,
-      "Medium": 30,
-      "Large": 50
-    },
-    "lengthOptions": {
-      "Short (Shoulder Length)": 0,
-      "Medium (Mid-Back)": 40,
-      "Long (Waist Length)": 80,
-      "Extra Long (Hip Length)": 120
-    },
-    "bohoOptions": {
-      "None": 0,
-      "Half Pack (Black)": 30,
-      "Full Pack (Black)": 60,
-      "Half Pack (Other Color)": 40,
-      "Full Pack (Other Color)": 70
-    }
+    "name": "Goddess Braids",
+    "description": "Elegant goddess braids with decorative elements. A stunning style that combines beauty and sophistication.",
+    "startingPrice": 80,
+    "priceNote": "and up",
+    "durationMinHours": 1,
+    "durationMaxHours": 2,
+    "category": "Specialty",
+    "active": true
   },
   {
     "id": "2",
-    "name": "Cornrows",
-    "description": "Traditional cornrow braiding styles. Elegant patterns that showcase your natural hair texture.",
-    "basePrice": 80,
-    "price": 80,
-    "duration": "2-3 hours",
+    "name": "Fulani",
+    "description": "Traditional Fulani braiding style with unique patterns and accessories. A beautiful cultural expression.",
+    "startingPrice": 200,
+    "priceNote": "starting",
+    "durationMinHours": 2,
+    "durationMaxHours": 3,
     "category": "Traditional",
-    "hasSizeOptions": true,
-    "hasLengthOptions": true,
-    "hasBohoOptions": true,
-    "sizeOptions": {
-      "Small": 0,
-      "Medium": 20,
-      "Large": 35
-    },
-    "lengthOptions": {
-      "Short (Shoulder Length)": 0,
-      "Medium (Mid-Back)": 30,
-      "Long (Waist Length)": 60,
-      "Extra Long (Hip Length)": 90
-    },
-    "bohoOptions": {
-      "None": 0,
-      "Half Pack (Black)": 30,
-      "Full Pack (Black)": 60,
-      "Half Pack (Other Color)": 40,
-      "Full Pack (Other Color)": 70
-    }
+    "active": true
   },
   {
     "id": "3",
-    "name": "Goddess Braids",
-    "description": "Elegant goddess braids with decorative elements. A stunning style that combines beauty and sophistication.",
-    "basePrice": 180,
-    "price": 180,
-    "duration": "5-7 hours",
-    "category": "Specialty",
-    "hasSizeOptions": true,
-    "hasLengthOptions": true,
-    "hasBohoOptions": true,
-    "sizeOptions": {
-      "Small": 0,
-      "Medium": 35,
-      "Large": 60
-    },
-    "lengthOptions": {
-      "Short (Shoulder Length)": 0,
-      "Medium (Mid-Back)": 45,
-      "Long (Waist Length)": 90,
-      "Extra Long (Hip Length)": 140
-    },
-    "bohoOptions": {
-      "None": 0,
-      "Half Pack (Black)": 30,
-      "Full Pack (Black)": 60,
-      "Half Pack (Other Color)": 40,
-      "Full Pack (Other Color)": 70
-    }
+    "name": "Micro Braids",
+    "description": "Fine micro braids for a delicate, natural look. Perfect for those who want subtle elegance.",
+    "startingPrice": 300,
+    "priceNote": "starting",
+    "durationMinHours": 3,
+    "durationMaxHours": 5,
+    "category": "Protective Styles",
+    "active": true
   },
   {
     "id": "4",
-    "name": "Fulani Braids",
-    "description": "Traditional Fulani braiding style with unique patterns and accessories. A beautiful cultural expression.",
-    "basePrice": 160,
-    "price": 160,
-    "duration": "4-6 hours",
-    "category": "Traditional",
-    "hasSizeOptions": true,
-    "hasLengthOptions": true,
-    "hasBohoOptions": true,
-    "sizeOptions": {
-      "Small": 0,
-      "Medium": 30,
-      "Large": 50
-    },
-    "lengthOptions": {
-      "Short (Shoulder Length)": 0,
-      "Medium (Mid-Back)": 40,
-      "Long (Waist Length)": 80,
-      "Extra Long (Hip Length)": 120
-    },
-    "bohoOptions": {
-      "None": 0,
-      "Half Pack (Black)": 30,
-      "Full Pack (Black)": 60,
-      "Half Pack (Other Color)": 40,
-      "Full Pack (Other Color)": 70
-    }
+    "name": "Knotless",
+    "description": "Gentle knotless braids for maximum hair protection. Reduces tension and promotes healthy hair growth.",
+    "startingPrice": 200,
+    "priceNote": "and up",
+    "durationMinHours": 3,
+    "durationMaxHours": 5,
+    "category": "Protective Styles",
+    "active": true
   },
   {
     "id": "5",
-    "name": "Micro Braids",
-    "description": "Fine micro braids for a delicate, natural look. Perfect for those who want subtle elegance.",
-    "basePrice": 200,
-    "price": 200,
-    "duration": "6-8 hours",
+    "name": "Feed in",
+    "description": "Seamless feed-in braids that look natural and blend beautifully with your hair.",
+    "startingPrice": 120,
+    "priceNote": "",
+    "durationMinHours": 1,
+    "durationMaxHours": 3,
     "category": "Protective Styles",
-    "hasSizeOptions": true,
-    "hasLengthOptions": true,
-    "hasBohoOptions": true,
-    "sizeOptions": {
-      "Small": 0,
-      "Medium": 40,
-      "Large": 70
-    },
-    "lengthOptions": {
-      "Short (Shoulder Length)": 0,
-      "Medium (Mid-Back)": 50,
-      "Long (Waist Length)": 100,
-      "Extra Long (Hip Length)": 150
-    },
-    "bohoOptions": {
-      "None": 0,
-      "Half Pack (Black)": 30,
-      "Full Pack (Black)": 60,
-      "Half Pack (Other Color)": 40,
-      "Full Pack (Other Color)": 70
-    }
+    "active": true
   },
   {
     "id": "6",
-    "name": "Knotless Braids",
-    "description": "Gentle knotless braids for maximum hair protection. Reduces tension and promotes healthy hair growth.",
-    "basePrice": 170,
-    "price": 170,
-    "duration": "5-7 hours",
-    "category": "Protective Styles",
-    "hasSizeOptions": true,
-    "hasLengthOptions": true,
-    "hasBohoOptions": true,
-    "sizeOptions": {
-      "Small": 0,
-      "Medium": 30,
-      "Large": 55
-    },
-    "lengthOptions": {
-      "Short (Shoulder Length)": 0,
-      "Medium (Mid-Back)": 40,
-      "Long (Waist Length)": 80,
-      "Extra Long (Hip Length)": 120
-    },
-    "bohoOptions": {
-      "None": 0,
-      "Half Pack (Black)": 30,
-      "Full Pack (Black)": 60,
-      "Half Pack (Other Color)": 40,
-      "Full Pack (Other Color)": 70
-    }
+    "name": "Senegalese twist",
+    "description": "Classic Senegalese twists for a sleek, polished look. Perfect for professional settings.",
+    "startingPrice": 250,
+    "priceNote": "+",
+    "durationMinHours": 4,
+    "durationMaxHours": 6,
+    "category": "Traditional",
+    "active": true
   },
   {
     "id": "7",
-    "name": "Feed-in Braids",
-    "description": "Seamless feed-in braids that look natural and blend beautifully with your hair.",
-    "basePrice": 140,
-    "price": 140,
-    "duration": "4-5 hours",
-    "category": "Protective Styles",
-    "hasSizeOptions": true,
-    "hasLengthOptions": true,
-    "hasBohoOptions": true,
-    "sizeOptions": {
-      "Small": 0,
-      "Medium": 25,
-      "Large": 45
-    },
-    "lengthOptions": {
-      "Short (Shoulder Length)": 0,
-      "Medium (Mid-Back)": 35,
-      "Long (Waist Length)": 70,
-      "Extra Long (Hip Length)": 105
-    },
-    "bohoOptions": {
-      "None": 0,
-      "Half Pack (Black)": 30,
-      "Full Pack (Black)": 60,
-      "Half Pack (Other Color)": 40,
-      "Full Pack (Other Color)": 70
-    }
+    "name": "Lemonade Braids",
+    "description": "Side-swept braids inspired by Beyoncé's iconic look. A trendy style featuring braids swept to one side.",
+    "startingPrice": 150,
+    "priceNote": "+",
+    "durationMinHours": 2,
+    "durationMaxHours": 3,
+    "category": "Specialty",
+    "active": true
   },
   {
     "id": "8",
-    "name": "Senegalese Twists",
-    "description": "Classic Senegalese twists for a sleek, polished look. Perfect for professional settings.",
-    "basePrice": 130,
-    "price": 130,
-    "duration": "3-4 hours",
-    "category": "Traditional",
-    "hasSizeOptions": true,
-    "hasLengthOptions": true,
-    "hasBohoOptions": true,
-    "sizeOptions": {
-      "Small": 0,
-      "Medium": 25,
-      "Large": 40
-    },
-    "lengthOptions": {
-      "Short (Shoulder Length)": 0,
-      "Medium (Mid-Back)": 30,
-      "Long (Waist Length)": 60,
-      "Extra Long (Hip Length)": 90
-    },
-    "bohoOptions": {
-      "None": 0,
-      "Half Pack (Black)": 30,
-      "Full Pack (Black)": 60,
-      "Half Pack (Other Color)": 40,
-      "Full Pack (Other Color)": 70
-    }
+    "name": "Passion twist",
+    "description": "Soft, bouncy twists with a natural, wavy texture. A modern protective style with added volume.",
+    "startingPrice": 200,
+    "priceNote": "+",
+    "durationMinHours": 3,
+    "durationMaxHours": 5,
+    "category": "Protective Styles",
+    "active": true
   },
   {
     "id": "9",
-    "name": "Lemonade Braids",
-    "description": "Side-swept braids inspired by Beyoncé's iconic look. A trendy style featuring braids swept to one side.",
-    "basePrice": 165,
-    "price": 165,
-    "duration": "5-6 hours",
-    "category": "Specialty",
-    "hasSizeOptions": true,
-    "hasLengthOptions": true,
-    "hasBohoOptions": true,
-    "sizeOptions": {
-      "Small": 0,
-      "Medium": 30,
-      "Large": 50
-    },
-    "lengthOptions": {
-      "Short (Shoulder Length)": 0,
-      "Medium (Mid-Back)": 40,
-      "Long (Waist Length)": 80,
-      "Extra Long (Hip Length)": 120
-    },
-    "bohoOptions": {
-      "None": 0,
-      "Half Pack (Black)": 30,
-      "Full Pack (Black)": 60,
-      "Half Pack (Other Color)": 40,
-      "Full Pack (Other Color)": 70
-    }
+    "name": "Ghana Braids",
+    "description": "Traditional Ghana braids featuring intricate patterns and designs. A beautiful cultural style.",
+    "startingPrice": 120,
+    "priceNote": "+",
+    "durationMinHours": 1,
+    "durationMaxHours": 2,
+    "category": "Traditional",
+    "active": true
   },
   {
     "id": "10",
-    "name": "Passion Twists",
-    "description": "Soft, bouncy twists with a natural, wavy texture. A modern protective style with added volume.",
-    "basePrice": 155,
-    "price": 155,
-    "duration": "4-5 hours",
+    "name": "Crochets",
+    "description": "Quick installation crochet braids using a crochet hook. A versatile protective style with minimal tension.",
+    "startingPrice": 130,
+    "priceNote": "+",
+    "durationMinHours": 1,
+    "durationMaxHours": 2,
     "category": "Protective Styles",
-    "hasSizeOptions": true,
-    "hasLengthOptions": true,
-    "hasBohoOptions": true,
-    "sizeOptions": {
-      "Small": 0,
-      "Medium": 28,
-      "Large": 48
-    },
-    "lengthOptions": {
-      "Short (Shoulder Length)": 0,
-      "Medium (Mid-Back)": 38,
-      "Long (Waist Length)": 75,
-      "Extra Long (Hip Length)": 110
-    },
-    "bohoOptions": {
-      "None": 0,
-      "Half Pack (Black)": 30,
-      "Full Pack (Black)": 60,
-      "Half Pack (Other Color)": 40,
-      "Full Pack (Other Color)": 70
-    }
+    "active": true
   },
   {
     "id": "11",
-    "name": "Ghana Braids",
-    "description": "Traditional Ghana braids featuring intricate patterns and designs. A beautiful cultural style.",
-    "basePrice": 145,
-    "price": 145,
-    "duration": "4-5 hours",
-    "category": "Traditional",
-    "hasSizeOptions": true,
-    "hasLengthOptions": true,
-    "hasBohoOptions": true,
-    "sizeOptions": {
-      "Small": 0,
-      "Medium": 28,
-      "Large": 45
-    },
-    "lengthOptions": {
-      "Short (Shoulder Length)": 0,
-      "Medium (Mid-Back)": 35,
-      "Long (Waist Length)": 70,
-      "Extra Long (Hip Length)": 105
-    },
-    "bohoOptions": {
-      "None": 0,
-      "Half Pack (Black)": 30,
-      "Full Pack (Black)": 60,
-      "Half Pack (Other Color)": 40,
-      "Full Pack (Other Color)": 70
-    }
+    "name": "Retwist",
+    "description": "Professional retwist service to maintain your locs, twists, or braids. Keep your style fresh and neat.",
+    "startingPrice": 80,
+    "priceNote": "",
+    "durationMinHours": 1,
+    "durationMaxHours": 2,
+    "category": "Maintenance",
+    "active": true
   },
   {
     "id": "12",
-    "name": "Crochet Braids",
-    "description": "Quick installation crochet braids using a crochet hook. A versatile protective style with minimal tension.",
-    "basePrice": 120,
-    "price": 120,
-    "duration": "2-3 hours",
-    "category": "Protective Styles",
-    "hasSizeOptions": true,
-    "hasLengthOptions": true,
-    "hasBohoOptions": true,
-    "sizeOptions": {
-      "Small": 0,
-      "Medium": 20,
-      "Large": 35
-    },
-    "lengthOptions": {
-      "Short (Shoulder Length)": 0,
-      "Medium (Mid-Back)": 30,
-      "Long (Waist Length)": 60,
-      "Extra Long (Hip Length)": 90
-    },
-    "bohoOptions": {
-      "None": 0,
-      "Half Pack (Black)": 30,
-      "Full Pack (Black)": 60,
-      "Half Pack (Other Color)": 40,
-      "Full Pack (Other Color)": 70
-    }
+    "name": "Wig install",
+    "description": "Professional wig installation and application services. From glueless wigs to custom installations.",
+    "startingPrice": 150,
+    "priceNote": "",
+    "durationMinHours": 1,
+    "durationMaxHours": 2,
+    "category": "Installation",
+    "active": true
   },
   {
     "id": "13",
-    "name": "Retwist Service",
-    "description": "Professional retwist service to maintain your locs, twists, or braids. Keep your style fresh and neat.",
-    "price": 60,
-    "duration": "1-2 hours",
-    "category": "Maintenance"
+    "name": "Eyebrow arch",
+    "description": "Professional eyebrow shaping and grooming services. Achieve perfectly arched brows that frame your face beautifully.",
+    "startingPrice": 10,
+    "priceNote": "",
+    "durationMinHours": 0.25,
+    "durationMaxHours": 0.5,
+    "category": "Grooming",
+    "active": true
   },
   {
     "id": "14",
-    "name": "Wig Application",
-    "description": "Professional wig installation and application services. From glueless wigs to custom installations.",
-    "price": 80,
-    "duration": "2-3 hours",
-    "category": "Installation"
+    "name": "Hair wash",
+    "description": "Professional hair washing and detangling service. Gentle cleansing and thorough detangling with deep conditioning.",
+    "startingPrice": 20,
+    "priceNote": "",
+    "durationMinHours": 0.5,
+    "durationMaxHours": 1,
+    "category": "Hair Care",
+    "active": true
   },
   {
     "id": "15",
-    "name": "Eyebrow Shaping",
-    "description": "Professional eyebrow shaping and grooming services. Achieve perfectly arched brows that frame your face beautifully.",
-    "price": 25,
-    "duration": "30 minutes",
-    "category": "Grooming"
+    "name": "Take out braids",
+    "description": "Professional braid removal service. Box braids $80, Micros $100. Careful removal to protect your natural hair.",
+    "startingPrice": 80,
+    "priceNote": "box braids; Micros $100",
+    "durationMinHours": null,
+    "durationMaxHours": null,
+    "category": "Maintenance",
+    "active": true
   },
   {
     "id": "16",
-    "name": "Hair Washing & Detangling",
-    "description": "Professional hair washing and detangling service. Gentle cleansing and thorough detangling with deep conditioning.",
-    "price": 35,
-    "duration": "45-60 minutes",
-    "category": "Hair Care"
+    "name": "Takeout scalp treatment",
+    "description": "Therapeutic scalp treatment to promote healthy hair growth and relieve dryness. Includes exfoliation and massage.",
+    "startingPrice": null,
+    "priceNote": "TBD",
+    "durationMinHours": null,
+    "durationMaxHours": null,
+    "category": "Hair Care",
+    "active": true
   },
   {
     "id": "17",
-    "name": "Deep Conditioning Treatment",
-    "description": "Intensive deep conditioning treatment to restore moisture and strength. Includes steam treatment for maximum penetration.",
-    "price": 45,
-    "duration": "1 hour",
-    "category": "Hair Care"
+    "name": "Starter locs",
+    "description": "Professional starter loc installation service. Begin your loc journey with expert care and precision.",
+    "startingPrice": 120,
+    "priceNote": "",
+    "durationMinHours": null,
+    "durationMaxHours": null,
+    "category": "Protective Styles",
+    "active": true
   },
   {
     "id": "18",
-    "name": "Hair Cut & Trim",
-    "description": "Professional hair cutting and trimming services. From precision cuts to simple trims, we maintain your hair's health.",
-    "price": 40,
-    "duration": "30-45 minutes",
-    "category": "Hair Care"
+    "name": "Take out color",
+    "description": "Professional color removal service. Safely remove hair color with minimal damage to your natural hair.",
+    "startingPrice": null,
+    "priceNote": "TBD",
+    "durationMinHours": null,
+    "durationMaxHours": null,
+    "category": "Hair Care",
+    "active": true
   },
   {
     "id": "19",
-    "name": "Scalp Treatment",
-    "description": "Therapeutic scalp treatment to promote healthy hair growth and relieve dryness. Includes exfoliation and massage.",
-    "price": 50,
-    "duration": "45 minutes",
-    "category": "Hair Care"
-  },
-  {
-    "id": "20",
-    "name": "Style Refresh",
-    "description": "Quick style refresh service to revive your existing braids, twists, or locs. Includes edge touch-ups and flyaway control.",
-    "price": 40,
-    "duration": "1 hour",
-    "category": "Maintenance"
-  },
-  {
-    "id": "21",
-    "name": "Color Services",
-    "description": "Professional hair coloring services including highlights, all-over color, and color correction. Quality products used.",
-    "price": 120,
-    "duration": "2-4 hours",
-    "category": "Styling"
+    "name": "Free Consultation",
+    "description": "Complimentary consultation to discuss your hair goals and find the perfect style for you.",
+    "startingPrice": 0,
+    "priceNote": "",
+    "durationMinHours": 0.25,
+    "durationMaxHours": 0.5,
+    "category": "Consultation",
+    "active": true
   }
 ]

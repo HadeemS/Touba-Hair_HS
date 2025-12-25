@@ -4,15 +4,22 @@ import { authAPI } from './api.js'
 const AUTH_KEY = 'touba_hair_auth'
 const TOKEN_KEY = 'auth_token'
 
-// Login with backend API
-export const login = async (email, password) => {
+// Login with backend API - supports both email and username
+export const login = async (emailOrUsername, password) => {
   try {
     // Validate inputs
-    if (!email || !email.trim()) {
-      return { success: false, error: 'Email is required.' }
+    if (!emailOrUsername || !emailOrUsername.trim()) {
+      return { success: false, error: 'Email or username is required.' }
     }
 
-    const response = await authAPI.login({ email: email.trim(), password: password || '' })
+    const identifier = emailOrUsername.trim()
+    // Determine if it's an email or username
+    const isEmail = identifier.includes('@')
+    const loginData = isEmail 
+      ? { email: identifier, password: password || '' }
+      : { username: identifier, password: password || '' }
+
+    const response = await authAPI.login(loginData)
     
     if (response.token && response.user) {
       // Store token and user info
@@ -24,7 +31,11 @@ export const login = async (email, password) => {
       }))
       // Dispatch custom event for same-tab auth updates
       window.dispatchEvent(new Event('auth-changed'))
-      return { success: true, user: response.user }
+      return { 
+        success: true, 
+        user: response.user,
+        requiresPasswordChange: response.requiresPasswordChange || false
+      }
     }
     
     return { success: false, error: 'Login failed - invalid response from server' }

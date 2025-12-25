@@ -10,7 +10,7 @@ const Login = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [formData, setFormData] = useState({
-    email: '',
+    emailOrUsername: '',
     password: ''
   })
   const [error, setError] = useState('')
@@ -88,10 +88,15 @@ const Login = () => {
     setIsLoading(true)
 
     try {
-      const result = await login(formData.email, formData.password)
+      const result = await login(formData.emailOrUsername, formData.password)
       
       if (result.success) {
         toast.success('Login successful!')
+        // Check if password change is required
+        if (result.requiresPasswordChange) {
+          navigate('/change-password', { replace: true, state: { forced: true } })
+          return
+        }
         // Wait for next tick to ensure localStorage and state are updated
         requestAnimationFrame(() => {
           // Redirect based on user role
@@ -202,16 +207,16 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="login-form">
             <div className="form-group">
-              <label htmlFor="email">Email Address</label>
+              <label htmlFor="emailOrUsername">Email or Username</label>
               <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
+                type="text"
+                id="emailOrUsername"
+                name="emailOrUsername"
+                value={formData.emailOrUsername}
                 onChange={handleChange}
                 required
-                placeholder="your.email@example.com"
-                autoComplete="email"
+                placeholder="your.email@example.com or username"
+                autoComplete="username"
               />
             </div>
 

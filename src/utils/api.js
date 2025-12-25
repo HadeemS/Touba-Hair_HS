@@ -164,6 +164,49 @@ export const authAPI = {
   }
 };
 
+// Admin API functions
+export const adminAPI = {
+  getUsers: (params = {}) => {
+    const token = localStorage.getItem('auth_token');
+    const queryString = new URLSearchParams(params).toString();
+    return apiCall(`/api/admin/users${queryString ? '?' + queryString : ''}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+  },
+  createUser: (data) => {
+    const token = localStorage.getItem('auth_token');
+    return apiCall('/api/admin/users', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data),
+    });
+  },
+  updateUser: (id, data) => {
+    const token = localStorage.getItem('auth_token');
+    return apiCall(`/api/admin/users/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data),
+    });
+  },
+  resetPassword: (id) => {
+    const token = localStorage.getItem('auth_token');
+    return apiCall(`/api/admin/users/${id}/reset-password`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+    });
+  }
+};
+
 // Appointments API functions
 export const appointmentsAPI = {
   getAll: (params = {}) => {

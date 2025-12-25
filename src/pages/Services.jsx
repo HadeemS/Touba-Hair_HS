@@ -18,24 +18,60 @@ const Services = () => {
       setLoading(true)
       const data = await pricesAPI.getAll()
       
-      // Check if API returned data and has all 21 services
-      if (data && Array.isArray(data) && data.length >= 21) {
+      // Check if API returned data
+      if (data && Array.isArray(data) && data.length > 0) {
         // Transform API data to match the format expected by the component
-        const transformedData = data.map(service => ({
-          id: service.id,
-          name: service.name,
-          description: service.description || '',
-          price: service.price,
-          duration: service.duration || '',
-          category: service.category || 'Other',
-          icon: getServiceIcon(service.name),
-          features: getServiceFeatures(service.name),
-          details: getServiceDetails(service.name),
-          popular: isPopularService(service.name)
-        }))
+        const transformedData = data
+          .filter(service => service.active !== false) // Only show active services
+          .map(service => {
+            // Format price with note
+            let priceDisplay = ''
+            if (service.startingPrice !== null && service.startingPrice !== undefined) {
+              priceDisplay = `$${service.startingPrice}`
+              if (service.priceNote) {
+                if (service.priceNote === '+') {
+                  priceDisplay += '+'
+                } else if (service.priceNote.toLowerCase().includes('and up')) {
+                  priceDisplay += ' and up'
+                } else if (service.priceNote.toLowerCase().includes('starting')) {
+                  priceDisplay += ' starting'
+                } else {
+                  priceDisplay += ` ${service.priceNote}`
+                }
+              }
+            } else if (service.priceNote === 'TBD') {
+              priceDisplay = 'Price TBD'
+            } else {
+              priceDisplay = service.priceNote || 'Contact for pricing'
+            }
+
+            // Format duration
+            let durationDisplay = ''
+            if (service.durationMinHours !== null && service.durationMaxHours !== null) {
+              durationDisplay = `${service.durationMinHours}-${service.durationMaxHours} hours`
+            } else if (service.duration) {
+              durationDisplay = service.duration
+            } else {
+              durationDisplay = 'Duration TBD'
+            }
+
+            return {
+              id: service.id,
+              name: service.name,
+              description: service.description || '',
+              price: service.startingPrice || service.price || 0,
+              priceDisplay,
+              duration: durationDisplay,
+              category: service.category || 'Other',
+              icon: getServiceIcon(service.name),
+              features: getServiceFeatures(service.name),
+              details: getServiceDetails(service.name),
+              popular: isPopularService(service.name)
+            }
+          })
         setServices(transformedData)
       } else {
-        // API returned less than 21 services (old data), use defaults
+        // API returned no services, use defaults
         setServices(getDefaultServices())
       }
     } catch (err) {
@@ -571,7 +607,9 @@ const Services = () => {
                   <div className="popular-badge">Popular</div>
                   <div className="popular-icon">{service.icon}</div>
                   <h3 className="popular-name">{service.name}</h3>
-                  <div className="popular-price">Starting at ${service.price}</div>
+                  <div className="popular-price">
+                    {service.priceDisplay || `Starting at $${service.price}`}
+                  </div>
                   <button 
                     className="btn btn-primary popular-btn"
                     onClick={() => navigate('/book-appointment')}
@@ -646,10 +684,18 @@ const Services = () => {
 
                   <div className="service-info-footer">
                     <div className="service-price-section">
-                      <span className="price-label">Starting at</span>
+                      <span className="price-label">
+                        {service.priceDisplay && service.priceDisplay.includes('TBD') ? '' : 'Starting at'}
+                      </span>
                       <div className="service-price">
-                        <span className="price-currency">$</span>
-                        <span className="price-amount">{service.price}</span>
+                        {service.priceDisplay ? (
+                          <span className="price-amount">{service.priceDisplay}</span>
+                        ) : (
+                          <>
+                            <span className="price-currency">$</span>
+                            <span className="price-amount">{service.price}</span>
+                          </>
+                        )}
                       </div>
                     </div>
 

@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import User from '../models/User.js';
 import { authenticate, generateToken } from '../middleware/auth.js';
-import { validate, registerValidation, loginValidation } from '../middleware/validation.js';
+import { validate, registerValidation, loginValidation, changePasswordValidation, createUserValidation } from '../middleware/validation.js';
 import rateLimit from 'express-rate-limit';
 import { logger } from '../utils/logger.js';
 
@@ -67,14 +67,15 @@ router.post('/register', validate(registerValidation), async (req, res) => {
   }
 });
 
-// Login
+// Login - supports both email and username
 router.post('/login', authLimiter, validate(loginValidation), async (req, res) => {
   const startTime = Date.now();
-  const { email, password } = req.body;
+  const { email, username, password } = req.body;
   
   try {
     // Log login attempt (without sensitive data)
-    logger.info(`[LOGIN] Attempt: ${email} at ${new Date().toISOString()}`);
+    const loginIdentifier = email || username;
+    logger.info(`[LOGIN] Attempt: ${loginIdentifier} at ${new Date().toISOString()}`);
     
     // Check MongoDB connection first
     const dbState = mongoose.connection.readyState;
@@ -88,53 +89,60 @@ router.post('/login', authLimiter, validate(loginValidation), async (req, res) =
       });
     }
 
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required.' });
+    if (!email && !username) {
+      return res.status(400).json({ error: 'Email or username is required.' });
     }
 
-    // Find user
-    const user = await User.findOne({ email: email.toLowerCase() });
+    // Find user by email or username
+    let user;
+    if (email) {
+      user = await User.findOne({ email: email.toLowerCase() });
+    } else {
+      user = await User.findOne({ username: username.toLowerCase() });
+    }
+    
     if (!user) {
-      logger.warn(`[LOGIN] User not found: ${email}`);
+      logger.warn(`[LOGIN] User not found: ${loginIdentifier}`);
+      // Generic error message to prevent username enumeration
       return res.status(401).json({ 
-        error: 'Invalid email or password.',
-        hint: 'User does not exist. Use /api/auth/create-demo-users to create demo accounts.'
+        error: 'Invalid credentials.',
+        hint: 'Check your username/email and password.'
       });
     }
 
-    logger.info(`[LOGIN] User found: ${user.email}, Role: ${user.role}, HasPassword: ${!!user.password}, IsActive: ${user.isActive}`);
+    const userIdentifier = user.email || user.username || user.name;
+    logger.info(`[LOGIN] User found: ${userIdentifier}, Role: ${user.role}, HasPassword: ${!!user.password}, IsActive: ${user.isActive}`);
 
     // Check if account is active
     if (!user.isActive) {
-      logger.warn(`[LOGIN] Account inactive: ${email}`);
+      logger.warn(`[LOGIN] Account inactive: ${userIdentifier}`);
       return res.status(403).json({ error: 'Account is inactive. Please contact support.' });
     }
 
     // For employees/admins, password is REQUIRED
     if (user.role === 'employee' || user.role === 'admin') {
       if (!password) {
-        logger.warn(`[LOGIN] Password required but not provided for ${user.role}: ${email}`);
+        logger.warn(`[LOGIN] Password required but not provided for ${user.role}: ${userIdentifier}`);
         return res.status(400).json({ error: 'Password is required for this account type.' });
       }
       
       if (!user.password) {
-        logger.warn(`[LOGIN] User has no password set: ${email}`);
+        logger.warn(`[LOGIN] User has no password set: ${userIdentifier}`);
         return res.status(400).json({ 
-          error: 'Account has no password set. Please contact support to set a password.',
-          hint: 'Use /api/auth/create-demo-users to reset password.'
+          error: 'Account has no password set. Please contact support to set a password.'
         });
       }
       
       const isPasswordValid = await user.comparePassword(password);
       if (!isPasswordValid) {
-        logger.warn(`[LOGIN] Invalid password for: ${email}`);
+        logger.warn(`[LOGIN] Invalid password for: ${userIdentifier}`);
+        // Generic error to prevent username enumeration
         return res.status(401).json({ 
-          error: 'Invalid email or password.',
-          hint: 'Password may have been changed. Use /api/auth/create-demo-users to reset.'
+          error: 'Invalid credentials.'
         });
       }
       
-      logger.info(`[LOGIN] Password verified for: ${email}`);
+      logger.info(`[LOGIN] Password verified for: ${userIdentifier}`);
     } else {
       // For clients, password is optional but if provided, must be valid
       if (password && user.password) {
@@ -156,7 +164,7 @@ router.post('/login', authLimiter, validate(loginValidation), async (req, res) =
     const token = generateToken(user._id);
     const duration = Date.now() - startTime;
 
-    logger.info(`[LOGIN] Success: ${email} (${user.role}) - ${duration}ms`);
+    logger.info(`[LOGIN] Success: ${userIdentifier} (${user.role}) - ${duration}ms`);
 
     res.json({
       message: 'Login successful',
@@ -165,11 +173,16 @@ router.post('/login', authLimiter, validate(loginValidation), async (req, res) =
         id: user._id,
         _id: user._id,
         name: user.name,
+        fullName: user.fullName,
+        username: user.username,
         email: user.email,
         phone: user.phone,
         role: user.role,
-        braiderId: user.braiderId || null
-      }
+        location: user.location,
+        braiderId: user.braiderId || null,
+        forcePasswordChange: user.forcePasswordChange || false
+      },
+      requiresPasswordChange: user.forcePasswordChange || false
     });
   } catch (error) {
     const duration = Date.now() - startTime;
@@ -197,16 +210,22 @@ router.post('/login', authLimiter, validate(loginValidation), async (req, res) =
 // Get current user
 router.get('/me', authenticate, async (req, res) => {
   try {
+    // Fetch fresh user data
+    const user = await User.findById(req.user._id).select('-password');
     res.json({
       user: {
-        id: req.user._id,
-        _id: req.user._id,
-        name: req.user.name,
-        email: req.user.email,
-        phone: req.user.phone,
-        role: req.user.role,
-        braiderId: req.user.braiderId || null,
-        notes: req.user.notes
+        id: user._id,
+        _id: user._id,
+        name: user.name,
+        fullName: user.fullName,
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        location: user.location,
+        braiderId: user.braiderId || null,
+        notes: user.notes,
+        forcePasswordChange: user.forcePasswordChange || false
       }
     });
   } catch (error) {
@@ -259,52 +278,59 @@ router.put('/profile', authenticate, async (req, res) => {
 });
 
 // Change password
-router.put('/change-password', authenticate, async (req, res) => {
+router.put('/change-password', authenticate, validate(changePasswordValidation), async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-
-    if (!newPassword || newPassword.length < 8) {
-      return res.status(400).json({ error: 'New password must be at least 8 characters.' });
-    }
     
-    // Check password complexity
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/;
-    if (!passwordRegex.test(newPassword)) {
-      return res.status(400).json({ error: 'Password must contain at least one uppercase letter, one lowercase letter, and one number.' });
-    }
-
+    // Fetch user with password
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ error: 'User not found.' });
     }
 
-    // If user has a password, verify current password (for employees/admins/clients with passwords)
-    if (user.password) {
+    // If forcePasswordChange is true, currentPassword is optional
+    // Otherwise, currentPassword is required
+    if (!user.forcePasswordChange) {
       if (!currentPassword) {
         return res.status(400).json({ error: 'Current password is required.' });
       }
-
-      const isPasswordValid = await user.comparePassword(currentPassword);
-      if (!isPasswordValid) {
-        return res.status(401).json({ error: 'Current password is incorrect.' });
+      
+      if (!user.password) {
+        return res.status(400).json({ error: 'No password set for this account.' });
       }
-    } else {
-      // For clients without a password, currentPassword is optional
-      // This allows setting a password for the first time
-      if (currentPassword) {
-        return res.status(400).json({ error: 'You don\'t have a password set. Leave current password empty to set a new password.' });
+      
+      const isCurrentPasswordValid = await user.comparePassword(currentPassword);
+      if (!isCurrentPasswordValid) {
+        return res.status(401).json({ error: 'Current password is incorrect.' });
       }
     }
 
-    // Update password (will be hashed by pre-save hook)
+    // Validate new password strength (already validated by middleware, but double-check)
+    if (!newPassword || newPassword.length < 10) {
+      return res.status(400).json({ error: 'New password must be at least 10 characters.' });
+    }
+    
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d).{10,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({ error: 'Password must contain at least one letter and one number.' });
+    }
+
+    // Update password (will be hashed by pre-save hook) and clear forcePasswordChange
     user.password = newPassword;
+    user.forcePasswordChange = false;
     await user.save();
 
+    logger.info(`[CHANGE_PASSWORD] Password changed for user: ${user.username || user.email || user.name}`);
+
     res.json({
-      message: 'Password changed successfully'
+      message: 'Password changed successfully',
+      forcePasswordChange: false
     });
   } catch (error) {
     logger.error('Change password error:', error);
+    if (error.message && error.message.includes('Password must be')) {
+      return res.status(400).json({ error: error.message });
+    }
     res.status(500).json({ error: 'Failed to change password.' });
   }
 });

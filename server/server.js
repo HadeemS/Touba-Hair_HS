@@ -11,6 +11,7 @@ import User from './models/User.js';
 import authRoutes from './routes/auth.js';
 import appointmentRoutes from './routes/appointments.js';
 import rewardRoutes from './routes/rewards.js';
+import adminRoutes from './routes/admin.js';
 import { validateEnv } from './utils/env.js';
 import { logger } from './utils/logger.js';
 
@@ -590,6 +591,7 @@ app.delete('/api/prices/:id', async (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/rewards', rewardRoutes);
 
 // MongoDB connection status helper
