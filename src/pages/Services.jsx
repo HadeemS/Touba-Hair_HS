@@ -24,25 +24,22 @@ const Services = () => {
         const transformedData = data
           .filter(service => service.active !== false) // Only show active services
           .map(service => {
-            // Format price with note
+            // Format price with clean "+" format
             let priceDisplay = ''
             if (service.startingPrice !== null && service.startingPrice !== undefined) {
-              priceDisplay = `$${service.startingPrice}`
-              if (service.priceNote) {
-                if (service.priceNote === '+') {
-                  priceDisplay += '+'
-                } else if (service.priceNote.toLowerCase().includes('and up')) {
-                  priceDisplay += ' and up'
-                } else if (service.priceNote.toLowerCase().includes('starting')) {
-                  priceDisplay += ' starting'
-                } else {
-                  priceDisplay += ` ${service.priceNote}`
-                }
+              const price = service.startingPrice
+              if (price === 0) {
+                priceDisplay = 'Free'
+              } else {
+                // Always show with + for variable pricing
+                priceDisplay = `$${price}+`
               }
-            } else if (service.priceNote === 'TBD') {
+            } else if (service.priceNote === 'TBD' || service.priceNote?.toLowerCase() === 'tbd') {
               priceDisplay = 'Price TBD'
+            } else if (service.price) {
+              priceDisplay = `$${service.price}+`
             } else {
-              priceDisplay = service.priceNote || 'Contact for pricing'
+              priceDisplay = 'Contact for pricing'
             }
 
             // Format duration
@@ -608,7 +605,7 @@ const Services = () => {
                   <div className="popular-icon">{service.icon}</div>
                   <h3 className="popular-name">{service.name}</h3>
                   <div className="popular-price">
-                    {service.priceDisplay || `Starting at $${service.price}`}
+                    {service.priceDisplay || `$${service.price}+`}
                   </div>
                   <button 
                     className="btn btn-primary popular-btn"
@@ -685,7 +682,7 @@ const Services = () => {
                   <div className="service-info-footer">
                     <div className="service-price-section">
                       <span className="price-label">
-                        {service.priceDisplay && service.priceDisplay.includes('TBD') ? '' : 'Starting at'}
+                        {service.priceDisplay && (service.priceDisplay.includes('TBD') || service.priceDisplay === 'Free') ? '' : 'Starting at'}
                       </span>
                       <div className="service-price">
                         {service.priceDisplay ? (
@@ -693,7 +690,7 @@ const Services = () => {
                         ) : (
                           <>
                             <span className="price-currency">$</span>
-                            <span className="price-amount">{service.price}</span>
+                            <span className="price-amount">{service.price}+</span>
                           </>
                         )}
                       </div>

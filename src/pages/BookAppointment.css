@@ -156,6 +156,52 @@
   gap: 20px;
 }
 
+.location-filter-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: var(--light-pink);
+  border-radius: 12px;
+}
+
+.location-filter-label {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 15px;
+}
+
+.location-buttons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.location-btn {
+  padding: 12px 24px;
+  border: 2px solid var(--primary-pink);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--primary-pink);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.location-btn:hover {
+  background: var(--light-pink);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.location-btn.active {
+  background: var(--gradient-primary);
+  color: var(--white);
+  border-color: var(--primary-pink);
+  box-shadow: var(--shadow-md);
+}
+
 .location-group-title {
   font-size: 1.5rem;
   font-weight: 600;
@@ -163,6 +209,31 @@
   margin-bottom: 10px;
   padding-bottom: 10px;
   border-bottom: 2px solid var(--light-pink);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.location-icon {
+  font-size: 1.3rem;
+}
+
+.braider-count {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-light);
+  margin-left: auto;
+}
+
+.no-braiders-message {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-light);
+}
+
+.no-braiders-message p {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
 }
 
 .braider-card {
@@ -335,6 +406,20 @@
 .service-card .btn-sm {
   margin-top: var(--spacing-xs);
   align-self: flex-start;
+}
+
+.no-addons-message {
+  text-align: center;
+  padding: 30px 20px;
+  background: var(--light-pink);
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.no-addons-message p {
+  color: var(--text-dark);
+  font-size: 1rem;
+  margin: 0;
 }
 
 .price-note {

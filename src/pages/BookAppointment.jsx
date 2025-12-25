@@ -21,6 +21,7 @@ const BookAppointment = () => {
   const [selectedBoho, setSelectedBoho] = useState(null)
   const [services, setServices] = useState([])
   const [braiders, setBraiders] = useState(defaultBraiders)
+  const [selectedLocation, setSelectedLocation] = useState(null) // Filter by location
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null)
   const [customerInfo, setCustomerInfo] = useState({
@@ -55,34 +56,20 @@ const BookAppointment = () => {
         const transformedServices = data
           .filter(service => service.active !== false)
           .map(service => {
-            // Format price with note - clean and consistent
+            // Format price with clean "+" format
             let priceDisplay = ''
             if (service.startingPrice !== null && service.startingPrice !== undefined) {
               const price = service.startingPrice
               if (price === 0) {
                 priceDisplay = 'Free'
               } else {
-                priceDisplay = `$${price}`
-                if (service.priceNote) {
-                  const note = service.priceNote.trim()
-                  if (note === '+') {
-                    priceDisplay += '+'
-                  } else if (note.toLowerCase().includes('and up') || note.toLowerCase().includes('andup')) {
-                    priceDisplay += ' and up'
-                  } else if (note.toLowerCase().includes('starting')) {
-                    priceDisplay += ' starting'
-                  } else if (note === 'TBD' || note.toLowerCase() === 'tbd') {
-                    priceDisplay = 'Price TBD'
-                  } else if (!note.toLowerCase().includes('tbd') && !note.toLowerCase().includes('box braids') && !note.toLowerCase().includes('micros')) {
-                    // Only add note if it's not TBD or special notes
-                    priceDisplay += ` ${note}`
-                  }
-                }
+                // Always show with + for variable pricing
+                priceDisplay = `$${price}+`
               }
             } else if (service.priceNote === 'TBD' || service.priceNote?.toLowerCase() === 'tbd') {
               priceDisplay = 'Price TBD'
             } else if (service.price) {
-              priceDisplay = `$${service.price}`
+              priceDisplay = `$${service.price}+`
             } else {
               priceDisplay = 'Contact for pricing'
             }
@@ -102,7 +89,17 @@ const BookAppointment = () => {
               price: service.startingPrice || service.price || 0,
               basePrice: service.startingPrice || service.price || 0,
               priceDisplay,
-              duration: durationDisplay
+              duration: durationDisplay,
+              // Ensure has* properties are set based on actual options
+              hasSizeOptions: service.hasSizeOptions !== undefined 
+                ? service.hasSizeOptions 
+                : !!(service.sizeOptions && Object.keys(service.sizeOptions).length > 0),
+              hasLengthOptions: service.hasLengthOptions !== undefined 
+                ? service.hasLengthOptions 
+                : !!(service.lengthOptions && Object.keys(service.lengthOptions).length > 0),
+              hasBohoOptions: service.hasBohoOptions !== undefined 
+                ? service.hasBohoOptions 
+                : !!(service.bohoOptions && Object.keys(service.bohoOptions).length > 0)
             }
           })
         setServices(transformedServices)
@@ -533,12 +530,9 @@ const BookAppointment = () => {
 
   const handleServiceSelect = (service) => {
     setSelectedService(service)
-    // If service has size/length/boho options, show those first, otherwise go to date selection
-    if (service.hasSizeOptions || service.hasLengthOptions || service.hasBohoOptions) {
-      setStep(3) // Move to size/length/boho selection
-    } else {
-      setStep(4) // Move directly to date selection
-    }
+    // Always go to step 3 (add-ons) first, even if service has no add-ons
+    // This ensures consistent routing and allows users to review their selection
+    setStep(3) // Move to size/length/boho selection (or skip if no options)
     setSelectedSize(null)
     setSelectedLength(null)
     setSelectedBoho(null)
@@ -777,10 +771,41 @@ const BookAppointment = () => {
           {/* Step 1: Select Braider */}
           {step === 1 && (
             <div className="booking-step">
-              <h2 className="step-title">Select Your Stylist</h2>
+              <h2 className="step-title">Select Your Shop & Stylist</h2>
+              
+              {/* Location Filter */}
+              <div className="location-filter-section">
+                <label className="location-filter-label">Choose Location:</label>
+                <div className="location-buttons">
+                  <button
+                    className={`location-btn ${selectedLocation === null ? 'active' : ''}`}
+                    onClick={() => setSelectedLocation(null)}
+                  >
+                    All Locations
+                  </button>
+                  <button
+                    className={`location-btn ${selectedLocation === 'Sandhills' ? 'active' : ''}`}
+                    onClick={() => setSelectedLocation('Sandhills')}
+                  >
+                    Sandhills
+                  </button>
+                  <button
+                    className={`location-btn ${selectedLocation === 'Two Notch' ? 'active' : ''}`}
+                    onClick={() => setSelectedLocation('Two Notch')}
+                  >
+                    Two Notch
+                  </button>
+                </div>
+              </div>
+
               {(() => {
+                // Filter braiders by selected location
+                const filteredBraiders = selectedLocation
+                  ? braiders.filter(b => b.location === selectedLocation)
+                  : braiders;
+
                 // Group braiders by location
-                const braidersByLocation = braiders.reduce((acc, braider) => {
+                const braidersByLocation = filteredBraiders.reduce((acc, braider) => {
                   const location = braider.location || 'Other';
                   if (!acc[location]) {
                     acc[location] = [];
@@ -791,11 +816,29 @@ const BookAppointment = () => {
 
                 const locations = Object.keys(braidersByLocation).sort();
 
+                if (filteredBraiders.length === 0) {
+                  return (
+                    <div className="no-braiders-message">
+                      <p>No stylists available at {selectedLocation} location.</p>
+                      <button 
+                        className="btn btn-secondary"
+                        onClick={() => setSelectedLocation(null)}
+                      >
+                        Show All Locations
+                      </button>
+                    </div>
+                  );
+                }
+
                 return (
                   <div className="braiders-by-location">
                     {locations.map(location => (
                       <div key={location} className="location-group">
-                        <h3 className="location-group-title">{location} Location</h3>
+                        <h3 className="location-group-title">
+                          <span className="location-icon">📍</span>
+                          {location} Location
+                          <span className="braider-count">({braidersByLocation[location].length} stylists)</span>
+                        </h3>
                         <div className="braiders-grid">
                           {braidersByLocation[location].map(braider => (
                             <div
@@ -867,8 +910,8 @@ const BookAppointment = () => {
             </div>
           )}
 
-          {/* Step 3: Select Size & Length & Boho */}
-          {step === 3 && selectedService && (selectedService.hasSizeOptions || selectedService.hasLengthOptions || selectedService.hasBohoOptions) && (
+          {/* Step 3: Select Size, Length & Boho (Add-ons) */}
+          {step === 3 && selectedService && (
             <div className="booking-step">
               <button className="back-button" onClick={goBack}>← Back</button>
               <h2 className="step-title">Select Size, Length & Boho</h2>
