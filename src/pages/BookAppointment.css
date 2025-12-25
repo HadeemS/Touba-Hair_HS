@@ -291,9 +291,19 @@
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--primary-pink);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
 }
 
-.service-card.selected .service-price {
+.price-main {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.service-card.selected .service-price,
+.service-card.selected .price-main {
   color: var(--white);
 }
 
