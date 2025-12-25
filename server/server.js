@@ -588,6 +588,46 @@ app.delete('/api/prices/:id', async (req, res) => {
   }
 });
 
+// Public endpoint to get employees/braiders (for booking page)
+app.get('/api/braiders', async (req, res) => {
+  try {
+    const { location } = req.query;
+    const query = { 
+      $or: [
+        { role: 'employee' },
+        { role: 'admin', location: { $exists: true, $ne: null } } // Include admins with locations
+      ],
+      isActive: true 
+    };
+    
+    if (location) {
+      query.location = location;
+    }
+
+    const users = await User.find(query)
+      .select('name fullName username location braiderId role')
+      .sort({ location: 1, name: 1 });
+
+    res.json({
+      braiders: users.map(user => ({
+        id: user.braiderId || user._id.toString(),
+        name: user.fullName || user.name,
+        specialty: 'Professional Stylist',
+        experience: 'Experienced',
+        rating: 4.8,
+        image: '👩🏾‍🦱',
+        bio: `Professional stylist at ${user.location || 'Touba Hair'}`,
+        availableDays: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        location: user.location,
+        role: user.role
+      }))
+    });
+  } catch (error) {
+    logger.error('Get braiders error:', error);
+    res.status(500).json({ error: 'Failed to fetch braiders.' });
+  }
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/appointments', appointmentRoutes);

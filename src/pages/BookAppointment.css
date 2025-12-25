@@ -144,6 +144,27 @@
   margin-top: var(--spacing-lg);
 }
 
+.braiders-by-location {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.location-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.location-group-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-pink);
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--light-pink);
+}
+
 .braider-card {
   background: var(--white);
   border: 2px solid var(--border-light);
@@ -170,6 +191,17 @@
   font-weight: 600;
   margin-bottom: var(--spacing-xs);
   color: var(--text-dark);
+}
+
+.braider-location {
+  color: var(--primary-pink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 5px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
 }
 
 .braider-specialty {

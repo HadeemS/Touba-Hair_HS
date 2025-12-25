@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { braiders } from '../data/braiders'
+import { braiders as defaultBraiders } from '../data/braiders'
 import { generateTimeSlots, getAvailableDates, formatDateDisplay, formatDateStorage, getDayName } from '../utils/timeSlots'
 import { isTimeSlotAvailable, saveBooking } from '../utils/bookingStorage'
-import { appointmentsAPI, pricesAPI } from '../utils/api'
-import { getCurrentUser } from '../utils/auth'
+import { appointmentsAPI, pricesAPI, braidersAPI } from '../utils/api'
+import { getCurrentUser, isAuthenticated } from '../utils/auth'
 import { getBraiderAvailableDays } from '../utils/braiderSettings'
 import './BookAppointment.css'
 import { getStoredProfile } from '../utils/profileStorage'
@@ -20,6 +20,7 @@ const BookAppointment = () => {
   const [selectedLength, setSelectedLength] = useState(null)
   const [selectedBoho, setSelectedBoho] = useState(null)
   const [services, setServices] = useState([])
+  const [braiders, setBraiders] = useState(defaultBraiders)
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null)
   const [customerInfo, setCustomerInfo] = useState({
@@ -32,7 +33,7 @@ const BookAppointment = () => {
   const availableDates = getAvailableDates()
   const timeSlots = generateTimeSlots()
 
-  // Load stored profile and services on component mount
+  // Load stored profile, services, and braiders on component mount
   useEffect(() => {
     const storedProfile = getStoredProfile()
     if (storedProfile && (storedProfile.name || storedProfile.email || storedProfile.phone)) {
@@ -43,13 +44,68 @@ const BookAppointment = () => {
       })
     }
     loadServices()
+    loadBraiders()
   }, [])
 
   const loadServices = async () => {
     try {
       const data = await pricesAPI.getAll()
       if (data && Array.isArray(data) && data.length > 0) {
-        setServices(data)
+        // Transform services to include priceDisplay
+        const transformedServices = data
+          .filter(service => service.active !== false)
+          .map(service => {
+            // Format price with note - clean and consistent
+            let priceDisplay = ''
+            if (service.startingPrice !== null && service.startingPrice !== undefined) {
+              const price = service.startingPrice
+              if (price === 0) {
+                priceDisplay = 'Free'
+              } else {
+                priceDisplay = `$${price}`
+                if (service.priceNote) {
+                  const note = service.priceNote.trim()
+                  if (note === '+') {
+                    priceDisplay += '+'
+                  } else if (note.toLowerCase().includes('and up') || note.toLowerCase().includes('andup')) {
+                    priceDisplay += ' and up'
+                  } else if (note.toLowerCase().includes('starting')) {
+                    priceDisplay += ' starting'
+                  } else if (note === 'TBD' || note.toLowerCase() === 'tbd') {
+                    priceDisplay = 'Price TBD'
+                  } else if (!note.toLowerCase().includes('tbd') && !note.toLowerCase().includes('box braids') && !note.toLowerCase().includes('micros')) {
+                    // Only add note if it's not TBD or special notes
+                    priceDisplay += ` ${note}`
+                  }
+                }
+              }
+            } else if (service.priceNote === 'TBD' || service.priceNote?.toLowerCase() === 'tbd') {
+              priceDisplay = 'Price TBD'
+            } else if (service.price) {
+              priceDisplay = `$${service.price}`
+            } else {
+              priceDisplay = 'Contact for pricing'
+            }
+
+            // Format duration
+            let durationDisplay = ''
+            if (service.durationMinHours !== null && service.durationMaxHours !== null) {
+              durationDisplay = `${service.durationMinHours}-${service.durationMaxHours} hours`
+            } else if (service.duration) {
+              durationDisplay = service.duration
+            } else {
+              durationDisplay = 'Duration TBD'
+            }
+
+            return {
+              ...service,
+              price: service.startingPrice || service.price || 0,
+              basePrice: service.startingPrice || service.price || 0,
+              priceDisplay,
+              duration: durationDisplay
+            }
+          })
+        setServices(transformedServices)
       } else {
         // Fallback to default services if API fails
         setServices(getDefaultServices())
@@ -57,6 +113,26 @@ const BookAppointment = () => {
     } catch (error) {
       // Silently fallback to default services
       setServices(getDefaultServices())
+    }
+  }
+
+  const loadBraiders = async () => {
+    try {
+      // Fetch braiders from public API
+      const response = await braidersAPI.getAll()
+      if (response.braiders && response.braiders.length > 0) {
+        // Combine API braiders with defaults (prioritize API data, avoid duplicates)
+        const apiBraiderIds = new Set(response.braiders.map(b => b.id))
+        const uniqueDefaults = defaultBraiders.filter(b => !apiBraiderIds.has(b.id))
+        setBraiders([...response.braiders, ...uniqueDefaults])
+      } else {
+        // Use default braiders if API returns empty
+        setBraiders(defaultBraiders)
+      }
+    } catch (error) {
+      // Silently fallback to default braiders
+      console.log('Could not load braiders from API, using defaults')
+      setBraiders(defaultBraiders)
     }
   }
 
@@ -702,26 +778,52 @@ const BookAppointment = () => {
           {step === 1 && (
             <div className="booking-step">
               <h2 className="step-title">Select Your Stylist</h2>
-              <div className="braiders-grid">
-                {braiders.map(braider => (
-                  <div
-                    key={braider.id}
-                    className="braider-card"
-                    onClick={() => handleBraiderSelect(braider)}
-                  >
-                    <div className="braider-image">{braider.image}</div>
-                    <h3 className="braider-name">{braider.name}</h3>
-                    <p className="braider-specialty">{braider.specialty}</p>
-                    <div className="braider-rating">
-                      <span className="rating-stars">⭐</span>
-                      <span className="rating-value">{braider.rating}</span>
-                    </div>
-                    <p className="braider-experience">{braider.experience} experience</p>
-                    <p className="braider-bio">{braider.bio}</p>
-                    <button className="btn btn-primary">Select</button>
+              {(() => {
+                // Group braiders by location
+                const braidersByLocation = braiders.reduce((acc, braider) => {
+                  const location = braider.location || 'Other';
+                  if (!acc[location]) {
+                    acc[location] = [];
+                  }
+                  acc[location].push(braider);
+                  return acc;
+                }, {});
+
+                const locations = Object.keys(braidersByLocation).sort();
+
+                return (
+                  <div className="braiders-by-location">
+                    {locations.map(location => (
+                      <div key={location} className="location-group">
+                        <h3 className="location-group-title">{location} Location</h3>
+                        <div className="braiders-grid">
+                          {braidersByLocation[location].map(braider => (
+                            <div
+                              key={braider.id}
+                              className="braider-card"
+                              onClick={() => handleBraiderSelect(braider)}
+                            >
+                              <div className="braider-image">{braider.image}</div>
+                              <h3 className="braider-name">{braider.name}</h3>
+                              <p className="braider-specialty">{braider.specialty}</p>
+                              {braider.location && (
+                                <p className="braider-location">📍 {braider.location}</p>
+                              )}
+                              <div className="braider-rating">
+                                <span className="rating-stars">⭐</span>
+                                <span className="rating-value">{braider.rating}</span>
+                              </div>
+                              <p className="braider-experience">{braider.experience} experience</p>
+                              <p className="braider-bio">{braider.bio}</p>
+                              <button className="btn btn-primary">Select</button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                );
+              })()}
             </div>
           )}
 
@@ -743,7 +845,9 @@ const BookAppointment = () => {
                       <div className="service-header">
                         <h3 className="service-name">{service.name}</h3>
                         <div className="service-price">
-                          ${service.basePrice || service.price}
+                          <span className="price-main">
+                            {service.priceDisplay || (service.startingPrice !== null && service.startingPrice !== undefined ? `$${service.startingPrice}` : `$${service.basePrice || service.price || 0}`)}
+                          </span>
                           {(service.hasSizeOptions || service.hasLengthOptions || service.hasBohoOptions) && (
                             <span className="price-note">+ options</span>
                           )}
@@ -770,7 +874,7 @@ const BookAppointment = () => {
               <h2 className="step-title">Select Size, Length & Boho</h2>
               <p className="selected-info">
                 Service: <strong>{selectedService.name}</strong> | 
-                Base Price: <strong>${selectedService.basePrice || selectedService.price}</strong>
+                Base Price: <strong>{selectedService.priceDisplay || `$${selectedService.basePrice || selectedService.price}`}</strong>
               </p>
               
               {selectedService.hasSizeOptions && (
@@ -847,7 +951,7 @@ const BookAppointment = () => {
                 <div className="price-breakdown">
                   <div className="price-item">
                     <span>Base Price:</span>
-                    <span>${selectedService.basePrice || selectedService.price}</span>
+                    <span>{selectedService.priceDisplay || `$${selectedService.basePrice || selectedService.price}`}</span>
                   </div>
                   {selectedSize && selectedService.sizeOptions && (
                     <div className="price-item">

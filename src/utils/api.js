@@ -104,6 +104,14 @@ export const pricesAPI = {
 // Health check
 export const healthCheck = () => apiCall('/api/health');
 
+// Braiders API (public)
+export const braidersAPI = {
+  getAll: (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    return apiCall(`/api/braiders${queryString ? '?' + queryString : ''}`);
+  }
+};
+
 // Test database connection
 export const testDatabase = () => apiCall('/api/test-db');
 
