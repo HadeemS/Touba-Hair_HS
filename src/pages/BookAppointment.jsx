@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { braiders as defaultBraiders } from '../data/braiders'
 import { generateTimeSlots, getAvailableDates, formatDateDisplay, formatDateStorage, getDayName } from '../utils/timeSlots'
 import { isTimeSlotAvailable, saveBooking } from '../utils/bookingStorage'
 import { appointmentsAPI, pricesAPI, braidersAPI } from '../utils/api'
@@ -20,7 +19,7 @@ const BookAppointment = () => {
   const [selectedLength, setSelectedLength] = useState(null)
   const [selectedBoho, setSelectedBoho] = useState(null)
   const [services, setServices] = useState([])
-  const [braiders, setBraiders] = useState(defaultBraiders)
+  const [braiders, setBraiders] = useState([])
   const [selectedLocation, setSelectedLocation] = useState(null) // Filter by location
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null)
@@ -115,21 +114,27 @@ const BookAppointment = () => {
 
   const loadBraiders = async () => {
     try {
-      // Fetch braiders from public API
+      // Fetch braiders from public API - only show employees from database
       const response = await braidersAPI.getAll()
+      
       if (response.braiders && response.braiders.length > 0) {
-        // Combine API braiders with defaults (prioritize API data, avoid duplicates)
-        const apiBraiderIds = new Set(response.braiders.map(b => b.id))
-        const uniqueDefaults = defaultBraiders.filter(b => !apiBraiderIds.has(b.id))
-        setBraiders([...response.braiders, ...uniqueDefaults])
+        // Ensure all API braiders have location property
+        const apiBraiders = response.braiders.map(b => ({
+          ...b,
+          location: b.location || 'Other' // Ensure location is always set
+        }))
+        
+        console.log(`Loaded ${apiBraiders.length} braiders from API`)
+        setBraiders(apiBraiders)
       } else {
-        // Use default braiders if API returns empty
-        setBraiders(defaultBraiders)
+        // API returned empty - no braiders to show
+        console.warn('API returned no braiders. Make sure to run seed script to populate employees.')
+        setBraiders([])
       }
     } catch (error) {
-      // Silently fallback to default braiders
-      console.log('Could not load braiders from API, using defaults')
-      setBraiders(defaultBraiders)
+      // API call failed - show empty list
+      console.error('Could not load braiders from API:', error)
+      setBraiders([])
     }
   }
 
@@ -799,14 +804,24 @@ const BookAppointment = () => {
               </div>
 
               {(() => {
-                // Filter braiders by selected location
+                // Filter braiders by selected location (case-insensitive, handle nulls)
                 const filteredBraiders = selectedLocation
-                  ? braiders.filter(b => b.location === selectedLocation)
+                  ? braiders.filter(b => {
+                      const braiderLocation = b.location || '';
+                      return braiderLocation.toLowerCase() === selectedLocation.toLowerCase();
+                    })
                   : braiders;
 
-                // Group braiders by location
+                // Group braiders by location (normalize location names)
                 const braidersByLocation = filteredBraiders.reduce((acc, braider) => {
-                  const location = braider.location || 'Other';
+                  let location = (braider.location || 'Other').trim();
+                  // Normalize location names for consistency
+                  if (location.toLowerCase().includes('sandhills')) {
+                    location = 'Sandhills';
+                  } else if (location.toLowerCase().includes('two notch') || location.toLowerCase().includes('twonotch')) {
+                    location = 'Two Notch';
+                  }
+                  
                   if (!acc[location]) {
                     acc[location] = [];
                   }

@@ -13,8 +13,7 @@ const Home = () => {
         <div className="container">
           <div className="hero-content">
             <h1 className="hero-title">
-              Beautiful Braids,<br />
-              <span className="gradient-text">Expert Stylists</span>
+              <span className="gradient-text">Touba African Hairbraiding</span>
             </h1>
             <p className="hero-subtitle">
               Experience the art of professional hair braiding. 
