@@ -714,27 +714,232 @@
   box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
 }
 
-@media (max-width: 768px) {
-  .booking-steps {
-    flex-direction: column;
+/* Tablet */
+@media (max-width: 992px) {
+  .booking-content {
+    padding: var(--spacing-lg);
+  }
+  
+  .braiders-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: var(--spacing-md);
+  }
+  
+  .step-title {
+    font-size: 1.75rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .book-appointment {
+    padding: var(--spacing-lg) 0;
+  }
+  
+  .booking-header {
+    margin-bottom: var(--spacing-lg);
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
+  .booking-steps {
+    flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    gap: var(--spacing-xs);
+    justify-content: flex-start;
+    scrollbar-width: none;
+  }
+  
+  .booking-steps::-webkit-scrollbar {
+    display: none;
   }
 
   .booking-steps::before {
     display: none;
   }
+  
+  .step-indicator {
+    flex-shrink: 0;
+    min-width: 80px;
+  }
+  
+  .step-number {
+    width: 36px;
+    height: 36px;
+    font-size: 0.875rem;
+  }
+  
+  .step-label {
+    font-size: 0.75rem;
+    margin-top: var(--spacing-xs);
+  }
+
+  .booking-content {
+    padding: var(--spacing-md);
+    border-radius: 15px;
+    margin: 0 var(--spacing-sm);
+  }
+  
+  .step-title {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .back-button {
+    min-height: var(--touch-target-min);
+    padding: var(--spacing-sm);
+    font-size: 0.9375rem;
+  }
 
   .braiders-grid {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+  }
+  
+  .braider-card {
+    padding: var(--spacing-md);
+  }
+  
+  .braider-image {
+    width: 80px;
+    height: 80px;
+    font-size: 2.5rem;
+  }
+  
+  .braider-name {
+    font-size: 1.125rem;
+  }
+  
+  .location-filter-section {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .location-buttons {
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+  
+  .location-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    min-height: var(--touch-target-min);
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .location-group-title {
+    font-size: 1.25rem;
+    padding-bottom: var(--spacing-sm);
   }
 
   .dates-grid,
   .time-slots-grid {
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: var(--spacing-sm);
+  }
+  
+  .date-card,
+  .time-slot {
+    padding: var(--spacing-sm);
+    min-height: var(--touch-target-min);
+    font-size: 0.9375rem;
   }
 
   .booking-summary {
     grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .summary-section {
+    padding: var(--spacing-md);
+  }
+  
+  .options-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--spacing-sm);
+  }
+  
+  .option-card {
+    padding: var(--spacing-md);
+    min-height: var(--touch-target-min);
+  }
+  
+  .form-group {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    padding: 0.875rem;
+    font-size: 1rem;
+    min-height: var(--touch-target-min);
+  }
+  
+  .btn-large {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1rem;
+    min-height: var(--touch-target-min);
+  }
+  
+  .price-summary {
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+  }
+  
+  .price-row {
+    padding: var(--spacing-sm) 0;
+    font-size: 0.9375rem;
+  }
+  
+  .price-total {
+    font-size: 1.5rem;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .step-title {
+    font-size: 1.25rem;
+  }
+  
+  .booking-content {
+    padding: var(--spacing-sm);
+    margin: 0 var(--spacing-xs);
+  }
+  
+  .braider-card {
+    padding: var(--spacing-sm);
+  }
+  
+  .dates-grid,
+  .time-slots-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: var(--spacing-xs);
+  }
+  
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .location-btn {
+    font-size: 0.875rem;
+    padding: 0.625rem 0.75rem;
   }
 }
 

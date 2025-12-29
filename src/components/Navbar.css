@@ -102,6 +102,11 @@
   border: none;
   cursor: pointer;
   padding: var(--spacing-xs);
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
 }
 
 .menu-toggle span {
@@ -110,6 +115,7 @@
   background: var(--primary-pink);
   border-radius: 3px;
   transition: all 0.3s ease;
+  display: block;
 }
 
 .menu-toggle.active span:nth-child(1) {
@@ -124,37 +130,104 @@
   transform: rotate(-45deg) translate(7px, -7px);
 }
 
+/* Tablet and Mobile Responsive */
+@media (max-width: 992px) {
+  .navbar-menu {
+    gap: var(--spacing-sm);
+  }
+  
+  .navbar-link {
+    font-size: 0.9375rem;
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+}
+
 @media (max-width: 768px) {
+  .navbar {
+    padding: var(--spacing-xs) 0;
+  }
+  
+  .navbar-container {
+    padding: 0 var(--spacing-sm);
+    position: relative;
+  }
+  
+  .navbar-logo {
+    font-size: 1.25rem;
+  }
+  
+  .logo-icon {
+    font-size: 1.5rem;
+  }
+
   .menu-toggle {
     display: flex;
   }
 
   .navbar-menu {
-    position: absolute;
-    top: 100%;
+    position: fixed;
+    top: 60px;
     left: 0;
     right: 0;
+    bottom: 0;
     background: var(--white);
     flex-direction: column;
-    padding: var(--spacing-md);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-100%);
+    padding: var(--spacing-lg) var(--spacing-md);
+    box-shadow: var(--shadow-lg);
+    transform: translateX(-100%);
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
-    gap: var(--spacing-sm);
+    transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+    gap: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: calc(100vh - 60px);
   }
 
   .navbar-menu.active {
-    transform: translateY(0);
+    transform: translateX(0);
     opacity: 1;
     visibility: visible;
   }
 
+  .navbar-menu li {
+    width: 100%;
+    border-bottom: 1px solid var(--border-light);
+  }
+
   .navbar-link {
     width: 100%;
-    text-align: center;
-    padding: var(--spacing-sm);
+    text-align: left;
+    padding: var(--spacing-md);
+    display: block;
+    min-height: var(--touch-target-min);
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+  }
+  
+  .logout-btn {
+    width: 100%;
+    text-align: left;
+    padding: var(--spacing-md);
+    min-height: var(--touch-target-min);
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .navbar-logo {
+    font-size: 1.125rem;
+  }
+  
+  .logo-text {
+    display: none;
+  }
+  
+  .navbar-menu {
+    padding: var(--spacing-md) var(--spacing-sm);
   }
 }
 

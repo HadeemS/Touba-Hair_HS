@@ -7,41 +7,90 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
 dist
 dist-ssr
 *.local
 
-# Environment variables
+# ============================================
+# SENSITIVE FILES - NEVER COMMIT THESE!
+# ============================================
+
+# Environment variables (contains MongoDB URI, JWT secrets, etc.)
 .env
 .env.local
 .env.production
 .env.development
+.env.test
 .env.*
+*.env
 server/.env
-server/.env.local
 server/.env.*
+**/.env
+**/.env.*
 
-# Sensitive credential files - DO NOT COMMIT THESE!
+# Credential files
 ADMIN_CREDENTIALS.md
 CREATE_ADMIN_ACCOUNT.md
 CREATE_ADMIN.md
 DEMO_CREDENTIALS.md
 *CREDENTIALS*.md
 *_CREDENTIALS*.md
+*CREDENTIALS*.txt
+*CREDENTIALS*.csv
+*credentials*.md
+*credentials*.txt
+*credentials*.csv
+
+# Connection strings and secrets
 *CONNECTION_STRING*.txt
 YOUR_CONNECTION_STRING.txt
 *CONNECTION*.md
+*SECRET*.txt
+*SECRET*.md
+*PASSWORD*.txt
+*PASSWORD*.md
 
-# Configuration files with secrets - DO NOT COMMIT THESE!
+# Employee/User credentials
+employee_credentials.csv
+**/employee_credentials.csv
+*employee*credentials*.csv
+*user*credentials*.csv
+*braider*credentials*.csv
+server/employee_credentials.csv
+server/**/employee_credentials.csv
+
+# Configuration files with secrets
 server/config/braiderCredentials.js
+**/config/braiderCredentials.js
 **/config/*credentials*.js
 **/config/*secrets*.js
 **/config/*secrets*.json
-employee_credentials.csv
-**/employee_credentials.csv
+**/config/*password*.js
+**/config/*.env
+**/config/.env*
+# But allow example files
+!**/config/*.example.js
+!**/config/*example*.js
 
+# Database dumps and backups
+*.sql
+*.dump
+*.backup
+*_backup.*
+*_dump.*
+
+# API keys and tokens
+*api*key*.txt
+*api*key*.json
+*api*key*.env
+*token*.txt
+*token*.json
+
+# ============================================
 # Editor directories and files
+# ============================================
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -51,4 +100,22 @@ employee_credentials.csv
 *.njsproj
 *.sln
 *.sw?
+
+# OS files
+Thumbs.db
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+.cache/
+tmp/
+temp/
 

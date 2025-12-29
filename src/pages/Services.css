@@ -465,7 +465,15 @@
   transform: translateY(0);
 }
 
-/* Responsive Design */
+/* Tablet */
+@media (max-width: 992px) {
+  .services-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+  }
+}
+
+/* Mobile */
 @media (max-width: 768px) {
   .services-grid {
     grid-template-columns: 1fr;
@@ -473,7 +481,8 @@
   }
 
   .popular-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--spacing-sm);
   }
 
   .category-filters {
@@ -481,32 +490,86 @@
     overflow-x: auto;
     padding-bottom: var(--spacing-xs);
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: var(--spacing-xs);
+  }
+  
+  .category-filters::-webkit-scrollbar {
+    display: none;
   }
 
   .category-filter {
     flex-shrink: 0;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    min-height: var(--touch-target-min);
+    font-size: 0.9375rem;
+  }
+
+  .service-card {
+    padding: var(--spacing-md);
   }
 
   .service-card-header {
     flex-direction: column;
     text-align: center;
+    gap: var(--spacing-sm);
   }
 
   .service-icon {
     margin: 0 auto;
+    font-size: 3rem;
+  }
+  
+  .service-name {
+    font-size: 1.25rem;
   }
 
   .service-info-footer {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: var(--spacing-sm);
   }
 
   .service-price-section {
     width: 100%;
   }
+  
+  .price-amount {
+    font-size: 2rem;
+  }
 
   .service-duration {
     width: 100%;
     justify-content: center;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .service-btn {
+    padding: 0.875rem;
+    font-size: 0.9375rem;
+    min-height: var(--touch-target-min);
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .services-grid {
+    gap: var(--spacing-sm);
+  }
+  
+  .service-card {
+    padding: var(--spacing-sm);
+  }
+  
+  .popular-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .price-amount {
+    font-size: 1.75rem;
+  }
+  
+  .service-name {
+    font-size: 1.125rem;
   }
 }

@@ -20,6 +20,7 @@ const BookAppointment = () => {
   const [selectedBoho, setSelectedBoho] = useState(null)
   const [services, setServices] = useState([])
   const [braiders, setBraiders] = useState([])
+  const [braidersLoading, setBraidersLoading] = useState(true)
   const [selectedLocation, setSelectedLocation] = useState(null) // Filter by location
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null)
@@ -114,27 +115,39 @@ const BookAppointment = () => {
 
   const loadBraiders = async () => {
     try {
+      setBraidersLoading(true)
+      console.log('🔄 Loading braiders from API...')
       // Fetch braiders from public API - only show employees from database
       const response = await braidersAPI.getAll()
       
-      if (response.braiders && response.braiders.length > 0) {
+      console.log('📦 API Response:', response)
+      
+      if (response && response.braiders && response.braiders.length > 0) {
         // Ensure all API braiders have location property
         const apiBraiders = response.braiders.map(b => ({
           ...b,
           location: b.location || 'Other' // Ensure location is always set
         }))
         
-        console.log(`Loaded ${apiBraiders.length} braiders from API`)
+        console.log(`✅ Loaded ${apiBraiders.length} braiders from API:`, apiBraiders.map(b => b.name))
         setBraiders(apiBraiders)
       } else {
         // API returned empty - no braiders to show
-        console.warn('API returned no braiders. Make sure to run seed script to populate employees.')
+        console.warn('⚠️ API returned no braiders. Response:', response)
+        console.warn('   Make sure:')
+        console.warn('   1. Server is running and connected to MongoDB')
+        console.warn('   2. Seed script has been run (node server/scripts/seedEmployees.js)')
+        console.warn('   3. Employees have isActive: true in database')
         setBraiders([])
       }
     } catch (error) {
       // API call failed - show empty list
-      console.error('Could not load braiders from API:', error)
+      console.error('❌ Could not load braiders from API:', error)
+      console.error('   Error details:', error.message)
+      console.error('   Make sure your server is running at:', import.meta.env.VITE_API_URL || 'https://touba-hair-hs-1.onrender.com')
       setBraiders([])
+    } finally {
+      setBraidersLoading(false)
     }
   }
 
@@ -830,6 +843,29 @@ const BookAppointment = () => {
                 }, {});
 
                 const locations = Object.keys(braidersByLocation).sort();
+
+                if (braidersLoading) {
+                  return (
+                    <div className="no-braiders-message">
+                      <p>Loading stylists...</p>
+                    </div>
+                  );
+                }
+
+                if (braiders.length === 0) {
+                  return (
+                    <div className="no-braiders-message">
+                      <p><strong>No stylists found.</strong></p>
+                      <p>Please make sure:</p>
+                      <ul style={{ textAlign: 'left', display: 'inline-block', marginTop: '10px' }}>
+                        <li>Your server is running and connected to MongoDB</li>
+                        <li>You've run the seed script: <code>node server/scripts/seedEmployees.js</code></li>
+                        <li>Employees have <code>isActive: true</code> in the database</li>
+                      </ul>
+                      <p style={{ marginTop: '15px' }}>Check the browser console for more details.</p>
+                    </div>
+                  );
+                }
 
                 if (filteredBraiders.length === 0) {
                   return (
