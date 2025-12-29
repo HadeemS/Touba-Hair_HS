@@ -597,7 +597,7 @@ app.get('/api/braiders', async (req, res) => {
         { role: 'employee' },
         { role: 'admin', location: { $exists: true, $ne: null } } // Include admins with locations
       ],
-      isActive: true 
+      isActive: { $ne: false } // Allow undefined/null to pass (defaults to true)
     };
     
     if (location) {
@@ -605,8 +605,10 @@ app.get('/api/braiders', async (req, res) => {
     }
 
     const users = await User.find(query)
-      .select('name fullName username location braiderId role')
+      .select('name fullName username location braiderId role isActive')
       .sort({ location: 1, name: 1 });
+
+    logger.info(`Found ${users.length} braiders${location ? ` for location: ${location}` : ''}`);
 
     res.json({
       braiders: users.map(user => ({
