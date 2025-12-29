@@ -360,6 +360,7 @@ router.post('/initialize-braiders', authenticate, async (req, res) => {
           existingUser.phone = cred.phone;
           existingUser.braiderId = cred.braiderId;
           existingUser.role = cred.role;
+          existingUser.location = cred.location || existingUser.location || null;
           existingUser.password = cred.password; // Will be hashed by pre-save hook
           existingUser.isActive = true;
           await existingUser.save();
@@ -373,6 +374,7 @@ router.post('/initialize-braiders', authenticate, async (req, res) => {
             password: cred.password,
             role: cred.role,
             braiderId: cred.braiderId,
+            location: cred.location || null,
             isActive: true
           });
           await newUser.save();
@@ -419,4 +421,3 @@ router.get('/braider-credentials', authenticate, async (req, res) => {
 });
 
 export default router;
-
